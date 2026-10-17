@@ -54,16 +54,35 @@ the lines are ready.
 
 ## Game updates
 
-1. After an update, start the game and check the log:
+The top-down panel (if enabled) never depends on the game build. For the
+guide lines:
+
+1. Start the game after the update and check the log.
    - *"engine functions located … (build not yet verified in game)"*: the
      patterns still match. Test-drive, then add the new exe hash to
      `verified_hashes` in `src/plugin/engine.cpp`.
-   - *"engine functions missing"*: the lines are off. Find the functions in
-     the new `amtrucks.exe`, regenerate the patterns with
-     `tools/re/make_patterns.py`, update `src/plugin/engine.cpp`, and rebuild.
-2. If an update misbehaves rather than failing cleanly, set
-   `allow_unverified = 0`, or switch back to the previous game version via
-   Steam → Properties → Betas.
+   - *"engine functions missing"*: the lines are off. Continue with step 2.
+2. Run the finder against the installed game:
+   ```bash
+   tools/re/update.sh            # report
+   tools/re/update.sh --apply    # rewrite the patterns in engine.cpp
+   ```
+   It compares the installed `amtrucks.exe` with the newest reference copy in
+   `refs/` (git-ignored) using four independent methods:
+   - **exact:** the current patterns;
+   - **loose:** longer patterns with struct offsets wildcarded;
+   - **shape:** instruction-shape fingerprints of every function;
+   - **callers:** what the matched callers call.
+
+   It accepts a function only when at least two methods agree, or the exact
+   pattern matches. The new patterns match both builds where possible.
+3. `tools/build.sh Release`, install the DLL, test in game, add the hash to
+   `verified_hashes`, and copy the new executable into `refs/` as the next
+   reference.
+
+If an update misbehaves rather than failing cleanly, set
+`allow_unverified = 0`, or switch to the previous game version via
+Steam → Properties → Betas.
 
 ## How the prediction works
 
@@ -95,7 +114,7 @@ src/plugin/    plugin.cpp (SDK), engine.cpp (pattern scan), world_lines.cpp (in-
 assets/base/   line model the variants are derived from (MIT, see third_party/licenses)
 tests/         core_tests.cpp, scene_preview.cpp
 tools/         build.sh (WSL -> MSVC), make_assets.py + pack_scs.ps1 (mod package),
-               install.ps1, re/ (pattern generation)
+               install.ps1, re/ (pattern generation and update finder)
 ```
 
 ## Build

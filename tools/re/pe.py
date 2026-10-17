@@ -45,3 +45,15 @@ class PE:
     def bytes_at(self, rva, n):
         off = self.rva_to_off(rva)
         return self.data[off:off + n]
+
+    def functions(self):
+        """(begin_rva, end_rva) of every function in the exception directory."""
+        name, va, vsize, raw, rsize = self.section('.pdata')
+        out = []
+        for off in range(raw, raw + min(vsize, rsize) - 11, 12):
+            begin, end, _unwind = struct.unpack_from('<III', self.data, off)
+            if begin == 0 and end == 0:
+                break
+            if end > begin:
+                out.append((begin, end))
+        return out

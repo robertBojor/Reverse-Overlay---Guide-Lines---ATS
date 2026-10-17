@@ -7,3 +7,4 @@ out/mod_stage/
 .claude/
 out/preview/
 __pycache__/
+refs/

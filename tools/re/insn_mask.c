@@ -1,7 +1,9 @@
 // Prints, for code at a file offset, each instruction's length and a mask of
 // bytes that are build-specific (rel32 branch targets and RIP-relative
 // displacements). Used by make_patterns.py to build wildcarded signatures.
-//   insn_mask <file> <offset-hex> <count>
+//   insn_mask <file> <offset-hex> <count> [loose]
+// "loose" additionally wildcards non-RIP 32-bit displacements (struct
+// offsets) and 32-bit immediates, for matching across builds.
 // Output per instruction: "<len> <mask>" where mask has one char per byte:
 // 'x' = keep, '?' = wildcard.
 #include <stdio.h>
@@ -17,6 +19,7 @@ int main(int argc, char **argv)
     if (!f) return 1;
     long off = strtol(argv[2], NULL, 16);
     int count = atoi(argv[3]);
+    int loose = argc > 4 && strcmp(argv[4], "loose") == 0;
     unsigned char buf[4096];
     fseek(f, off, SEEK_SET);
     size_t n = fread(buf, 1, sizeof(buf), f);
@@ -42,6 +45,13 @@ int main(int argc, char **argv)
         // RIP-relative memory operand: disp32 sits before any immediate.
         if ((hs.flags & F_MODRM) && hs.modrm_mod == 0 && hs.modrm_rm == 5 && (hs.flags & F_DISP32))
             memset(mask + len - imm - 4, '?', 4);
+        if (loose)
+        {
+            if ((hs.flags & F_DISP32) && !(hs.modrm_mod == 0 && hs.modrm_rm == 5))
+                memset(mask + len - imm - 4, '?', 4);
+            if ((hs.flags & F_IMM32) && !(hs.flags & F_RELATIVE))
+                memset(mask + len - 4, '?', 4);
+        }
         printf("%u %s\n", len, mask);
         // Stop after an unconditional return/jump at function level.
         pos += len;
