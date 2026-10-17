@@ -7,7 +7,7 @@
 | `upload/` | **Select this folder** as "Mod data" in the uploader. It holds only `versions.sii` and the `universal` package, as the uploader requires. | yes |
 | `mod_icon.jpg` | Mod Manager icon, **exactly 276×162 JPEG**, under 1 MB. **You supply it.** Run `python3 -I tools/make_assets.py workshop` afterwards to copy it into `upload/universal/`. | via `upload/` |
 | `images/` | Your preview image and screenshots, **not** part of `upload/`. The preview is commonly 640×360 JPEG/PNG. Screenshots are added on the Workshop page after the first upload. | separately |
-| `description.bbcode.txt` | Text for the uploader's description field (Steam BBCode). Replace `RELEASE_URL_HERE` with the plugin download link first. | paste |
+| `description.bbcode.txt` | Text for the uploader's description field (Steam BBCode). Its plugin link points to the latest GitHub release. | paste |
 
 Generated files (`upload/`) are rebuilt by `tools/make_assets.py workshop`. Don't edit them by hand.
 
@@ -21,7 +21,7 @@ Generated files (`upload/`) are rebuilt by `tools/make_assets.py workshop`. Don'
 4. Preview image: from `images/`.
 5. Title: **Reverse Overlay - Guide Lines - ATS**
 6. Visibility: **Private** for the first upload.
-7. Description: paste `description.bbcode.txt`, with the release URL filled in.
+7. Description: paste `description.bbcode.txt`.
 8. Tags: type tag (e.g. *Others* or *Interior*, whatever fits best).
 9. Change note: `Initial release v<VERSION>`.
 10. Upload. If validation fails, read

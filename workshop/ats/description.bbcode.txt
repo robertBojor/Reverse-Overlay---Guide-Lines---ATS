@@ -14,7 +14,7 @@ Backup-camera style guide lines for reversing. While you are in reverse, two lin
 [h2]IMPORTANT: two parts are needed[/h2]
 [olist]
 [*][b]This Workshop item[/b] provides the line models. Subscribe and enable it in the Mod Manager.
-[*][b]The plugin DLL[/b] draws the lines. Steam Workshop cannot install it, so download it separately: [b][url=RELEASE_URL_HERE]Reverse Overlay for ATS - plugin download[/url][/b]. Exit the game and run [i]Install.bat[/i]. It copies [i]ats_reverse_overlay.dll[/i] into [i]American Truck Simulator\bin\win_x64\plugins[/i] and creates that folder if needed.
+[*][b]The plugin DLL[/b] draws the lines. Steam Workshop cannot install it, so download it separately: [b][url=https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS/releases/latest]Reverse Overlay for ATS - plugin download[/url][/b]. Exit the game and run [i]Install.bat[/i]. It copies [i]ats_reverse_overlay.dll[/i] into [i]American Truck Simulator\bin\win_x64\plugins[/i] and creates that folder if needed.
 [/olist]
 [b]Subscribing alone does nothing.[/b] When you start the game with the plugin installed, it shows a notice about "advanced SDK features". That is expected.
 
