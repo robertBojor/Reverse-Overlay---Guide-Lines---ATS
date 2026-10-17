@@ -8,3 +8,4 @@ out/mod_stage/
 out/preview/
 __pycache__/
 refs/
+out/release/

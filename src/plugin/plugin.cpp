@@ -510,7 +510,7 @@ SCSAPI_RESULT scs_telemetry_init(const scs_u32_t version, const scs_telemetry_in
     const auto folder = documents_folder() / "American Truck Simulator";
     rto::log::init(folder / "ats_reverse_overlay.log", &game_log_bridge);
     char message[256];
-    std::snprintf(message, sizeof(message), "ATS Reverse Overlay starting in %s %u.%u",
+    std::snprintf(message, sizeof(message), "Reverse Overlay %s starting in %s %u.%u", RTO_VERSION,
                   api->common.game_name ? api->common.game_name : "?",
                   SCS_GET_MAJOR_VERSION(api->common.game_version),
                   SCS_GET_MINOR_VERSION(api->common.game_version));

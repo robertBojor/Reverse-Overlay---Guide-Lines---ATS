@@ -5,8 +5,9 @@ sweep_edge model (assets/base): a 0.36 m bar that the runtime lays down every
 0.25 m so consecutive pieces overlap into a continuous line. Variants differ
 only in width and in the material path stored in the .pmd.
 
-    python3 -I tools/make_assets.py      # stage files in out/mod_stage
-    tools/pack_scs.ps1                    # zip them into out/ats_reverse_overlay.scs
+    python3 -I tools/make_assets.py [scs|workshop|all]
+      scs       stage files in out/mod_stage (zip with tools/pack_scs.ps1)
+      workshop  write the uploader layout to workshop/ats/upload
 """
 import struct
 from pathlib import Path
@@ -104,35 +105,44 @@ def make_pmg():
     return bytes(data)
 
 
-MANIFEST = '''SiiNunit
-{
-mod_package : .package_name {
- package_version: "0.1.0"
- display_name: "Reverse Overlay - Guide Lines - ATS"
- author: "ats-reverse-overlay"
- category[]: "interior"
- description_file: "description.txt"
- compatible_versions[]: "1.61.*"
-}
-}
-'''
+VERSION = (ROOT / 'VERSION').read_text().strip()
+DISPLAY_NAME = 'Reverse Overlay - Guide Lines - ATS'
+WORKSHOP_DIR = ROOT / 'workshop' / 'ats'
+ICON = WORKSHOP_DIR / 'mod_icon.jpg'  # 276x162 JPEG, supplied by hand
 
-DESCRIPTION = '''Reverse Overlay - Guide Lines - ATS
 
-Guide-line models for the Reverse Overlay telemetry plugin.
+def manifest(workshop, with_icon):
+    # The Workshop uploader manages display_name and compatible_versions
+    # (from the item title and versions.sii); they must not be in the manifest.
+    lines = ['SiiNunit', '{', 'mod_package : .package_name {',
+             f' package_version: "{VERSION}"']
+    if not workshop:
+        lines.append(f' display_name: "{DISPLAY_NAME}"')
+    lines += [' author: "Robert"', ' category[]: "interior"']
+    if with_icon:
+        lines.append(' icon: "mod_icon.jpg"')
+    lines.append(' description_file: "description.txt"')
+    if not workshop:
+        lines.append(' compatible_versions[]: "1.61.*"')
+    lines += ['}', '}', '']
+    return '\n'.join(lines).encode()
 
-This package only contains the coloured line models. The lines are placed by
-ats_reverse_overlay.dll (bin/win_x64/plugins) while reversing.
+
+DESCRIPTION = f'''{DISPLAY_NAME} (v{VERSION})
+
+Backup-camera style guide lines shown on the ground while reversing:
+red, yellow and green by distance, visible in every camera and the mirrors.
+
+This package contains only the line models. The lines are drawn by the
+ats_reverse_overlay.dll plugin, which must be installed separately into
+the game's bin/win_x64/plugins folder (see the Workshop page).
 
 Line models derived from "Reverse Posture Assistant For ATS" by yyysheng (MIT).
-'''
+'''.encode()
 
 
-def main():
-    files = {
-        'manifest.sii': MANIFEST.encode(),
-        'description.txt': DESCRIPTION.encode(),
-    }
+def model_files():
+    files = {}
     pmg = make_pmg()
     for name, rgb in COLOURS.items():
         dds = f'/{MODEL_DIR}/line_{name}.dds'
@@ -142,20 +152,66 @@ def main():
         files[MATERIAL_PATHS[name][1:]] = make_material(rgb, tobj)
         files[f'{MODEL_DIR}/line_{name}.pmd'] = make_pmd(MATERIAL_PATHS[name])
         files[f'{MODEL_DIR}/line_{name}.pmg'] = pmg
+    return files
 
-    # Stage the tree; tools/pack_scs.ps1 zips it with .NET's ZipFile, the same
-    # writer the original mod's working .scs packages used. (A Python-written
-    # stored zip mounted but the game did not see its manifest.)
+
+def package_files(workshop):
+    icon = ICON.read_bytes() if ICON.exists() else None
+    files = model_files()
+    files['manifest.sii'] = manifest(workshop, icon is not None)
+    files['description.txt'] = DESCRIPTION
+    if icon is not None:
+        files['mod_icon.jpg'] = icon
+    return files, icon is not None
+
+
+def write_tree(root, files):
     import shutil
-    if STAGE.exists():
-        shutil.rmtree(STAGE)
+    if root.exists():
+        shutil.rmtree(root)
     for path, data in files.items():
-        target = STAGE / path
+        target = root / path
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(data)
+
+
+VERSIONS_SII = '''SiiNunit
+{
+package_version_info : .universal {
+ package_name: "universal"
+}
+}
+'''
+
+
+def build_scs_stage():
+    # tools/pack_scs.ps1 zips this with .NET's ZipFile (deflate); the game
+    # rejects stored zip entries.
+    files, _ = package_files(workshop=False)
+    write_tree(STAGE, files)
     print(f'staged {len(files)} files in {STAGE}')
-    for path in sorted(files):
-        print('  ', path)
+
+
+def build_workshop():
+    # Uploader layout: the selected folder may contain only versions.sii and
+    # version packages. One universal package serves every game version.
+    upload = WORKSHOP_DIR / 'upload'
+    files, has_icon = package_files(workshop=True)
+    write_tree(upload / 'universal', files)
+    (upload / 'versions.sii').write_text(VERSIONS_SII)
+    print(f'wrote {upload} ({len(files)} files in universal/)')
+    if not has_icon:
+        print(f'WARNING: {ICON.relative_to(ROOT)} is missing; the uploader requires a '
+              '276x162 JPEG icon. Add it and run this again.')
+
+
+def main():
+    import sys
+    target = sys.argv[1] if len(sys.argv) > 1 else 'scs'
+    if target in ('scs', 'all'):
+        build_scs_stage()
+    if target in ('workshop', 'all'):
+        build_workshop()
 
 
 if __name__ == '__main__':

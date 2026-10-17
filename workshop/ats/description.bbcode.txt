@@ -1,0 +1,39 @@
+[h1]Reverse Overlay - Guide Lines - ATS[/h1]
+
+Backup-camera style guide lines for reversing. While you are in reverse, two lines are drawn on the ground from the rear corners of your trailer (or truck, when bobtail) along the path it will actually take:
+
+[list]
+[*][b]Red[/b] for the first 3 m, [b]yellow[/b] to 8 m, [b]green[/b] out to 15 m, with ticks where the colour changes
+[*]Real objects in the world, so they show in [b]every camera and in the mirrors[/b]
+[*]Follows your [b]actual wheel angles[/b] (different steering locks, lift axles and multi-steer trucks)
+[*]Single trailers, doubles and triples; self-steering trailer axles included
+[*]Distances and line height adjustable in a settings file
+[/list]
+
+[hr][/hr]
+[h2]IMPORTANT: two parts are needed[/h2]
+[olist]
+[*][b]This Workshop item[/b] provides the line models. Subscribe and enable it in the Mod Manager.
+[*][b]The plugin DLL[/b] draws the lines. Steam Workshop cannot install it, so download it separately: [b][url=RELEASE_URL_HERE]Reverse Overlay for ATS - plugin download[/url][/b]. Exit the game and run [i]Install.bat[/i]. It copies [i]ats_reverse_overlay.dll[/i] into [i]American Truck Simulator\bin\win_x64\plugins[/i] and creates that folder if needed.
+[/olist]
+[b]Subscribing alone does nothing.[/b] When you start the game with the plugin installed, it shows a notice about "advanced SDK features". That is expected.
+
+[h2]Requirements[/h2]
+[list]
+[*]American Truck Simulator 1.61, Windows 64-bit
+[/list]
+
+[h2]Settings and troubleshooting[/h2]
+Settings: [i]Documents\American Truck Simulator\ats_reverse_overlay.ini[/i] (created on first start, changes apply while driving).
+Log: [i]Documents\American Truck Simulator\ats_reverse_overlay.log[/i]. The first lines say whether the plugin found what it needs on your game version.
+
+[list]
+[*][b]No lines at all:[/b] check that the DLL is in [i]bin\win_x64\plugins[/i] and this mod is enabled.
+[*][b]After a game update:[/b] if the log says "engine functions missing", the lines switch themselves off until the plugin is updated. The game keeps running normally.
+[/list]
+
+[h2]Compatibility[/h2]
+Works alongside other mods. Do not run it together with "Reverse Posture Assistant", which hooks the same part of the game. Use one or the other.
+
+[h2]Credits[/h2]
+In-world drawing technique and base line model from "Reverse Posture Assistant For ATS" by yyysheng (MIT licence). Uses the SCS Telemetry SDK and MinHook.

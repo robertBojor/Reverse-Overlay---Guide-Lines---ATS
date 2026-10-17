@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
-project(ats_reverse_overlay LANGUAGES C CXX)
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" RTO_VERSION LIMIT_COUNT 1)
+project(ats_reverse_overlay VERSION ${RTO_VERSION} LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -72,6 +73,7 @@ if(WIN32 AND RTO_BUILD_PLUGIN)
         third_party/scs_sdk/include)
     target_link_libraries(ats_reverse_overlay PRIVATE minhook imgui d3d11 dxgi shell32 ole32 bcrypt)
     rto_strict(ats_reverse_overlay)
+    target_compile_definitions(ats_reverse_overlay PRIVATE RTO_VERSION="${RTO_VERSION}")
     if(MSVC)
         # /EHa: catch(...) in the render hook also catches access violations
         # while still running destructors (mutex unlocks).

@@ -58,7 +58,7 @@ try {
     $docs = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'American Truck Simulator'
     Write-Host "Settings: $(Join-Path $docs 'ats_reverse_overlay.ini') (created on first start)"
     Write-Host "Log:      $(Join-Path $docs 'ats_reverse_overlay.log')"
-    Write-Host 'Start ATS with DirectX 11 and confirm the SDK features dialog on launch.'
+    Write-Host 'Enable "Reverse Overlay - Guide Lines - ATS" in the Mod Manager and accept the SDK features notice on launch.'
     exit 0
 }
 catch {
