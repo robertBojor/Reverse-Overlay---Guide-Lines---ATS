@@ -1,0 +1,4 @@
+LIBRARY ats_reverse_overlay
+EXPORTS
+    scs_telemetry_init
+    scs_telemetry_shutdown

@@ -1,0 +1,9 @@
+build/
+out/*.exe
+out/preview/*.svg
+out/*.dll
+out/*.scs
+out/mod_stage/
+.claude/
+out/preview/
+__pycache__/
