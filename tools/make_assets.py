@@ -118,7 +118,7 @@ def manifest(workshop, with_icon):
              f' package_version: "{VERSION}"']
     if not workshop:
         lines.append(f' display_name: "{DISPLAY_NAME}"')
-    lines += [' author: "Robert"', ' category[]: "interior"']
+    lines += [' author: "Robert Bojor"', ' category[]: "interior"']
     if with_icon:
         lines.append(' icon: "mod_icon.jpg"')
     lines.append(' description_file: "description.txt"')

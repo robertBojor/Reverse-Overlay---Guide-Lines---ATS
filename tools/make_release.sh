@@ -101,6 +101,7 @@ files = {
 }
 for lic in sorted((root / 'third_party' / 'licenses').glob('*.txt')):
     files[f'LICENSES/{lic.name}'] = lic.read_bytes()
+files['LICENSE.txt'] = crlf((root / 'LICENSE').read_text())
 files['LICENSES/LICENSE.imgui.txt'] = (root / 'third_party' / 'imgui' / 'LICENSE.txt').read_bytes()
 
 with zipfile.ZipFile(target, 'w', compression=zipfile.ZIP_DEFLATED) as z:

@@ -9,6 +9,7 @@ drawn in the game world and visible in the mirrors.**
 ![Platform](https://img.shields.io/badge/platform-Windows%20x64-555)
 ![Version](https://img.shields.io/badge/version-0.1.0-2ea44f)
 ![Status](https://img.shields.io/badge/status-early%20release-orange)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 </div>
 
@@ -164,6 +165,12 @@ third_party/    SCS SDK headers, MinHook, Dear ImGui, licences
 - SCS Telemetry SDK
   · [MinHook](https://github.com/TsudaKageyu/minhook) (BSD-2-Clause)
   · [Dear ImGui](https://github.com/ocornut/imgui) (MIT).
+
+## License
+
+[MIT](LICENSE) © 2026 Robert Bojor. Third-party components keep their own
+licences; see [third_party/licenses](third_party/licenses) and
+[third_party/imgui/LICENSE.txt](third_party/imgui/LICENSE.txt).
 
 *Not affiliated with or endorsed by SCS Software. American Truck Simulator is a
 trademark of SCS Software.*
