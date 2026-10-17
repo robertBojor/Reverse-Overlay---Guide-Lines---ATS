@@ -70,6 +70,9 @@ You need BOTH parts:
 Start the game. It will mention "advanced SDK features" - that is expected.
 Shift into reverse to see the lines.
 
+Full instructions, settings and troubleshooting: User_Guide.md
+(open it with any text editor or a Markdown viewer).
+
 Settings:  Documents\\American Truck Simulator\\ats_reverse_overlay.ini
 Log:       Documents\\American Truck Simulator\\ats_reverse_overlay.log
 
@@ -92,6 +95,7 @@ files = {
     'Install.bat': crlf(install_bat),
     'Uninstall.bat': crlf(uninstall_bat),
     'README.txt': crlf(readme),
+    'User_Guide.md': crlf((root / 'docs' / 'USER_GUIDE.md').read_text()),
     'installer/install.ps1': crlf((root / 'tools' / 'install.ps1').read_text()),
     'optional/ats_reverse_overlay.scs': (root / 'out' / 'ats_reverse_overlay.scs').read_bytes(),
 }

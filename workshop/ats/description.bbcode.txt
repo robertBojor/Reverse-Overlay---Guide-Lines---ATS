@@ -24,11 +24,14 @@ Backup-camera style guide lines for reversing. While you are in reverse, two lin
 [/list]
 
 [h2]Settings and troubleshooting[/h2]
+The plugin download includes a full user guide (User_Guide.md) with installation, settings, troubleshooting and what happens after game updates.
+
 Settings: [i]Documents\American Truck Simulator\ats_reverse_overlay.ini[/i] (created on first start, changes apply while driving).
 Log: [i]Documents\American Truck Simulator\ats_reverse_overlay.log[/i]. The first lines say whether the plugin found what it needs on your game version.
 
 [list]
 [*][b]No lines at all:[/b] check that the DLL is in [i]bin\win_x64\plugins[/i] and this mod is enabled.
+[*][b]Plugin does not load at all:[/b] the DLL is not digitally signed yet; Windows Smart App Control or antivirus software may block it. See the user guide.
 [*][b]After a game update:[/b] if the log says "engine functions missing", the lines switch themselves off until the plugin is updated. The game keeps running normally.
 [/list]
 

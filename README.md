@@ -1,135 +1,169 @@
-# Reverse Overlay - Guide Lines - ATS
+<div align="center">
 
-Backup-camera style guide lines for American Truck Simulator. While you are
-in reverse, two lines are drawn on the ground from the rear corners of your
-trailer (or truck, when bobtail) along the predicted path: red for the first
-3 m, yellow to 8 m, then green out to 15 m, with ticks where the colour
-changes. They are real objects in the game world, so they show up in every
-camera and in the mirrors.
+# Reverse Overlay · Guide Lines for ATS
+
+**Backup-camera style guide lines for reversing in American Truck Simulator,
+drawn in the game world and visible in the mirrors.**
+
+![Game](https://img.shields.io/badge/game-American%20Truck%20Simulator%201.61-1f6feb)
+![Platform](https://img.shields.io/badge/platform-Windows%20x64-555)
+![Version](https://img.shields.io/badge/version-0.1.0-2ea44f)
+![Status](https://img.shields.io/badge/status-early%20release-orange)
+
+</div>
+
+<!-- Screenshot: add an in-game image here, e.g.
+<p align="center"><img src="docs/images/reversing.jpg" width="820" alt="Guide lines while reversing"></p>
+-->
+
+When you shift into reverse, two lines appear on the ground from the rear
+corners of your trailer, or of the truck when you drive without one. They follow
+the path the rig will actually take if you hold the current steering:
+
+| | |
+|---|---|
+| 🟥 **0 – 3 m** | red |
+| 🟨 **3 – 8 m** | yellow |
+| 🟩 **8 – 15 m** | green, with ticks where each band ends |
+
+## Features
+
+- **In the world, not on the screen:** the lines are real objects, so they show
+  up from every camera **and in the mirrors**, where you actually reverse a
+  trailer.
+- **Real steering geometry:** the path is computed from the game's actual
+  front-wheel angles, so it handles different steering locks, lift axles and
+  multi-steer trucks.
+- **Trailers done properly:** single trailers, doubles and triples, off-axle
+  fifth wheels and self-steering trailer axles. Couplings are measured live.
+- **Patch-tolerant:** game functions are found by code patterns, not fixed
+  addresses. If an update breaks them, the lines switch off cleanly instead of
+  crashing the game, and a bundled tool regenerates the patterns.
+- **Lightweight:** about 140 small line pieces while reversing, nothing
+  otherwise. No network access, and save games are never touched.
+- **Configurable:** band distances, path length and line height, all changeable
+  while you drive.
+
+## Installation
+
+You need **two parts**. Steam Workshop can't install plugins, so the DLL is a
+separate download.
+
+1. **Line models:** subscribe to **Reverse Overlay - Guide Lines - ATS** on the
+   Steam Workshop, *or* use the `.scs` included in the download.
+2. **Plugin:** download the latest zip from
+   [**Releases**](../../releases), exit the game and run `Install.bat`. It
+   copies `ats_reverse_overlay.dll` into
+   `American Truck Simulator\bin\win_x64\plugins`.
+3. Start ATS, accept the *advanced SDK features* notice, enable the mod in the
+   Mod Manager, and reverse.
+
+The **[user guide](docs/USER_GUIDE.md)** covers settings, troubleshooting, game
+updates and uninstalling.
+
+> [!NOTE]
+> The plugin is not code-signed yet. Windows Smart App Control or antivirus
+> software may block or flag it. See
+> [Windows security](docs/USER_GUIDE.md#7-windows-security-unsigned-plugin).
 
 ## How it works
 
-- **Prediction** uses only the official SCS telemetry SDK: truck and trailer
-  placement, wheel layout, per-wheel steering, lift and ground contact, and
-  hitch positions.
-- **Drawing** places small line models (from the
-  `Reverse Overlay - Guide Lines - ATS` mod package) in the player vehicle's
-  render pass. The five engine functions involved are found by wildcarded
-  byte patterns, not by fixed address or executable hash. Each pattern must
-  match exactly once, and a function that another plugin has already hooked
-  is still recognised.
-- **If a game update changes the code,** the patterns stop matching and the
-  lines switch themselves off cleanly. To recover, regenerate the patterns
-  for the new build with `tools/re/` (see "Game updates" below).
+```mermaid
+flowchart LR
+    T["SCS Telemetry SDK<br/>wheels · steering · placement · hitches"] --> P["Prediction<br/>src/core/rig.hpp"]
+    P --> G["Guide lines<br/>src/core/guides.hpp"]
+    G --> W["World renderer<br/>src/plugin/world_lines.cpp"]
+    E["Pattern scan<br/>src/plugin/engine.cpp"] --> W
+    W --> R["Game render pass<br/>(all cameras + mirrors)"]
+```
 
-## Install
-
-1. Exit ATS.
-2. Copy `out/ats_reverse_overlay.dll` to `<ATS>\bin\win_x64\plugins\`, or run:
-   ```powershell
-   powershell -ExecutionPolicy Bypass -File tools\install.ps1 -Dll out\ats_reverse_overlay.dll
-   ```
-3. Copy `out/ats_reverse_overlay.scs` to `Documents\American Truck Simulator\mod\`.
-4. Start ATS, accept the "SDK features" prompt, and enable
-   **Reverse Overlay - Guide Lines - ATS** in the Mod Manager.
-5. Shift into reverse.
-
-## Settings
-
-`Documents\American Truck Simulator\ats_reverse_overlay.ini` is created on
-first start and re-read while the game runs.
-
-| Section / setting | Default | Meaning |
-|---|---|---|
-| `[world] enabled` | `1` | guide lines on or off |
-| `[world] red_until_m`, `yellow_until_m` | `3`, `8` | colour band limits (metres travelled) |
-| `[world] line_height_m` | `0.35` | line height above the rear unit's reference point |
-| `[world] allow_unverified` | `1` | also run on game builds not yet confirmed in game; `0` = panel-only safety mode after updates |
-| `[prediction] horizon_m` | `15` | prediction distance |
-| `[overlay] enabled` | `0` | optional top-down panel (DirectX 11). Read at game start; when off, DirectX is not hooked |
-
-The log is written to `Documents\American Truck Simulator\ats_reverse_overlay.log`.
-Its startup lines show whether the engine functions were found and whether
-the lines are ready.
+- **Prediction:** a kinematic bicycle model about the tractor's virtual rear
+  axle, with curvature from the real wheel angles,
+  `k = tan(δ) / (L − x·tan(δ))`. That's exact for Ackermann steering. Each
+  trailer obeys a no-side-slip constraint at its equivalent axle, driven by the
+  movement of its coupling point. Integration stops at 85° articulation.
+- **Guide lines:** the rear-corner paths of the last unit, cut into 0.25 m
+  pieces and coloured by distance travelled.
+- **Rendering:** plugin-owned model instances submitted from the player
+  vehicle's render pass. Five engine functions are located by unique
+  wildcarded byte patterns. A function another plugin has already hooked is
+  still recognised.
+- **Optional top-down panel:** a bird's-eye view drawn with Dear ImGui over
+  DirectX 11. It's off by default, and when it's off DirectX isn't hooked at
+  all.
 
 ## Game updates
 
-The top-down panel (if enabled) never depends on the game build. For the
-guide lines:
-
-1. Start the game after the update and check the log.
-   - *"engine functions located … (build not yet verified in game)"*: the
-     patterns still match. Test-drive, then add the new exe hash to
-     `verified_hashes` in `src/plugin/engine.cpp`.
-   - *"engine functions missing"*: the lines are off. Continue with step 2.
-2. Run the finder against the installed game:
-   ```bash
-   tools/re/update.sh            # report
-   tools/re/update.sh --apply    # rewrite the patterns in engine.cpp
-   ```
-   It compares the installed `amtrucks.exe` with the newest reference copy in
-   `refs/` (git-ignored) using four independent methods:
-   - **exact:** the current patterns;
-   - **loose:** longer patterns with struct offsets wildcarded;
-   - **shape:** instruction-shape fingerprints of every function;
-   - **callers:** what the matched callers call.
-
-   It accepts a function only when at least two methods agree, or the exact
-   pattern matches. The new patterns match both builds where possible.
-3. `tools/build.sh Release`, install the DLL, test in game, add the hash to
-   `verified_hashes`, and copy the new executable into `refs/` as the next
-   reference.
-
-If an update misbehaves rather than failing cleanly, set
-`allow_unverified = 0`, or switch to the previous game version via
-Steam → Properties → Betas.
-
-## How the prediction works
-
-`src/core/rig.hpp` (platform neutral, unit tested):
-
-- **Tractor:** kinematic bicycle model about the virtual rear axle, which is
-  the centroid of the grounded rear axles, so lifting a tag axle shortens the
-  wheelbase. Curvature comes from the **actual front-wheel angles** using
-  `k = tan(d) / (L - x tan(d))` per wheel, which is exact for Ackermann
-  steering.
-- **Trailers:** no-side-slip constraint at the equivalent axle, driven by the
-  displacement of the coupling point. Self-steering trailer axles are
-  included.
-- **Doubles and triples:** each coupling point is measured live from the
-  telemetry placements.
-- **Limits:** the SDK reports no body dimensions. The width and rear
-  overhang of the rearmost unit are estimated from wheel and kingpin
-  positions (`rto::tuning`). Integration stops at 85° articulation.
-
-`src/core/guides.hpp` turns the prediction into 0.25 m line pieces with
-colour bands and ticks.
-
-## Layout
-
-```
-src/core/      rig.hpp (prediction), guides.hpp (guide lines), scene.hpp + panel_layout.hpp (panel)
-src/plugin/    plugin.cpp (SDK), engine.cpp (pattern scan), world_lines.cpp (in-world lines),
-               overlay_dx11.cpp (optional panel), config, log
-assets/base/   line model the variants are derived from (MIT, see third_party/licenses)
-tests/         core_tests.cpp, scene_preview.cpp
-tools/         build.sh (WSL -> MSVC), make_assets.py + pack_scs.ps1 (mod package),
-               install.ps1, re/ (pattern generation and update finder)
-```
-
-## Build
-
-From WSL, using the Windows Visual Studio 2026 Build Tools:
+After an update, the log shows either *"engine functions located"* (all good)
+or *"engine functions missing"* (lines off, game unaffected). In the second
+case:
 
 ```bash
-tools/build.sh Release                 # DLL -> out/
-python3 -I tools/make_assets.py        # stage the mod files in out/mod_stage
+tools/re/update.sh --apply   # find the functions in the new build, rewrite the patterns
+tools/build.sh Release       # rebuild the plugin
 ```
 
-Then zip the staged files with `tools/pack_scs.ps1`. The archive must use
-deflate compression: the game rejects stored zip entries.
+The finder compares the new executable with a known-good reference using four
+independent methods:
+- exact patterns;
+- loose patterns;
+- instruction-shape fingerprints over every function;
+- caller voting.
+
+It accepts a result only when they agree. See
+[Game updates](docs/USER_GUIDE.md#5-game-updates) for the player side.
+
+## Building from source
+
+Requirements: Windows with **Visual Studio 2026 Build Tools** (MSVC, CMake,
+Ninja). The scripts are written for WSL, but the CMake project builds on
+Windows directly.
+
+```bash
+tools/build.sh Release                  # plugin DLL -> out/
+python3 -I tools/make_assets.py all     # mod files: out/mod_stage + workshop/ats/upload
+tools/make_release.sh                   # release zip -> out/release/
+```
+
+Core tests (platform-neutral, any C++20 compiler):
+
+```bash
+c++ -std=c++20 -O2 tests/core_tests.cpp -o core_tests && ./core_tests
+```
+
+Workshop publishing steps: [workshop/ats/UPLOAD.md](workshop/ats/UPLOAD.md).
+
+<details>
+<summary><b>Repository layout</b></summary>
+
+```
+src/core/       platform-neutral prediction, guide lines, panel scene (unit tested)
+src/plugin/     SDK plugin, pattern scan, world renderer, optional DX11 panel, settings, log
+assets/base/    base line model the coloured variants are generated from
+tests/          core unit tests and SVG scene previews
+tools/          build, asset, packaging and install scripts
+tools/re/       pattern generation and the game-update finder
+workshop/ats/   Steam Workshop upload folder, description and checklist
+docs/           user guide
+third_party/    SCS SDK headers, MinHook, Dear ImGui, licences
+```
+</details>
+
+## Roadmap
+
+- [ ] Euro Truck Simulator 2 version
+- [ ] Code-signed releases
+- [ ] Better height on uneven ground (wheel-based ground fit)
+- [ ] Configurable colours
 
 ## Credits
 
-The in-world drawing technique and the base line model come from
-"Reverse Posture Assistant For ATS" by yyysheng (MIT).
+- In-world drawing technique and base line model:
+  [Reverse Posture Assistant For ATS](https://github.com/yyysheng/ATSmods) by
+  yyysheng (MIT).
+- SCS Telemetry SDK
+  · [MinHook](https://github.com/TsudaKageyu/minhook) (BSD-2-Clause)
+  · [Dear ImGui](https://github.com/ocornut/imgui) (MIT).
+
+*Not affiliated with or endorsed by SCS Software. American Truck Simulator is a
+trademark of SCS Software.*

@@ -100,7 +100,7 @@ void render_pieces(std::uint64_t context)
             if (!pool[index])
             {
                 log::error(std::string("Could not create ") + model_paths[band] +
-                           " - is the ats_reverse_overlay.scs mod enabled?");
+                           " - is the \"Reverse Overlay - Guide Lines - ATS\" mod enabled in the Mod Manager?");
                 faulted = true;
                 return;
             }

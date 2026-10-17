@@ -12,7 +12,7 @@ namespace rto
 {
 namespace
 {
-constexpr const char *default_file = R"(; ATS Reverse Overlay settings. Changes are picked up while the game runs.
+constexpr const char *default_file = R"(; Reverse Overlay - Guide Lines - ATS settings. Most changes apply while the game runs.
 
 [overlay]
 ; Top-down panel. 1 = on, 0 = off. Takes effect the next time the game starts
@@ -49,7 +49,8 @@ line_height_m = 0.35
 allow_unverified = 1
 
 [hotkey]
-; Toggle the overlay. key is a letter, digit, F1-F12, or none
+; Show/hide the top-down panel (does not affect the guide lines).
+; key is a letter, digit, F1-F12, or none
 key = F9
 ctrl = 1
 shift = 1
