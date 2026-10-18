@@ -1,6 +1,6 @@
 [h1]Reverse Overlay - Guide Lines - ATS[/h1]
 
-Backup-camera style guide lines for reversing. While you are in reverse, two lines are drawn on the ground from the rear corners of your trailer (or truck, when bobtail) along the path it will actually take:
+Backup-camera style guide lines for reversing, and forward dots for lane position. While you are in reverse, two lines are drawn on the ground from the rear corners of your trailer (or truck, when bobtail) along the path it will actually take:
 
 [list]
 [*][b]Red[/b] for the first 3 m, [b]yellow[/b] to 8 m, [b]green[/b] out to 15 m, with ticks where the colour changes
@@ -10,18 +10,28 @@ Backup-camera style guide lines for reversing. While you are in reverse, two lin
 [*]Distances and line height adjustable in a settings file
 [/list]
 
-[h2]New: forward dots for lane position[/h2]
-In a forward gear, two square dots appear on the road ahead: [b]red[/b] where your truck's front-left corner will be and [b]green[/b] where the front-right corner will be, about 1.5 seconds from now. Keep red inside the left lane line and green inside the right one.
+[h2]New in 0.2.0: forward dots for lane position[/h2]
+In a forward gear, two square dots appear on the road ahead: [b]red[/b] where your truck's front-left corner will be and [b]green[/b] where the front-right corner will be, about 1.5 seconds from now. Keep red inside the left lane line and green inside the right one. Trailers are ignored, because they follow inside the truck's path.
 
-[b]Ctrl+Shift+F9[/b] steps through: forward dots only, reverse lines only, both, nothing. The plugin remembers your choice.
+[h2]Keyboard shortcut: Ctrl+Shift+F9[/h2]
+Each press moves to the next mode (only while the game window has focus):
+[olist]
+[*][b]Forward dots only[/b]
+[*][b]Reverse lines only[/b]
+[*][b]Both[/b]: dots in a forward gear, lines in reverse
+[*][b]Nothing[/b]: everything hidden
+[/olist]
+The next press starts again at forward dots only. Your choice is remembered between games; the very first start is on [b]Both[/b]. Another key can be set in the [i][hotkey][/i] section of the settings file.
+
+[b]Updating from 0.1.0?[/b] Update the plugin DLL as well. This item now also contains the dot models the new plugin needs, and the old plugin simply ignores them.
 
 Open source (MIT): read the full README, user guide and source code on GitHub before installing: [b][url=https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS]Reverse Overlay for ATS on GitHub[/url][/b]
 
 [hr][/hr]
 [h2]IMPORTANT: two parts are needed[/h2]
 [olist]
-[*][b]This Workshop item[/b] provides the line models. Subscribe and enable it in the Mod Manager.
-[*][b]The plugin DLL[/b] draws the lines. Steam Workshop cannot install it, so download it separately: [b][url=https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS/releases/latest]Reverse Overlay for ATS - plugin download[/url][/b]. Exit the game and run [i]Install.bat[/i]. It copies [i]ats_reverse_overlay.dll[/i] into [i]American Truck Simulator\bin\win_x64\plugins[/i] and creates that folder if needed.
+[*][b]This Workshop item[/b] provides the models for the lines and dots. Subscribe and enable it in the Mod Manager.
+[*][b]The plugin DLL[/b] draws them. Steam Workshop cannot install it, so download it separately: [b][url=https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS/releases/latest]Reverse Overlay for ATS - plugin download[/url][/b]. Exit the game and run [i]Install.bat[/i]. It copies [i]ats_reverse_overlay.dll[/i] into [i]American Truck Simulator\bin\win_x64\plugins[/i] and creates that folder if needed.
 [/olist]
 [b]Subscribing alone does nothing.[/b] When you start the game with the plugin installed, it shows a notice about "advanced SDK features". That is expected.
 
@@ -34,10 +44,11 @@ Open source (MIT): read the full README, user guide and source code on GitHub be
 The plugin download includes a full user guide (User_Guide.md) with installation, settings, troubleshooting and what happens after game updates.
 
 Settings: [i]Documents\American Truck Simulator\ats_reverse_overlay.ini[/i] (created on first start, changes apply while driving).
-Log: [i]Documents\American Truck Simulator\ats_reverse_overlay.log[/i]. The first lines say whether the plugin found what it needs on your game version.
+Log: [i]Documents\American Truck Simulator\ats_reverse_overlay.log[/i]. The first lines say whether the plugin found what it needs on your game version, and which mode the shortcut is in.
 
 [list]
-[*][b]No lines at all:[/b] check that the DLL is in [i]bin\win_x64\plugins[/i] and this mod is enabled.
+[*][b]No lines or dots at all:[/b] check that the DLL is in [i]bin\win_x64\plugins[/i] and this mod is enabled, then press [b]Ctrl+Shift+F9[/b]: the mode may be set to show nothing.
+[*][b]Log says "Could not create /model/rto_guides/dot_red.pmd":[/b] the mod is older than the plugin. Let Steam update this item, or update the local .scs.
 [*][b]Plugin does not load at all:[/b] the DLL is not digitally signed yet; Windows Smart App Control or antivirus software may block it. See the user guide.
 [*][b]After a game update:[/b] if the log says "engine functions missing", the lines switch themselves off until the plugin is updated. The game keeps running normally.
 [/list]

@@ -39,3 +39,17 @@ Generated files (`upload/`) are rebuilt by `tools/make_assets.py workshop`. Don'
 ## Updating
 
 Run `tools/make_assets.py workshop`, then in the uploader select the existing item, check the folder and preview paths, write a change note, and upload. Subscribers get it automatically. Bump `VERSION` for every release so the package version and the DLL log line match.
+
+Publish the matching plugin release on GitHub **at the same time**. The Workshop description links to the latest release.
+
+### 0.2.0 checklist
+
+1. Replace the preview images in `assets/images/` and the icon `mod_icon.jpg`, then run `python3 -I tools/make_assets.py workshop`.
+2. Uploader: select the existing item, paste the new `description.bbcode.txt`, set the new 640×360 preview.
+3. Change note:
+
+   ```
+   v0.2.0: Forward dots for lane position (red = front-left corner, green = front-right, about 1.5 s ahead). Ctrl+Shift+F9 now cycles forward dots only / reverse lines only / both / nothing, and remembers the choice. Top-down panel removed. Update the plugin DLL too.
+   ```
+
+4. Replace the screenshots on the Workshop page with ones that show the dots.

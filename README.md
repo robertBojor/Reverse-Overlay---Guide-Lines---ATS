@@ -8,7 +8,7 @@ the mirrors.**
 
 ![Game](https://img.shields.io/badge/game-American%20Truck%20Simulator%201.61-1f6feb)
 ![Platform](https://img.shields.io/badge/platform-Windows%20x64-555)
-![Version](https://img.shields.io/badge/version-0.1.0-2ea44f)
+![Version](https://img.shields.io/badge/version-0.2.0-2ea44f)
 ![Status](https://img.shields.io/badge/status-early%20release-orange)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Steam Workshop](https://img.shields.io/badge/Steam%20Workshop-subscribe-171a21?logo=steam)](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979)
@@ -34,7 +34,9 @@ front corners will be about 1.5 seconds from now (at least 6 m ahead): 🟥 red
 for the front-left corner, 🟩 green for the front-right. Keep red inside the
 left lane line and green inside the right one.
 
-**Ctrl+Shift+F9** steps through what is shown:
+## Keyboard shortcut: Ctrl+Shift+F9
+
+One shortcut chooses what you see. Each press moves to the next mode:
 
 | Press | Shows |
 |---|---|
@@ -43,8 +45,23 @@ left lane line and green inside the right one.
 | 3rd | **Both**: dots in a forward gear, lines in reverse |
 | 4th | **Nothing** (everything hidden) |
 
-The next press starts again with forward dots only. The plugin remembers the
-mode between game sessions (it starts on **Both** the very first time).
+- The next press starts again with forward dots only.
+- The mode is **remembered** between game sessions. The very first start
+  is on **Both**.
+- The shortcut works only while the game window has focus.
+- The log confirms each change, e.g. *"Hotkey: showing forward dots only."*
+- To use a different key, edit `[hotkey]` in the settings file
+  ([details](docs/USER_GUIDE.md#hotkey)).
+
+## What's new in 0.2.0
+
+- **Forward dots** for lane position in any forward gear.
+- **Ctrl+Shift+F9** now cycles forward only / reverse only / both / off, and
+  remembers the choice.
+- The optional top-down panel was removed. The plugin no longer hooks DirectX
+  at all.
+
+Full history: [CHANGELOG.md](CHANGELOG.md).
 
 ## Features
 
@@ -78,7 +95,14 @@ separate download.
    copies `ats_reverse_overlay.dll` into
    `American Truck Simulator\bin\win_x64\plugins`.
 3. Start ATS, accept the *advanced SDK features* notice, enable the mod in the
-   Mod Manager, and drive.
+   Mod Manager, and drive. Press **Ctrl+Shift+F9** to choose what is shown
+   ([see above](#keyboard-shortcut-ctrlshiftf9)).
+
+> [!IMPORTANT]
+> **Updating from 0.1.0:** update both parts. The plugin needs the new dot
+> models from the Workshop item (Steam updates it on its own) or the new
+> `.scs`, otherwise the log reports *"Could not create
+> /model/rto_guides/dot_red.pmd"*.
 
 The **[user guide](docs/USER_GUIDE.md)** covers settings, troubleshooting, game
 updates and uninstalling.
@@ -163,7 +187,7 @@ Workshop publishing steps: [workshop/ats/UPLOAD.md](workshop/ats/UPLOAD.md).
 <summary><b>Repository layout</b></summary>
 
 ```
-src/core/       platform-neutral prediction and guide lines (unit tested)
+src/core/       platform-neutral prediction, guide lines, forward dots, hotkey modes (unit tested)
 src/plugin/     SDK plugin, pattern scan, world renderer, settings, log
 assets/base/    base line model the coloured variants are generated from
 tests/          core unit tests

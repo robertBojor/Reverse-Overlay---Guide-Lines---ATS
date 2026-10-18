@@ -145,6 +145,9 @@ red, yellow and green by distance, visible in every camera and the mirrors.
 In a forward gear, two square dots show where the truck's front corners
 will be in a moment (red left, green right), to help with lane position.
 
+Ctrl+Shift+F9 cycles what is shown: forward dots only, reverse lines only,
+both, nothing. The choice is remembered.
+
 This package contains only the models. They are drawn by the
 ats_reverse_overlay.dll plugin, which must be installed separately into
 the game's bin/win_x64/plugins folder.

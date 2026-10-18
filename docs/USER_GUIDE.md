@@ -21,6 +21,15 @@ where the truck's **front-left** corner will be and **green** where the
 the truck centred in its lane. **Ctrl+Shift+F9** chooses whether you see the
 dots, the lines, both or neither.
 
+> **Keyboard shortcut: Ctrl+Shift+F9**
+> Each press moves to the next mode: **forward dots only → reverse lines only
+> → both → nothing**, then back to forward dots only. Your choice is
+> remembered. Details in [section 3](#what-is-shown-ctrlshiftf9).
+
+**New in 0.2.0:** forward dots, the four-step shortcut, and the top-down panel
+removed. See the [changelog](../CHANGELOG.md). Updating from 0.1.0? Update the
+plugin **and** the mod, because the plugin needs the new dot models.
+
 ---
 
 ## 1. Requirements
@@ -38,13 +47,13 @@ The mod comes in **two parts**, and you need both:
 
 | Part | What it does | Where it comes from |
 |---|---|---|
-| **Guide-line models** | The coloured line pieces the game draws | Steam Workshop item *or* `optional\ats_reverse_overlay.scs` in the download |
-| **Plugin** (`ats_reverse_overlay.dll`) | Predicts the path and places the lines while you reverse | The plugin download (zip) |
+| **Models** | The coloured line pieces and dots the game draws | Steam Workshop item *or* `optional\ats_reverse_overlay.scs` in the download |
+| **Plugin** (`ats_reverse_overlay.dll`) | Predicts the path and places the lines and dots | The plugin download (zip) |
 
 Steam Workshop can only deliver mod files. It cannot install the plugin, so
 **subscribing on its own does nothing**.
 
-### Step 1: Get the line models (choose one)
+### Step 1: Get the models (choose one)
 
 **A. Steam Workshop (recommended)**
 1. Subscribe to [**Reverse Overlay - Guide Lines - ATS**](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979) on the Steam Workshop.
@@ -82,7 +91,8 @@ missing. The game only loads plugins from that exact folder.
    expected for any telemetry plugin. Confirm it.
 3. Open the **Mod Manager**, enable **Reverse Overlay - Guide Lines - ATS**, and
    confirm the changes.
-4. Load your profile, drive, and shift into **reverse**.
+4. Load your profile and drive: the dots appear in a forward gear, the
+   lines in reverse. Press **Ctrl+Shift+F9** to choose what is shown.
 
 ### Check it's working
 
@@ -90,19 +100,20 @@ Open `Documents\American Truck Simulator\ats_reverse_overlay.log`. After
 starting the game you should see:
 
 ```
-Reverse Overlay 0.1.0 starting in American Truck Simulator ...
+Reverse Overlay 0.2.0 starting in American Truck Simulator ...
+Showing forward dots and reverse guide lines (the hotkey changes this).
 engine functions located: ...
 In-world guide lines ready (vehicle render hook installed).
 ```
 
-After you first reverse:
+The first time something is drawn:
 
 ```
-In-world guide lines rendering: 134 pieces.
+In-world guide lines rendering: 2 pieces.
 ```
 
-(The number varies: about 140 while reversing, 2 for the forward dots.) If these lines are missing, see
-[Troubleshooting](#6-troubleshooting).
+(The number varies: 2 for the forward dots, about 140 while reversing.) If
+these lines are missing, see [Troubleshooting](#6-troubleshooting).
 
 ---
 
@@ -117,10 +128,15 @@ In-world guide lines rendering: 134 pieces.
 | 3rd | **Both**: dots in a forward gear, lines in reverse |
 | 4th | **Nothing** (everything hidden) |
 
-The next press starts again with forward dots only. The plugin remembers the
-mode between game sessions (it starts on **Both** the very first time).
-
-The log records each change, for example *"Hotkey: showing forward dots only."*
+- The next press starts again with forward dots only.
+- The mode is **remembered** between game sessions, in
+  `Documents\American Truck Simulator\ats_reverse_overlay.mode`. The very
+  first start is on **Both**. To reset, delete that file.
+- The shortcut works only while the **game window has focus**. It does nothing
+  in the Windows desktop or another program.
+- The log records each change, for example *"Hotkey: showing forward dots
+  only."*
+- To use another key combination, see [`[hotkey]`](#hotkey).
 
 ### Forward dots
 
@@ -208,7 +224,18 @@ and nothing (see [Using it](#3-using-it)). The current mode is saved in
 | `key` | `F9` | a letter, a digit, `F1`–`F12`, or `none` to turn the hotkey off |
 | `ctrl`, `shift`, `alt` | `1`, `1`, `0` | which modifier keys must be held |
 
-The key only works while the game window has focus.
+The key only works while the game window has focus. Example: Alt+F10 instead:
+
+```ini
+[hotkey]
+key = F10
+ctrl = 0
+shift = 0
+alt = 1
+```
+
+Avoid combinations the game already uses (Ctrl+Shift+R, for example, opens
+the radio). Changes apply within about 2 seconds.
 
 Older versions also had an `[overlay]` section for a top-down panel. That
 panel has been removed; an `[overlay]` section left in your file is ignored.

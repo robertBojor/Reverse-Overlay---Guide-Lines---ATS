@@ -53,11 +53,12 @@ pause
 readme = f'''Reverse Overlay - Guide Lines - ATS  v{version}
 ==============================================
 
-Backup-camera style guide lines while reversing in American Truck Simulator.
+Backup-camera style guide lines while reversing in American Truck Simulator,
+and forward dots for lane position.
 
 You need BOTH parts:
 
-  1. The line models: subscribe to "Reverse Overlay - Guide Lines - ATS" on
+  1. The models: subscribe to "Reverse Overlay - Guide Lines - ATS" on
      the Steam Workshop and enable it in the Mod Manager.
      (No Workshop? Copy optional\\ats_reverse_overlay.scs into
      Documents\\American Truck Simulator\\mod and enable that instead.
@@ -68,15 +69,28 @@ You need BOTH parts:
      <ATS folder>\\bin\\win_x64\\plugins  (the folder is created if needed).
 
 Start the game. It will mention "advanced SDK features" - that is expected.
-Shift into reverse to see the lines; in a forward gear, two dots show where
-the truck's front corners will be. Ctrl+Shift+F9 steps through forward
-only / reverse only / both / off.
+In a forward gear, two dots show where the truck's front corners will be
+(red = front-left, green = front-right). In reverse, the guide lines show
+the path of the rear corners.
+
+KEYBOARD SHORTCUT: Ctrl+Shift+F9 (only while the game window has focus)
+Each press moves to the next mode:
+  1st press   forward dots only
+  2nd press   reverse lines only
+  3rd press   both (dots forward, lines in reverse)
+  4th press   nothing
+...then back to forward dots only. The choice is remembered between games
+(the first start is on "both"). Another key can be set in the settings file.
+
+Updating from 0.1.0? Update the mod as well as the plugin: the plugin needs
+the new dot models.
 
 Full instructions, settings and troubleshooting: User_Guide.md
 (open it with any text editor or a Markdown viewer).
 
 Settings:  Documents\\American Truck Simulator\\ats_reverse_overlay.ini
 Log:       Documents\\American Truck Simulator\\ats_reverse_overlay.log
+Mode:      Documents\\American Truck Simulator\\ats_reverse_overlay.mode
 
 Uninstall: run Uninstall.bat (removes the DLL) and disable the mod.
 

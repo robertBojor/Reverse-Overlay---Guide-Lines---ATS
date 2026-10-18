@@ -59,6 +59,7 @@ try {
     Write-Host "Settings: $(Join-Path $docs 'ats_reverse_overlay.ini') (created on first start)"
     Write-Host "Log:      $(Join-Path $docs 'ats_reverse_overlay.log')"
     Write-Host 'Enable "Reverse Overlay - Guide Lines - ATS" in the Mod Manager and accept the SDK features notice on launch.'
+    Write-Host 'In game, Ctrl+Shift+F9 cycles: forward dots only, reverse lines only, both, nothing.'
     exit 0
 }
 catch {

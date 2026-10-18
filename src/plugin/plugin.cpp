@@ -640,7 +640,7 @@ SCSAPI_RESULT scs_telemetry_init(const scs_u32_t version, const scs_telemetry_in
     state.mode_path = folder / "ats_reverse_overlay.mode";
     load_mode();
     rto::log::info(std::string("Showing ") + mode_description(state.mode) +
-                   " (Ctrl+Shift+F9 changes this).");
+                   " (the hotkey changes this).");
 
     const bool events =
         api->register_for_event(SCS_TELEMETRY_EVENT_frame_end, event_callback, nullptr) == SCS_RESULT_ok &&
