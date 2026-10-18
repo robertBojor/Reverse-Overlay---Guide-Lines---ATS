@@ -1,6 +1,6 @@
 <div align="center">
 
-# Reverse Overlay · Guide Lines for ATS
+# Backing & Lane Prediction · ATS
 
 **Backup-camera style guide lines for reversing in American Truck Simulator,
 plus forward dots for lane position, drawn in the game world and visible in
@@ -15,7 +15,9 @@ the mirrors.**
 
 </div>
 
-<p align="center"><img src="assets/images/preview-image-large.jpg" width="820" alt="Backing Prediction: reversing and trailer trajectory guide lines behind a truck and trailer at night"></p>
+*Formerly **Reverse Overlay - Guide Lines - ATS**. Same Workshop item, same plugin file, new name for 0.2.0.*
+
+<p align="center"><img src="assets/images/preview-image-large.jpg" width="820" alt="Backing &amp; Lane Prediction: on the left, red, yellow and green reverse guide lines behind a truck and trailer at night; on the right, a red and a green dot on the highway ahead of a truck, marking where its front corners will be"></p>
 
 When you shift into reverse, two lines appear on the ground from the rear
 corners of your trailer, or of the truck when you drive without one. They follow
@@ -88,7 +90,7 @@ Full history: [CHANGELOG.md](CHANGELOG.md).
 You need **two parts**. Steam Workshop can't install plugins, so the DLL is a
 separate download.
 
-1. **Line models:** subscribe to [**Reverse Overlay - Guide Lines - ATS**](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979) on the
+1. **Line models:** subscribe to [**Backing & Lane Prediction - ATS**](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979) on the
    Steam Workshop, *or* use the `.scs` included in the download.
 2. **Plugin:** download the latest zip from
    [**Releases**](../../releases), exit the game and run `Install.bat`. It

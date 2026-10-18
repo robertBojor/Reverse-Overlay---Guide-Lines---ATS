@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds the plugin release zip: out/release/Reverse_Overlay_ATS_v<VERSION>.zip
+# Builds the plugin release zip: out/release/Backing_Lane_Prediction_ATS_v<VERSION>.zip
 #   tools/make_release.sh            # uses the DLL already in out/
 #   tools/make_release.sh --build    # rebuild the DLL first
 # The DLL should be signed before running this for a public release.
@@ -33,32 +33,33 @@ from pathlib import Path
 root, version = Path(sys.argv[1]), sys.argv[2]
 out = root / 'out' / 'release'
 out.mkdir(parents=True, exist_ok=True)
-target = out / f'Reverse_Overlay_ATS_v{version}.zip'
+target = out / f'Backing_Lane_Prediction_ATS_v{version}.zip'
 
 def crlf(text):
     return text.replace('\r\n', '\n').replace('\n', '\r\n').encode()
 
 install_bat = r'''@echo off
-title Reverse Overlay for ATS - install
+title Backing ^& Lane Prediction - ATS - install
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0installer\install.ps1" -Dll "%~dp0ats_reverse_overlay.dll"
 echo.
 pause
 '''
 uninstall_bat = r'''@echo off
-title Reverse Overlay for ATS - uninstall
+title Backing ^& Lane Prediction - ATS - uninstall
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0installer\install.ps1" -Uninstall
 echo.
 pause
 '''
-readme = f'''Reverse Overlay - Guide Lines - ATS  v{version}
-==============================================
+readme = f'''Backing & Lane Prediction - ATS  v{version}
+==========================================
+(formerly "Reverse Overlay - Guide Lines - ATS")
 
 Backup-camera style guide lines while reversing in American Truck Simulator,
 and forward dots for lane position.
 
 You need BOTH parts:
 
-  1. The models: subscribe to "Reverse Overlay - Guide Lines - ATS" on
+  1. The models: subscribe to "Backing & Lane Prediction - ATS" on
      the Steam Workshop and enable it in the Mod Manager.
      (No Workshop? Copy optional\\ats_reverse_overlay.scs into
      Documents\\American Truck Simulator\\mod and enable that instead.
@@ -121,7 +122,7 @@ files['LICENSE.txt'] = crlf((root / 'LICENSE').read_text())
 
 with zipfile.ZipFile(target, 'w', compression=zipfile.ZIP_DEFLATED) as z:
     for name in sorted(files):
-        z.writestr(f'Reverse_Overlay_ATS_v{version}/{name}', files[name])
+        z.writestr(f'Backing_Lane_Prediction_ATS_v{version}/{name}', files[name])
 print(f'wrote {target}')
 for name in sorted(files):
     print('  ', name)

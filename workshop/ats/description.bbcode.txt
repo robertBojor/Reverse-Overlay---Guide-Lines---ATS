@@ -1,4 +1,5 @@
-[h1]Reverse Overlay - Guide Lines - ATS[/h1]
+[h1]Backing & Lane Prediction - ATS[/h1]
+[i]Formerly "Reverse Overlay - Guide Lines - ATS". Same item, new name for v0.2.0.[/i]
 
 Backup-camera style guide lines for reversing, and forward dots for lane position. While you are in reverse, two lines are drawn on the ground from the rear corners of your trailer (or truck, when bobtail) along the path it will actually take:
 
@@ -25,13 +26,13 @@ The next press starts again at forward dots only. Your choice is remembered betw
 
 [b]Updating from 0.1.0?[/b] Update the plugin DLL as well. This item now also contains the dot models the new plugin needs, and the old plugin simply ignores them.
 
-Open source (MIT): read the full README, user guide and source code on GitHub before installing: [b][url=https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS]Reverse Overlay for ATS on GitHub[/url][/b]
+Open source (MIT): read the full README, user guide and source code on GitHub before installing: [b][url=https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS]Backing & Lane Prediction on GitHub[/url][/b]
 
 [hr][/hr]
 [h2]IMPORTANT: two parts are needed[/h2]
 [olist]
 [*][b]This Workshop item[/b] provides the models for the lines and dots. Subscribe and enable it in the Mod Manager.
-[*][b]The plugin DLL[/b] draws them. Steam Workshop cannot install it, so download it separately: [b][url=https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS/releases/latest]Reverse Overlay for ATS - plugin download[/url][/b]. Exit the game and run [i]Install.bat[/i]. It copies [i]ats_reverse_overlay.dll[/i] into [i]American Truck Simulator\bin\win_x64\plugins[/i] and creates that folder if needed.
+[*][b]The plugin DLL[/b] draws them. Steam Workshop cannot install it, so download it separately: [b][url=https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS/releases/latest]Backing & Lane Prediction - plugin download[/url][/b]. Exit the game and run [i]Install.bat[/i]. It copies [i]ats_reverse_overlay.dll[/i] into [i]American Truck Simulator\bin\win_x64\plugins[/i] and creates that folder if needed.
 [/olist]
 [b]Subscribing alone does nothing.[/b] When you start the game with the plugin installed, it shows a notice about "advanced SDK features". That is expected.
 

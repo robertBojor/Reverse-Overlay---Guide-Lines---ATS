@@ -1,4 +1,4 @@
-# Installs (or removes) the ATS Reverse Overlay telemetry plugin.
+# Installs (or removes) the Backing & Lane Prediction ATS telemetry plugin.
 #   powershell -ExecutionPolicy Bypass -File install.ps1 [-Dll path] [-GameRoot path] [-Uninstall]
 # The game only loads telemetry plugins from bin\win_x64\plugins, so that
 # folder is created if it does not exist yet.
@@ -58,7 +58,7 @@ try {
     $docs = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'American Truck Simulator'
     Write-Host "Settings: $(Join-Path $docs 'ats_reverse_overlay.ini') (created on first start)"
     Write-Host "Log:      $(Join-Path $docs 'ats_reverse_overlay.log')"
-    Write-Host 'Enable "Reverse Overlay - Guide Lines - ATS" in the Mod Manager and accept the SDK features notice on launch.'
+    Write-Host 'Enable "Backing & Lane Prediction - ATS" in the Mod Manager and accept the SDK features notice on launch.'
     Write-Host 'In game, Ctrl+Shift+F9 cycles: forward dots only, reverse lines only, both, nothing.'
     exit 0
 }

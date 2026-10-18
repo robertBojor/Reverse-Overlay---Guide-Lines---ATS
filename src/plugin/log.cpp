@@ -30,7 +30,7 @@ void write(const char *level, int game_type, const std::string &message, bool to
         }
     }
     if (to_game && game_logger)
-        game_logger(game_type, ("[reverse-overlay] " + message).c_str());
+        game_logger(game_type, ("[lane-prediction] " + message).c_str());
 }
 }
 
@@ -41,7 +41,7 @@ void init(const std::filesystem::path &file, void (*game_log)(int, const char *)
     game_logger = game_log;
     std::error_code ignored;
     std::filesystem::create_directories(path.parent_path(), ignored);
-    std::ofstream(path, std::ios::trunc) << "ATS Reverse Overlay log\n";
+    std::ofstream(path, std::ios::trunc) << "Backing & Lane Prediction - ATS log\n";
 }
 
 void shutdown()

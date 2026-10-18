@@ -116,7 +116,7 @@ def make_pmg(half_width, half_length, radius):
 
 
 VERSION = (ROOT / 'VERSION').read_text().strip()
-DISPLAY_NAME = 'Reverse Overlay - Guide Lines - ATS'
+DISPLAY_NAME = 'Backing & Lane Prediction - ATS'
 WORKSHOP_DIR = ROOT / 'workshop' / 'ats'
 ICON = WORKSHOP_DIR / 'mod_icon.jpg'  # 276x162 JPEG, supplied by hand
 

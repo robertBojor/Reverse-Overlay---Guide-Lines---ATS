@@ -103,7 +103,7 @@ void render_pieces(std::uint64_t context)
             if (!pool[index])
             {
                 log::error(std::string("Could not create ") + model_paths[band] +
-                           " - is the \"Reverse Overlay - Guide Lines - ATS\" mod enabled in the Mod Manager?");
+                           " - is the \"Backing & Lane Prediction - ATS\" mod enabled in the Mod Manager?");
                 faulted = true;
                 return;
             }

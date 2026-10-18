@@ -1,4 +1,4 @@
-# Workshop upload: Reverse Overlay - Guide Lines - ATS
+# Workshop upload: Backing & Lane Prediction - ATS
 
 ## Files in this folder
 
@@ -19,7 +19,7 @@ Generated files (`upload/`) are rebuilt by `tools/make_assets.py workshop`. Don'
    `\\wsl.localhost\Ubuntu\home\rb\work\ats-reverse-overlay\workshop\ats\upload`,
    or copy the folder somewhere on `C:` first).
 4. Preview image: from `images/`.
-5. Title: **Reverse Overlay - Guide Lines - ATS**
+5. Title: **Backing & Lane Prediction - ATS**
 6. Visibility: **Private** for the first upload.
 7. Description: paste `description.bbcode.txt`.
 8. Tags: type tag (e.g. *Others* or *Interior*, whatever fits best).
@@ -45,11 +45,12 @@ Publish the matching plugin release on GitHub **at the same time**. The Workshop
 ### 0.2.0 checklist
 
 1. Replace the preview images in `assets/images/` and the icon `mod_icon.jpg`, then run `python3 -I tools/make_assets.py workshop`.
-2. Uploader: select the existing item, paste the new `description.bbcode.txt`, set the new 640×360 preview.
+2. Uploader: select the existing item, change the **title** to **Backing & Lane Prediction - ATS**, paste the new `description.bbcode.txt`, set the new 640×360 preview.
 3. Change note:
 
    ```
-   v0.2.0: Forward dots for lane position (red = front-left corner, green = front-right, about 1.5 s ahead). Ctrl+Shift+F9 now cycles forward dots only / reverse lines only / both / nothing, and remembers the choice. Top-down panel removed. Update the plugin DLL too.
+   v0.2.0: Renamed to Backing & Lane Prediction. Forward dots for lane position (red = front-left corner, green = front-right, about 1.5 s ahead). Ctrl+Shift+F9 now cycles forward dots only / reverse lines only / both / nothing, and remembers the choice. Top-down panel removed. Update the plugin DLL too.
    ```
 
 4. Replace the screenshots on the Workshop page with ones that show the dots.
+5. Optional: rename the GitHub repo (Settings → General). GitHub redirects the old URL, so the links in the Workshop description keep working; update them on the next release.

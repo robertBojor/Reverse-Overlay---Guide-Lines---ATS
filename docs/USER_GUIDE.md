@@ -1,4 +1,7 @@
-# Reverse Overlay - Guide Lines - ATS · User guide
+# Backing & Lane Prediction - ATS · User guide
+
+*Formerly "Reverse Overlay - Guide Lines - ATS". The Workshop item and the
+plugin file (`ats_reverse_overlay.dll`) are the same; only the name changed.*
 
 Backup-camera style guide lines for American Truck Simulator. When you shift
 into reverse, two lines appear on the ground behind your trailer (or behind the
@@ -56,7 +59,7 @@ Steam Workshop can only deliver mod files. It cannot install the plugin, so
 ### Step 1: Get the models (choose one)
 
 **A. Steam Workshop (recommended)**
-1. Subscribe to [**Reverse Overlay - Guide Lines - ATS**](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979) on the Steam Workshop.
+1. Subscribe to [**Backing & Lane Prediction - ATS**](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979) on the Steam Workshop.
 2. Wait until Steam has downloaded it.
 
 **B. Without the Workshop**
@@ -68,7 +71,7 @@ Use **A or B, not both**.
 ### Step 2: Install the plugin
 
 1. **Exit the game completely.**
-2. Download `Reverse_Overlay_ATS_v<version>.zip`.
+2. Download `Backing_Lane_Prediction_ATS_v<version>.zip`.
 3. Before extracting, right-click the zip → **Properties**, tick **Unblock**
    if it's there, then click **OK**. This avoids extra Windows security prompts
    (see [section 7](#7-windows-security-unsigned-plugin)).
@@ -89,7 +92,7 @@ missing. The game only loads plugins from that exact folder.
 1. Start ATS.
 2. The game shows a notice that a plugin uses **advanced SDK features**. This is
    expected for any telemetry plugin. Confirm it.
-3. Open the **Mod Manager**, enable **Reverse Overlay - Guide Lines - ATS**, and
+3. Open the **Mod Manager**, enable **Backing & Lane Prediction - ATS**, and
    confirm the changes.
 4. Load your profile and drive: the dots appear in a forward gear, the
    lines in reverse. Press **Ctrl+Shift+F9** to choose what is shown.
@@ -100,7 +103,7 @@ Open `Documents\American Truck Simulator\ats_reverse_overlay.log`. After
 starting the game you should see:
 
 ```
-Reverse Overlay 0.2.0 starting in American Truck Simulator ...
+Backing & Lane Prediction 0.2.0 starting in American Truck Simulator ...
 Showing forward dots and reverse guide lines (the hotkey changes this).
 engine functions located: ...
 In-world guide lines ready (vehicle render hook installed).
@@ -263,12 +266,12 @@ update, one of three things happens:
 
 **Start with the log:** `Documents\American Truck Simulator\ats_reverse_overlay.log`.
 The game's own log is `Documents\American Truck Simulator\game.log.txt`; search
-it for `reverse-overlay` or `ats_reverse_overlay`.
+it for `lane-prediction` or `ats_reverse_overlay`.
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | No `ats_reverse_overlay.log` at all, or it isn't updated | The plugin isn't loaded | Check that the DLL is in `bin\win_x64\plugins\` (not just `bin\win_x64\`). In `game.log.txt`, look for `loading 'ats_reverse_overlay'`. If the game log shows the plugin failing to load, see [section 7](#7-windows-security-unsigned-plugin) |
-| Log: *"Could not create /model/rto_guides/… - is the … mod enabled in the Mod Manager?"* | The line models aren't loaded | Enable **Reverse Overlay - Guide Lines - ATS** in the Mod Manager. Then restart the game, because after this error the lines stay off for the session |
+| Log: *"Could not create /model/rto_guides/… - is the … mod enabled in the Mod Manager?"* | The line models aren't loaded | Enable **Backing & Lane Prediction - ATS** in the Mod Manager. Then restart the game, because after this error the lines stay off for the session |
 | Log: *"engine functions missing"* | Unsupported game version | See [Game updates](#5-game-updates) |
 | Log: *"In-world guide lines skipped: build not verified and allow_unverified = 0"* | Safety mode is on | Set `allow_unverified = 1` if you want to try it on this version |
 | Log: *"In-world rendering raised an exception…"* | Something went wrong while drawing. The lines are switched off for the session | Restart the game. If it repeats, send the log with your report |
@@ -316,7 +319,7 @@ What the plugin does and doesn't do:
 1. Exit the game.
 2. Run **`Uninstall.bat`** from the download, or delete
    `<ATS folder>\bin\win_x64\plugins\ats_reverse_overlay.dll`.
-3. Disable or unsubscribe **Reverse Overlay - Guide Lines - ATS** (or delete
+3. Disable or unsubscribe **Backing & Lane Prediction - ATS** (or delete
    `Documents\American Truck Simulator\mod\ats_reverse_overlay.scs`).
 4. Optionally delete `ats_reverse_overlay.ini`, `ats_reverse_overlay.log` and
    `ats_reverse_overlay.mode` from `Documents\American Truck Simulator`.

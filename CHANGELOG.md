@@ -2,6 +2,11 @@
 
 ## 0.2.0
 
+**Renamed** from *Reverse Overlay - Guide Lines - ATS* to
+**Backing & Lane Prediction - ATS**. The Workshop item, the plugin file
+(`ats_reverse_overlay.dll`) and the settings, log and model paths are
+unchanged, so updating needs no clean-up.
+
 **New**
 - **Forward dots for lane position.** In any forward gear, two square dots
   appear on the road where the truck's front corners will be about 1.5 s from
