@@ -14,24 +14,6 @@ namespace
 {
 constexpr const char *default_file = R"(; Reverse Overlay - Guide Lines - ATS settings. Most changes apply while the game runs.
 
-[overlay]
-; Top-down panel. 1 = on, 0 = off. Takes effect the next time the game starts
-; (when off, the plugin does not hook DirectX at all).
-enabled = 0
-; Show the panel even when not in reverse (handy while positioning it)
-always_show = 0
-; left, right, top_left, top_right, bottom_left, bottom_right
-anchor = right
-; Panel height as a fraction of the screen height, and width/height ratio
-panel_height = 0.42
-aspect = 0.75
-; Gap to the screen edge and extra offset, as fractions of the screen height
-margin = 0.02
-offset_x = 0.0
-offset_y = 0.0
-; 0.2 - 1.0
-opacity = 0.9
-
 [prediction]
 ; How far back to predict, in metres
 horizon_m = 15
@@ -49,7 +31,7 @@ line_height_m = 0.35
 allow_unverified = 1
 
 [hotkey]
-; Show/hide the top-down panel (does not affect the guide lines).
+; Show/hide the guide lines while driving.
 ; key is a letter, digit, F1-F12, or none
 key = F9
 ctrl = 1
@@ -127,25 +109,10 @@ Config load_config(const std::filesystem::path &path, std::string *report)
         const std::string value = lower(trim(line.substr(eq + 1)));
         const std::string id = section + "." + key;
 
-        if (id == "overlay.enabled") c.enabled = parse_bool(value);
-        else if (id == "overlay.always_show") c.always_show = parse_bool(value);
-        else if (id == "overlay.anchor")
-        {
-            if (value == "left") c.anchor = Anchor::left;
-            else if (value == "right") c.anchor = Anchor::right;
-            else if (value == "top_left") c.anchor = Anchor::top_left;
-            else if (value == "top_right") c.anchor = Anchor::top_right;
-            else if (value == "bottom_left") c.anchor = Anchor::bottom_left;
-            else if (value == "bottom_right") c.anchor = Anchor::bottom_right;
-            else problems << " unknown anchor '" << value << "';";
-        }
-        else if (id == "overlay.panel_height") c.panel_height = parse_float(value, c.panel_height, 0.15f, 0.95f);
-        else if (id == "overlay.aspect") c.aspect = parse_float(value, c.aspect, 0.4f, 2.5f);
-        else if (id == "overlay.margin") c.margin = parse_float(value, c.margin, 0.0f, 0.3f);
-        else if (id == "overlay.offset_x") c.offset_x = parse_float(value, c.offset_x, -2.0f, 2.0f);
-        else if (id == "overlay.offset_y") c.offset_y = parse_float(value, c.offset_y, -1.0f, 1.0f);
-        else if (id == "overlay.opacity") c.opacity = parse_float(value, c.opacity, 0.2f, 1.0f);
-        else if (id == "world.enabled") c.world_enabled = parse_bool(value);
+        // [overlay] configured the top-down panel, removed after 0.1.0. Older
+        // settings files still contain it; skip it without complaint.
+        if (section == "overlay") continue;
+        if (id == "world.enabled") c.world_enabled = parse_bool(value);
         else if (id == "world.allow_unverified") c.world_allow_unverified = parse_bool(value);
         else if (id == "world.red_until_m") c.red_until_m = parse_float(value, c.red_until_m, 0.0f, 60.0f);
         else if (id == "world.yellow_until_m") c.yellow_until_m = parse_float(value, c.yellow_until_m, 0.0f, 60.0f);

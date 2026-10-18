@@ -39,7 +39,7 @@ EOF
 (cd /mnt/c && cmd.exe /c "${mirror_win}\\build.bat")
 
 mkdir -p "$project_dir/out"
-for f in ats_reverse_overlay.dll core_tests.exe scene_preview.exe; do
+for f in ats_reverse_overlay.dll core_tests.exe; do
     if [ -f "$mirror/build-${config}/$f" ]; then
         cp "$mirror/build-${config}/$f" "$project_dir/out/"
     fi

@@ -44,7 +44,7 @@ the path the rig will actually take if you hold the current steering:
 - **Lightweight:** about 140 small line pieces while reversing, nothing
   otherwise. No network access, and save games are never touched.
 - **Configurable:** band distances, path length and line height, all changeable
-  while you drive.
+  while you drive. **Ctrl+Shift+F9** hides and shows the lines.
 
 ## Installation
 
@@ -90,9 +90,6 @@ flowchart LR
   vehicle's render pass. Five engine functions are located by unique
   wildcarded byte patterns. A function another plugin has already hooked is
   still recognised.
-- **Optional top-down panel:** a bird's-eye view drawn with Dear ImGui over
-  DirectX 11. It's off by default, and when it's off DirectX isn't hooked at
-  all.
 
 ## Game updates
 
@@ -139,15 +136,15 @@ Workshop publishing steps: [workshop/ats/UPLOAD.md](workshop/ats/UPLOAD.md).
 <summary><b>Repository layout</b></summary>
 
 ```
-src/core/       platform-neutral prediction, guide lines, panel scene (unit tested)
-src/plugin/     SDK plugin, pattern scan, world renderer, optional DX11 panel, settings, log
+src/core/       platform-neutral prediction and guide lines (unit tested)
+src/plugin/     SDK plugin, pattern scan, world renderer, settings, log
 assets/base/    base line model the coloured variants are generated from
-tests/          core unit tests and SVG scene previews
+tests/          core unit tests
 tools/          build, asset, packaging and install scripts
 tools/re/       pattern generation and the game-update finder
 workshop/ats/   Steam Workshop upload folder, description and checklist
 docs/           user guide
-third_party/    SCS SDK headers, MinHook, Dear ImGui, licences
+third_party/    SCS SDK headers, MinHook, licences
 ```
 </details>
 
@@ -164,14 +161,12 @@ third_party/    SCS SDK headers, MinHook, Dear ImGui, licences
   [Reverse Posture Assistant For ATS](https://github.com/yyysheng/ATSmods) by
   yyysheng (MIT).
 - SCS Telemetry SDK
-  · [MinHook](https://github.com/TsudaKageyu/minhook) (BSD-2-Clause)
-  · [Dear ImGui](https://github.com/ocornut/imgui) (MIT).
+  · [MinHook](https://github.com/TsudaKageyu/minhook) (BSD-2-Clause).
 
 ## License
 
 [MIT](LICENSE) © 2026 Robert Bojor. Third-party components keep their own
-licences; see [third_party/licenses](third_party/licenses) and
-[third_party/imgui/LICENSE.txt](third_party/imgui/LICENSE.txt).
+licences; see [third_party/licenses](third_party/licenses).
 
 *Not affiliated with or endorsed by SCS Software. American Truck Simulator is a
 trademark of SCS Software.*

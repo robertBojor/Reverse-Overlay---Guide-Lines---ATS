@@ -68,7 +68,7 @@ You need BOTH parts:
      <ATS folder>\\bin\\win_x64\\plugins  (the folder is created if needed).
 
 Start the game. It will mention "advanced SDK features" - that is expected.
-Shift into reverse to see the lines.
+Shift into reverse to see the lines. Ctrl+Shift+F9 hides and shows them.
 
 Full instructions, settings and troubleshooting: User_Guide.md
 (open it with any text editor or a Markdown viewer).
@@ -87,7 +87,7 @@ part of the game).
 
 Credits: in-world drawing technique and base line model from
 "Reverse Posture Assistant For ATS" by yyysheng (MIT). Uses the SCS
-Telemetry SDK, MinHook and Dear ImGui - licences in the LICENSES folder.
+Telemetry SDK and MinHook - licences in the LICENSES folder.
 '''
 
 files = {
@@ -102,7 +102,6 @@ files = {
 for lic in sorted((root / 'third_party' / 'licenses').glob('*.txt')):
     files[f'LICENSES/{lic.name}'] = lic.read_bytes()
 files['LICENSE.txt'] = crlf((root / 'LICENSE').read_text())
-files['LICENSES/LICENSE.imgui.txt'] = (root / 'third_party' / 'imgui' / 'LICENSE.txt').read_bytes()
 
 with zipfile.ZipFile(target, 'w', compression=zipfile.ZIP_DEFLATED) as z:
     for name in sorted(files):

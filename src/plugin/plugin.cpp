@@ -1,6 +1,6 @@
 // SCS telemetry plugin entry points. Collects official SDK telemetry for the
 // truck and up to ten trailers, predicts the reverse path every frame and
-// hands the resulting scene to the DX11 overlay.
+// hands the guide-line pieces to the in-world renderer.
 
 #include <windows.h>
 #include <shlobj.h>
@@ -24,11 +24,9 @@
 
 #include "core/guides.hpp"
 #include "core/rig.hpp"
-#include "core/scene.hpp"
 #include "plugin/config.hpp"
 #include "plugin/log.hpp"
 #include "plugin/engine.hpp"
-#include "plugin/overlay_dx11.hpp"
 #include "plugin/world_lines.hpp"
 
 #include <MinHook.h>
@@ -106,8 +104,9 @@ struct State
     std::filesystem::file_time_type config_time{};
     ULONGLONG next_config_check = 0;
     bool logged_first_rig = false;
-    bool world_ready = false;   // engine functions found and render hook installed
-    bool overlay_ready = false; // top-down panel hooks installed
+    bool world_ready = false; // engine functions found and render hook installed
+    bool hidden_by_hotkey = false;
+    bool hotkey_was_down = false;
 };
 
 State state;
@@ -134,7 +133,6 @@ void reload_config_if_changed(bool force)
     std::string report;
     state.config = rto::load_config(state.config_path, &report);
     state.config_time = std::filesystem::last_write_time(state.config_path, ec);
-    rto::overlay::set_config(state.config);
     rto::log::info(report);
 }
 
@@ -210,16 +208,40 @@ void publish_world(const rto::Rig &rig, const rto::Prediction &prediction)
     rto::world::publish(std::move(pieces));
 }
 
+// Toggles the guide lines on the key's press edge. Only while the game window
+// has focus, so the same combination typed in another application is ignored.
+void poll_hotkey()
+{
+    const rto::Config &c = state.config;
+    DWORD pid = 0;
+    if (const HWND foreground = GetForegroundWindow()) GetWindowThreadProcessId(foreground, &pid);
+    if (c.toggle_vk <= 0 || pid != GetCurrentProcessId())
+    {
+        state.hotkey_was_down = false;
+        return;
+    }
+    const auto down = [](int vk) { return (GetAsyncKeyState(vk) & 0x8000) != 0; };
+    const bool pressed = down(c.toggle_vk) && down(VK_CONTROL) == c.toggle_ctrl &&
+                         down(VK_SHIFT) == c.toggle_shift && down(VK_MENU) == c.toggle_alt;
+    if (pressed && !state.hotkey_was_down)
+    {
+        state.hidden_by_hotkey = !state.hidden_by_hotkey;
+        rto::log::info(state.hidden_by_hotkey ? "Guide lines hidden by hotkey."
+                                              : "Guide lines shown by hotkey.");
+    }
+    state.hotkey_was_down = pressed;
+}
+
 void update_frame()
 {
     reload_config_if_changed(false);
+    poll_hotkey();
 
     const Unit &truck = state.units[0];
     const bool reversing = state.gear_valid && state.gear < 0;
-    if (!state.driving || !truck.placement_valid || !truck.configured ||
-        !(reversing || state.config.always_show))
+    if (!state.driving || !reversing || state.hidden_by_hotkey || !truck.placement_valid ||
+        !truck.configured)
     {
-        rto::overlay::publish({});
         rto::world::publish({});
         return;
     }
@@ -240,11 +262,7 @@ void update_frame()
 
     const rto::Rig rig = rto::build_rig(input);
     const rto::Prediction prediction = rto::predict_reverse(rig, state.config.horizon_m);
-    if (state.overlay_ready) rto::overlay::publish(rto::build_scene(rig, prediction));
-    if (reversing)
-        publish_world(rig, prediction);
-    else
-        rto::world::publish({});
+    publish_world(rig, prediction);
 
     if (!state.logged_first_rig)
     {
@@ -421,7 +439,6 @@ SCSAPI_VOID event_callback(const scs_event_t event, const void *const info, cons
         break;
     case SCS_TELEMETRY_EVENT_paused:
         state.driving = false;
-        rto::overlay::publish({});
         // Pause also covers menus and loading; free our model instances
         // before the game tears the scene down.
         rto::world::release_models();
@@ -539,19 +556,9 @@ SCSAPI_RESULT scs_telemetry_init(const scs_u32_t version, const scs_telemetry_in
         return SCS_RESULT_ok;
     }
 
-    std::string error;
-    if (!state.config.enabled)
-        rto::log::info("Top-down panel disabled in settings; DirectX not hooked.");
-    else if (rto::overlay::install(&error))
-    {
-        state.overlay_ready = true;
-        rto::log::info("Overlay hooks installed (DXGI Present).", true);
-    }
-    else
-        rto::log::error("Overlay unavailable: " + error, true);
-
     // In-world guide lines: engine functions are located by pattern; any
-    // mismatch leaves the top-down panel as the only display.
+    // mismatch leaves the plugin running with the lines switched off.
+    std::string error;
     rto::engine::Functions functions;
     const auto resolution = rto::engine::resolve(&functions);
     rto::log::info(resolution.report, true);
@@ -573,9 +580,7 @@ SCSAPI_VOID scs_telemetry_shutdown(void)
 {
     rto::log::info("Shutting down.");
     rto::world::release_models();
-    const bool world_idle = rto::world::uninstall();
-    const bool overlay_idle = rto::overlay::uninstall();
-    if (world_idle && overlay_idle)
+    if (rto::world::uninstall())
         MH_Uninitialize();
     else
         rto::log::warn("A thread was still inside a hook at shutdown; leaving MinHook trampolines allocated.");

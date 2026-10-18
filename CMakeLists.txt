@@ -25,12 +25,9 @@ endfunction()
 
 # --- core tests (platform neutral) -----------------------------------------
 add_executable(core_tests tests/core_tests.cpp)
-add_executable(scene_preview tests/scene_preview.cpp)
 rto_strict(core_tests)
-rto_strict(scene_preview)
 if(MSVC)
     target_compile_options(core_tests PRIVATE /EHsc)
-    target_compile_options(scene_preview PRIVATE /EHsc)
 endif()
 
 enable_testing()
@@ -49,21 +46,8 @@ if(WIN32 AND RTO_BUILD_PLUGIN)
         target_compile_options(minhook PRIVATE /W0)
     endif()
 
-    add_library(imgui STATIC
-        third_party/imgui/imgui.cpp
-        third_party/imgui/imgui_draw.cpp
-        third_party/imgui/imgui_tables.cpp
-        third_party/imgui/imgui_widgets.cpp
-        third_party/imgui/imgui_impl_dx11.cpp)
-    target_include_directories(imgui PUBLIC third_party/imgui)
-    target_compile_definitions(imgui PUBLIC IMGUI_DISABLE_DEMO_WINDOWS IMGUI_DISABLE_DEBUG_TOOLS)
-    if(MSVC)
-        target_compile_options(imgui PRIVATE /W0 /EHsc)
-    endif()
-
     add_library(ats_reverse_overlay SHARED
         src/plugin/plugin.cpp
-        src/plugin/overlay_dx11.cpp
         src/plugin/config.cpp
         src/plugin/engine.cpp
         src/plugin/log.cpp
@@ -71,7 +55,7 @@ if(WIN32 AND RTO_BUILD_PLUGIN)
     target_include_directories(ats_reverse_overlay PRIVATE
         src
         third_party/scs_sdk/include)
-    target_link_libraries(ats_reverse_overlay PRIVATE minhook imgui d3d11 dxgi shell32 ole32 bcrypt)
+    target_link_libraries(ats_reverse_overlay PRIVATE minhook shell32 ole32 bcrypt user32)
     rto_strict(ats_reverse_overlay)
     target_compile_definitions(ats_reverse_overlay PRIVATE RTO_VERSION="${RTO_VERSION}")
     if(MSVC)

@@ -6,7 +6,6 @@
 #include <cstdio>
 
 #include "../src/core/guides.hpp"
-#include "../src/core/scene.hpp"
 #include "fixtures.hpp"
 
 using namespace rto;
@@ -118,16 +117,13 @@ int main()
     }
 
     // Constant steering in reverse eventually jackknifes; the prediction
-    // stops there and the scene reports it.
+    // stops there.
     {
         const Rig rig = build_rig(fixtures::single(0.35, 0.0));
         const Prediction p = predict_reverse(rig, 60.0);
         CHECK(p.jackknife_distance > 2.0);
         CHECK(p.jackknife_unit == 1);
         CHECK(std::abs(deg(articulation(p.steps.back().poses[0], p.steps.back().poses[1]))) > 84.0);
-        const Scene s = build_scene(rig, p);
-        CHECK(s.warning);
-        CHECK(!s.status.empty() && s.status.back().rfind("JACKKNIFE", 0) == 0);
     }
 
     // Positive articulation puts the trailer's tail to the right. Reversing
@@ -163,8 +159,6 @@ int main()
         const Prediction p = predict_reverse(rig, 3.0);
         const auto &end = p.steps.back().poses;
         CHECK(std::abs(articulation(end[1], end[2])) > 0.0);
-        const Scene s = build_scene(rig, p);
-        CHECK(s.status.size() >= 2);
     }
 
     // Integration step size barely changes the answer.

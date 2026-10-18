@@ -104,6 +104,7 @@ In-world guide lines rendering: 134 pieces.
 
 - The lines appear when the **gearbox is in reverse** and disappear when you
   shift out. They are hidden while the game is paused or in menus.
+- **Ctrl+Shift+F9** hides and shows them (see [`[hotkey]`](#hotkey)).
 - The path assumes you **hold the current steering**. Turn the wheel and
   the lines update immediately. Use them to find the steering angle that puts
   the trailer where you want it, then follow that.
@@ -148,23 +149,20 @@ changes apply **while you drive** (within about 2 seconds).
 |---|---|---|
 | `horizon_m` | `15` | how far ahead (backwards) the path is predicted, 3–60 m |
 
-### `[overlay]` optional top-down panel
+### `[hotkey]`
 
-An optional bird's-eye panel showing the truck, the trailer and the predicted
-area. **It's off by default.** It needs the DirectX 11 renderer, and turning it
-on or off takes effect the **next time the game starts**.
+**Ctrl+Shift+F9** hides and shows the guide lines while you drive. They start
+visible every time the game starts.
 
 | Setting | Default | Meaning |
 |---|---|---|
-| `enabled` | `0` | `1` shows the panel while reversing |
-| `anchor` | `right` | `left`, `right`, `top_left`, `top_right`, `bottom_left`, `bottom_right` |
-| `panel_height`, `aspect` | `0.42`, `0.75` | size relative to the screen height |
-| `margin`, `offset_x`, `offset_y` | `0.02`, `0`, `0` | position fine-tuning |
-| `opacity` | `0.9` | 0.2–1.0 |
-| `always_show` | `0` | `1` shows it outside reverse (for positioning) |
+| `key` | `F9` | a letter, a digit, `F1`–`F12`, or `none` to turn the hotkey off |
+| `ctrl`, `shift`, `alt` | `1`, `1`, `0` | which modifier keys must be held |
 
-`[hotkey]`: **Ctrl+Shift+F9** shows and hides the panel. It doesn't affect the
-guide lines.
+The key only works while the game window has focus.
+
+Older versions also had an `[overlay]` section for a top-down panel. That
+panel has been removed; an `[overlay]` section left in your file is ignored.
 
 ---
 
@@ -201,7 +199,8 @@ it for `reverse-overlay` or `ats_reverse_overlay`.
 | Lines float above or sink into the road | Height estimate | Adjust `line_height_m` |
 | Lines look too narrow or wide for your trailer | Body size is estimated from the wheels | Known limitation, see [Accuracy notes](#accuracy-notes) |
 | Two sets of lines (blue/orange and red/yellow/green) | "Reverse Posture Assistant" is also installed | Use one or the other. Remove `ATSReverseTrajectoryRuntime.dll` from `plugins` and disable that mod |
-| Ctrl+Shift+F9 does nothing | The hotkey only controls the optional panel | Expected. The lines are controlled with `[world] enabled` |
+| Lines don't appear in reverse, but the log shows no errors | They were hidden with the hotkey | Press **Ctrl+Shift+F9** again. The log says *"Guide lines hidden by hotkey"* when this happens |
+| Ctrl+Shift+F9 does nothing | The game window doesn't have focus, or `[hotkey]` was changed | Click into the game first. Check `key`, `ctrl`, `shift` and `alt` in the settings file |
 
 ---
 
@@ -265,5 +264,4 @@ reversing and nothing otherwise.
 - In-world drawing technique and base line model: *Reverse Posture Assistant
   For ATS* by yyysheng (MIT licence).
 - SCS Telemetry SDK © SCS Software. MinHook © Tsuda Kageyu (BSD-2-Clause).
-  Dear ImGui © Omar Cornut (MIT, used only by the optional panel).
 - Licence texts are in the `LICENSES` folder of the download.
