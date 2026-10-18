@@ -6,7 +6,7 @@
 #include <cstdio>
 
 #include "../src/core/display_mode.hpp"
-#include "../src/core/dots.hpp"
+#include "../src/core/forward.hpp"
 #include "../src/core/guides.hpp"
 #include "fixtures.hpp"
 
@@ -207,56 +207,180 @@ int main()
         for (const auto &s : guides) CHECK(length(s.to - s.from) <= 0.25 + 1e-6);
     }
 
-    // Forward look-ahead: speed x time, never closer than the minimum.
+    // Forward line length: speed x time, within the limits.
     {
-        DotOptions o;
-        o.lookahead_s = 1.5;
-        o.min_distance = 6.0;
-        o.max_distance = 80.0;
-        CHECK(near(lookahead_distance(0.0, o), 6.0, 1e-12));
-        CHECK(near(lookahead_distance(-3.0, o), 6.0, 1e-12)); // rolling back in a forward gear
-        CHECK(near(lookahead_distance(25.0, o), 37.5, 1e-12));
-        CHECK(near(lookahead_distance(100.0, o), 80.0, 1e-12));
+        ForwardOptions o;
+        o.min_length = 25.0;
+        o.length_time = 1.2;
+        o.max_length = 40.0;
+        CHECK(near(forward_length(0.0, o), 25.0, 1e-12));
+        CHECK(near(forward_length(-3.0, o), 25.0, 1e-12)); // rolling back in a forward gear
+        CHECK(near(forward_length(25.0, o), 30.0, 1e-12));
+        CHECK(near(forward_length(100.0, o), 40.0, 1e-12));
     }
 
-    // Straight ahead: the truck moves forward, the dots sit on its front
-    // corners, red on the left and green on the right.
+    // Curvature: wheel angles when slow, the measured turn rate at speed,
+    // blended in between.
+    {
+        ForwardOptions o;
+        o.measured_from = 5.0;
+        o.measured_full = 10.0;
+        CHECK(near(forward_curvature(0.02, 0.0, 0.0, o), 0.02, 1e-12));
+        CHECK(near(forward_curvature(0.02, 0.5, 5.0, o), 0.02, 1e-12));
+        CHECK(near(forward_curvature(0.02, 0.1, 25.0, o), 0.004, 1e-12)); // understeer at speed
+        CHECK(near(forward_curvature(0.0, 0.08, 7.5, o), 0.08 / 7.5 * 0.5, 1e-12));
+        CHECK(near(forward_curvature(0.01, -0.25, 25.0, o), -0.01, 1e-12)); // turning right
+    }
+
+    // The front axle sits ahead of the rear axle by the wheelbase.
     {
         const Rig rig = build_rig(fixtures::bobtail(0.0));
         const auto &g = rig.units[0];
-        const Pose end = predict_forward(g, rig.poses[0], 20.0);
-        CHECK(near(end.heading, 0.0, 1e-12));
-        CHECK(near(to_local(rig.poses[0], end.p).z, -20.0, 1e-9));
-        DotOptions one_tile;
-        one_tile.size = one_tile.tile;
-        const auto dots = build_dots(rig, 20.0, one_tile);
-        CHECK(dots.size() == 2); // one tile per dot
-        CHECK(dots[0].band == Band::dot_red && dots[1].band == Band::dot_green);
-        const Vec2 left = to_local(rig.poses[0], dots[0].centre);
-        const Vec2 right = to_local(rig.poses[0], dots[1].centre);
-        CHECK(near(left.x, -g.half_width, 1e-9) && near(right.x, g.half_width, 1e-9));
-        CHECK(near(left.z, g.front_z - 20.0, 1e-9) && near(right.z, g.front_z - 20.0, 1e-9));
+        CHECK(near(g.front_axle.x, 0.0, 1e-12));
+        CHECK(near(g.axle.z - g.front_axle.z, g.wheelbase, 1e-9));
+        CHECK(g.front_axle.z > g.front_z); // behind the bumper
     }
 
-    // Steering left: the rear axle follows a circle about the turn centre,
-    // the truck turns counter-clockwise and both dots move left.
+    // Straight ahead: one blue line from the front axle, straight forward,
+    // cut into equal pieces.
+    {
+        const Rig rig = build_rig(fixtures::bobtail(0.0));
+        const auto &g = rig.units[0];
+        ForwardOptions o;
+        o.width = o.piece_width;
+        const auto line = build_forward(rig, 24.4, o);
+        CHECK(line.size() == 24); // whole 1 m pieces; the 0.4 m tail is dropped
+        double total = 0.0, min_z = 1e9, max_z = -1e9;
+        for (const auto &s : line)
+        {
+            CHECK(s.band == Band::blue);
+            const Vec2 a = to_local(rig.poses[0], s.from), b = to_local(rig.poses[0], s.to);
+            CHECK(near(a.x, 0.0, 1e-9) && near(b.x, 0.0, 1e-9));
+            min_z = std::min({min_z, a.z, b.z});
+            max_z = std::max({max_z, a.z, b.z});
+            total += length(s.to - s.from);
+        }
+        CHECK(near(total, 24.0, 1e-6));
+        for (const auto &s : line) CHECK(near(length(s.to - s.from), 1.0, 1e-9)); // edge to edge
+        CHECK(near(max_z, g.front_axle.z, 1e-9) && near(min_z, g.front_axle.z - 24.0, 1e-6));
+    }
+
+    // A wider line is parallel strips centred on the path.
+    {
+        const Rig rig = build_rig(fixtures::bobtail(0.0));
+        ForwardOptions o;
+        o.width = 0.3;
+        const auto line = build_forward(rig, 24.0, o);
+        CHECK(line.size() == 24 * 2);
+        double min_x = 1e9, max_x = -1e9;
+        for (const auto &s : line)
+        {
+            const double x = to_local(rig.poses[0], s.from).x;
+            min_x = std::min(min_x, x);
+            max_x = std::max(max_x, x);
+        }
+        CHECK(near(max_x - min_x, o.piece_width, 1e-9)); // strips side by side, no overlap
+        CHECK(near(min_x + max_x, 0.0, 1e-9));
+        o.width = 0.4; // rounds to whole strips
+        CHECK(build_forward(rig, 24.0, o).size() == 24 * 3);
+    }
+
+    // Steering left: the front axle turns about the same centre as the rear
+    // axle, so the line is an arc of radius sqrt(R^2 + wheelbase^2), bending
+    // left from the truck.
     {
         const Rig rig = build_rig(fixtures::bobtail(0.3));
         const auto &g = rig.units[0];
-        const Pose end = predict_forward(g, rig.poses[0], 10.0);
-        CHECK(near(end.heading, g.curvature * 10.0, 1e-9));
+        ForwardOptions o;
+        o.width = o.piece_width;
         const double R = 1.0 / g.curvature;
         const Vec2 centre = to_world(rig.poses[0], {-R, g.axle.z});
-        CHECK(near(length(to_world(end, g.axle) - centre), R, 1e-9));
-        DotOptions one_tile;
-        one_tile.size = one_tile.tile;
-        const auto dots = build_dots(rig, 10.0, one_tile);
-        CHECK(to_local(rig.poses[0], dots[0].centre).x < -g.half_width - 0.5);
-        CHECK(to_local(rig.poses[0], dots[1].centre).x < g.half_width - 0.5);
-        CHECK(near(dots[0].heading, end.heading, 1e-12));
+        const double r = length(to_world(rig.poses[0], g.front_axle) - centre);
+        CHECK(near(r, std::hypot(R, g.wheelbase), 1e-9));
+        const auto line = build_forward(rig, 10.0, o);
+        CHECK(!line.empty());
+        for (const auto &s : line)
+            CHECK(near(length(s.from - centre), r, 1e-3) && near(length(s.to - centre), r, 1e-3));
+        CHECK(to_local(rig.poses[0], line.back().to).x < -0.5);
     }
 
-    // The closed-form arc matches the integrated reverse model run backwards:
+    // On a tight turn the line stops after a quarter turn instead of curling round.
+    {
+        const Rig rig = build_rig(fixtures::bobtail(0.6));
+        const auto &g = rig.units[0];
+        ForwardOptions o;
+        o.width = o.piece_width;
+        const double R = 1.0 / g.curvature;
+        CHECK(60.0 > o.max_turn * R); // the full length would turn further
+        const auto line = build_forward(rig, 60.0, o);
+        const Vec2 centre = to_world(rig.poses[0], {-R, g.axle.z});
+        const Vec2 start = to_world(rig.poses[0], g.front_axle) - centre;
+        const Vec2 end = line.back().to - centre;
+        const double turned = std::acos(dot(start, end) / (length(start) * length(end)));
+        CHECK(turned <= o.max_turn + 0.05 && turned > o.max_turn - 0.1);
+        CHECK(build_forward(rig, 0.0, o).empty());
+    }
+
+    // Trailer line, straight: the trailer follows the truck, nothing to show.
+    {
+        const Rig rig = build_rig(fixtures::single(0.0, 0.0));
+        ForwardOptions o;
+        o.width = o.piece_width;
+        const auto t = build_trailer_forward(rig, 30.0, o);
+        CHECK(t.offtrack < 1e-6);
+        CHECK(!t.segments.empty());
+        for (const auto &s : t.segments) CHECK(s.band == Band::teal);
+        CHECK(build_trailer_forward(build_rig(fixtures::bobtail(0.2)), 30.0, o).segments.empty());
+    }
+
+    // Trailer line on a steady left turn: the trailer axle settles on radius
+    // sqrt(Rk^2 - d^2) about the turn centre (Rk: kingpin radius, d: kingpin to
+    // axle), so it runs inside the front axle's circle by the difference. The
+    // line follows the inner (left) wheels.
+    {
+        const Rig rig = build_rig(fixtures::single(0.1, 0.0));
+        const auto &tr = rig.units[0];
+        const auto &tl = rig.units[1];
+        ForwardOptions o;
+        o.width = o.piece_width;
+        const double R = 1.0 / tr.curvature;
+        const Vec2 centre = to_world(rig.poses[0], {-R, tr.axle.z});
+        const double r_front = std::hypot(R, tr.wheelbase);
+        const double r_kingpin = length(to_world(rig.poses[0], tl.coupling_on_parent) - centre);
+        const double d = tl.axle.z - tl.kingpin.z;
+        const double r_trailer = std::sqrt(r_kingpin * r_kingpin - d * d);
+        const double span = 200.0; // capped at a quarter turn, about 90 m: settled
+        const auto t = build_trailer_forward(rig, span, o);
+        CHECK(near(t.offtrack, r_front - r_trailer, 0.05));
+        CHECK(t.offtrack > 1.0);
+        const Prediction p = predict_motion(rig, std::min(span, o.max_turn * R), 1.0, 0.05, 0.2);
+        CHECK(near(length(to_world(p.steps.back().poses[1], tl.axle) - centre), r_trailer, 0.02));
+        const double r_line = length(t.segments.back().to - centre);
+        CHECK(near(r_line, r_trailer - tl.half_width, 0.05)); // the inner wheels
+        CHECK(to_local(rig.poses[0], t.segments.front().from).z < tr.front_axle.z + 1.0); // ahead
+    }
+
+    // Turning right: the line runs ahead of the truck, alongside the forward
+    // line and inside it, along the trailer's right-hand wheels.
+    {
+        const Rig rig = build_rig(fixtures::single(-0.2, 0.0));
+        const auto &tr = rig.units[0];
+        ForwardOptions o;
+        o.width = o.piece_width;
+        const auto t = build_trailer_forward(rig, 25.0, o);
+        CHECK(t.offtrack > 0.5);
+        CHECK(!t.segments.empty());
+        const double R = 1.0 / tr.curvature; // negative: centre on the right
+        const Vec2 centre = to_world(rig.poses[0], {-R, tr.axle.z});
+        const double r_front = std::hypot(R, tr.wheelbase);
+        for (const auto &s : t.segments)
+            CHECK(length(s.from - centre) < r_front - 0.5 && length(s.to - centre) < r_front - 0.5);
+        // It starts level with the front axle, not back at the trailer.
+        const Vec2 first = to_local(rig.poses[0], t.segments.front().from);
+        CHECK(first.z < tr.front_axle.z + 1.0);
+    }
+
+
     // reversing from the predicted pose returns to the start.
     {
         const Rig rig = build_rig(fixtures::bobtail(0.25, 0.7));
@@ -266,125 +390,6 @@ int main()
         const Pose home = predict_reverse(back, 12.0).steps.back().poses[0];
         CHECK(length(home.p - rig.poses[0].p) < 1e-4); // reverse uses 5 cm midpoint steps
         CHECK(near(normalize_angle(home.heading - rig.poses[0].heading), 0.0, 1e-9));
-    }
-
-    // Bigger dots are an n x n grid of overlapping tiles spanning the size.
-    {
-        const Rig rig = build_rig(fixtures::bobtail(0.0));
-        DotOptions o;
-        o.size = 0.3;
-        const auto dots = build_dots(rig, 8.0, o);
-        CHECK(dots.size() == 2 * 9);
-        double min_x = 1e9, max_x = -1e9, min_z = 1e9, max_z = -1e9;
-        for (std::size_t i = 0; i < 9; ++i)
-        {
-            const Vec2 c = to_local(rig.poses[0], dots[i].centre);
-            min_x = std::min(min_x, c.x);
-            max_x = std::max(max_x, c.x);
-            min_z = std::min(min_z, c.z);
-            max_z = std::max(max_z, c.z);
-        }
-        CHECK(near(max_x - min_x + o.tile, 0.3, 1e-9) && near(max_z - min_z + o.tile, 0.3, 1e-9));
-        CHECK(near((min_x + max_x) * 0.5, -rig.units[0].half_width, 1e-9));
-        o.size = 0.05; // never smaller than one tile
-        CHECK(build_dots(rig, 8.0, o).size() == 2);
-    }
-
-    // Line length grows with speed up to the cap; 0 s keeps dots.
-    {
-        DotOptions o;
-        o.line_time = 0.5;
-        o.max_line = 15.0;
-        CHECK(near(line_length(0.0, o), 0.0, 1e-12));
-        CHECK(near(line_length(-2.0, o), 0.0, 1e-12));
-        CHECK(near(line_length(10.0, o), 5.0, 1e-12));
-        CHECK(near(line_length(40.0, o), 15.0, 1e-12));
-        o.line_time = 0.0;
-        CHECK(near(line_length(40.0, o), 0.0, 1e-12));
-    }
-
-    // Straight ahead: each line runs along its corner's path, centred on the
-    // look-ahead point, cut into equal pieces.
-    {
-        const Rig rig = build_rig(fixtures::bobtail(0.0));
-        const auto &g = rig.units[0];
-        DotOptions o;
-        o.size = o.tile;
-        const auto lines = build_lines(rig, 20.0, 9.0, o);
-        double red_length = 0.0, min_z = 1e9, max_z = -1e9;
-        std::size_t red = 0, green = 0;
-        for (const auto &s : lines)
-        {
-            const Vec2 a = to_local(rig.poses[0], s.from), b = to_local(rig.poses[0], s.to);
-            if (s.band == Band::red)
-            {
-                ++red;
-                red_length += length(s.to - s.from);
-                CHECK(near(a.x, -g.half_width, 1e-9) && near(b.x, -g.half_width, 1e-9));
-                min_z = std::min({min_z, a.z, b.z});
-                max_z = std::max({max_z, a.z, b.z});
-            }
-            else
-            {
-                ++green;
-                CHECK(s.band == Band::green);
-                CHECK(near(a.x, g.half_width, 1e-9) && near(b.x, g.half_width, 1e-9));
-            }
-            CHECK(length(s.to - s.from) <= o.line_spacing + 1e-9);
-        }
-        CHECK(red == 30 && green == 30); // 9 m in 0.3 m pieces
-        CHECK(near(red_length, 9.0, 1e-6));
-        CHECK(near(max_z, g.front_z - 15.5, 1e-6) && near(min_z, g.front_z - 24.5, 1e-6));
-    }
-
-    // A line as wide as the dot is parallel strips, centred on the corner path.
-    {
-        const Rig rig = build_rig(fixtures::bobtail(0.0));
-        DotOptions o;
-        o.size = 0.5;
-        const auto lines = build_lines(rig, 20.0, 9.0, o);
-        CHECK(lines.size() == 2 * 30 * 5);
-        double min_x = 1e9, max_x = -1e9;
-        for (const auto &s : lines)
-            if (s.band == Band::red)
-            {
-                const double x = to_local(rig.poses[0], s.from).x;
-                min_x = std::min(min_x, x);
-                max_x = std::max(max_x, x);
-            }
-        CHECK(near(max_x - min_x + o.tile, 0.5, 1e-9));
-        CHECK(near((min_x + max_x) * 0.5, -rig.units[0].half_width, 1e-9));
-    }
-
-    // Steering left: the corners turn rigidly about the turn centre, so each
-    // line follows a circle through its corner; the left one is the inner.
-    {
-        const Rig rig = build_rig(fixtures::bobtail(0.3));
-        const auto &g = rig.units[0];
-        DotOptions o;
-        o.size = o.tile;
-        const double R = 1.0 / g.curvature;
-        const Vec2 centre = to_world(rig.poses[0], {-R, g.axle.z});
-        const auto corners = body_corners(g, rig.poses[0]);
-        const double r_left = length(corners[0] - centre), r_right = length(corners[1] - centre);
-        CHECK(r_left < r_right);
-        const auto lines = build_lines(rig, 15.0, 10.0, o);
-        CHECK(!lines.empty());
-        for (const auto &s : lines)
-        {
-            const double r = s.band == Band::red ? r_left : r_right;
-            CHECK(near(length(s.from - centre), r, 1e-3) && near(length(s.to - centre), r, 1e-3));
-        }
-    }
-
-    // A line never starts behind the truck's front.
-    {
-        const Rig rig = build_rig(fixtures::bobtail(0.0));
-        DotOptions o;
-        o.size = o.tile;
-        for (const auto &s : build_lines(rig, 2.0, 10.0, o))
-            CHECK(to_local(rig.poses[0], s.from).z <= rig.units[0].front_z + 1e-9);
-        CHECK(build_lines(rig, 20.0, 0.0, o).empty());
     }
 
     // Steering smoothing.

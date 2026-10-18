@@ -19,7 +19,7 @@ constexpr const char *default_file = R"(; Backing & Lane Prediction - ATS settin
 horizon_m = 15
 
 [world]
-; Reverse guide lines and forward dots drawn on the ground (also visible in mirrors).
+; Reverse guide lines and the forward line drawn on the ground (also visible in mirrors).
 ; Needs the "Backing & Lane Prediction - ATS" mod enabled in the Mod Manager.
 enabled = 1
 ; Colour bands by distance travelled: red, then yellow, then green
@@ -31,28 +31,29 @@ line_height_m = 0.35
 allow_unverified = 1
 
 [forward]
-; Two square dots ahead of the truck in a forward gear: red marks where the
-; front-left corner will be, green the front-right corner. Truck only.
-; Look-ahead time in seconds: the dots are speed x this far ahead
-lookahead_s = 1.5
-; Distance limits in metres (the minimum applies when slow or stopped)
-min_distance_m = 14
-max_distance_m = 80
-; Dot edge length in metres (0.12 - 1.0); also the width of the lines
-dot_size_m = 0.5
-; With speed each dot stretches into a line along the predicted path, centred
-; on the same point: speed x line_time_s long, at most max_line_m (0 - 20).
-; line_time_s = 0 keeps square dots at every speed.
-line_time_s = 0.5
-max_line_m = 15
-; Dot height above the truck's reference point, in metres
-dot_height_m = 0.35
-; Steering smoothing in seconds, so the dots don't jitter at speed (0 = off)
+; In a forward gear, a blue line runs from the middle of the truck's front axle
+; along the path it will take at the current steering. Truck only.
+; Length in metres when slow or stopped (the first part is under the truck)
+min_length_m = 25
+; With speed the line is speed x length_time_s long, up to max_length_m
+length_time_s = 1.2
+max_length_m = 40
+; Line width in metres, in steps of 0.15 (0.15 - 0.6)
+width_m = 0.3
+; Line height above the truck's reference point, in metres
+height_m = 0.35
+; With a trailer, a teal line shows where the last trailer's inner wheels will
+; go, on turns where they cut inside the blue line by more than
+; trailer_offtrack_m metres. 1 = on, 0 = off.
+trailer_line = 1
+trailer_offtrack_m = 0.5
+; Steering smoothing in seconds, so the line doesn't jitter at speed (0 = off)
 steering_smoothing_s = 0.25
 
 [hotkey]
-; Each press moves to the next mode: forward dots only -> reverse lines only
-; -> both (dots forward, lines in reverse) -> off. The mode is remembered.
+; Each press moves to the next mode: forward line only -> reverse lines only
+; -> both (forward line when driving, lines in reverse) -> off. The mode is
+; remembered.
 ; key is a letter, digit, F1-F12, or none
 key = F9
 ctrl = 1
@@ -138,13 +139,21 @@ Config load_config(const std::filesystem::path &path, std::string *report)
         else if (id == "world.red_until_m") c.red_until_m = parse_float(value, c.red_until_m, 0.0f, 60.0f);
         else if (id == "world.yellow_until_m") c.yellow_until_m = parse_float(value, c.yellow_until_m, 0.0f, 60.0f);
         else if (id == "world.line_height_m") c.line_height_m = parse_float(value, c.line_height_m, -1.0f, 2.0f);
-        else if (id == "forward.lookahead_s") c.lookahead_s = parse_float(value, c.lookahead_s, 0.0f, 10.0f);
-        else if (id == "forward.min_distance_m") c.min_distance_m = parse_float(value, c.min_distance_m, 1.0f, 50.0f);
-        else if (id == "forward.max_distance_m") c.max_distance_m = parse_float(value, c.max_distance_m, 1.0f, 200.0f);
-        else if (id == "forward.dot_size_m") c.dot_size_m = parse_float(value, c.dot_size_m, 0.12f, 1.0f);
-        else if (id == "forward.line_time_s") c.line_time_s = parse_float(value, c.line_time_s, 0.0f, 2.0f);
-        else if (id == "forward.max_line_m") c.max_line_m = parse_float(value, c.max_line_m, 0.0f, 20.0f);
-        else if (id == "forward.dot_height_m") c.dot_height_m = parse_float(value, c.dot_height_m, -1.0f, 2.0f);
+        else if (id == "forward.min_length_m") c.min_length_m = parse_float(value, c.min_length_m, 5.0f, 100.0f);
+        else if (id == "forward.length_time_s") c.length_time_s = parse_float(value, c.length_time_s, 0.0f, 5.0f);
+        else if (id == "forward.max_length_m") c.max_length_m = parse_float(value, c.max_length_m, 5.0f, 100.0f);
+        else if (id == "forward.width_m") c.forward_width_m = parse_float(value, c.forward_width_m, 0.15f, 0.6f);
+        else if (id == "forward.trailer_line") c.trailer_line = parse_bool(value);
+        else if (id == "forward.trailer_offtrack_m") c.trailer_offtrack_m = parse_float(value, c.trailer_offtrack_m, 0.0f, 10.0f);
+        // dot_height_m is the 0.2.0 - 0.3.0 name for the same height.
+        else if (id == "forward.height_m" || id == "forward.dot_height_m")
+            c.forward_height_m = parse_float(value, c.forward_height_m, -1.0f, 2.0f);
+        // The forward dots (0.2.0 - 0.3.0) were replaced by the forward line;
+        // their settings are skipped without complaint.
+        else if (id == "forward.lookahead_s" || id == "forward.min_distance_m" ||
+                 id == "forward.max_distance_m" || id == "forward.dot_size_m" ||
+                 id == "forward.line_time_s" || id == "forward.max_line_m")
+            continue;
         else if (id == "forward.steering_smoothing_s") c.steering_smoothing_s = parse_float(value, c.steering_smoothing_s, 0.0f, 2.0f);
         else if (id == "prediction.horizon_m") c.horizon_m = parse_float(value, c.horizon_m, 3.0f, 60.0f);
         else if (id == "hotkey.key")

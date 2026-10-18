@@ -17,17 +17,17 @@ namespace rto::world
 {
 namespace
 {
-// Per model. The largest user is a forward line at the setting limits: 1 m
-// wide (9 strips) and 20 m long in 0.3 m pieces, about 600 pieces per side.
+// Per model. The largest user is the forward line at the setting limits:
+// 0.6 m wide (4 strips) and 100 m long in 1 m pieces, 400 pieces.
 // Instances are created on first use, so unused slots cost a pointer.
-constexpr std::size_t pool_size = 640;
+constexpr std::size_t pool_size = 512;
 // Indexed by Band.
 constexpr std::array<const char *, 5> model_paths{
     "/model/rto_guides/line_red.pmd",
     "/model/rto_guides/line_yellow.pmd",
     "/model/rto_guides/line_green.pmd",
-    "/model/rto_guides/dot_red.pmd",
-    "/model/rto_guides/dot_green.pmd",
+    "/model/rto_guides/line_blue.pmd",
+    "/model/rto_guides/line_teal.pmd",
 };
 
 engine::Functions fn;
@@ -44,7 +44,7 @@ std::array<std::array<std::uint64_t *, pool_size>, model_paths.size()> pools{};
 std::atomic<bool> suspended{false}; // between release_models() and resume()
 std::atomic<bool> faulted{false};
 // A model that failed to load (e.g. a mod older than the plugin, without the
-// dot models) is skipped for the session; the other models keep drawing.
+// forward-line models) is skipped for the session; the other models keep drawing.
 std::array<bool, model_paths.size()> missing{};
 bool logged_first_render = false;
 

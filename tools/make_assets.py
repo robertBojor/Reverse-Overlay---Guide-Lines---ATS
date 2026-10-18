@@ -3,9 +3,12 @@
 The line models are derived from the MIT-licensed "Reverse Posture Assistant"
 sweep_edge model (assets/base): a 0.36 m bar that the runtime lays down every
 0.25 m so consecutive pieces overlap into a continuous line. Variants differ
-only in width and in the material path stored in the .pmd. The forward dots
-use the same bar shortened to a square tile (DOT_TILE); the runtime tiles it
-for bigger dots, since model instances cannot be scaled.
+only in width and in the material path stored in the .pmd. The forward line
+uses the same bar, longer and see-through, in blue for the truck and teal for
+the trailer (FORWARD_*); the runtime lays
+parallel strips for wider lines, since model instances cannot be scaled. The
+square dot tiles used by plugins 0.2.0 - 0.3.0 stay in the package so those
+plugins keep working with this mod.
 
     python3 -I tools/make_assets.py [scs|workshop|all]
       scs       stage files in out/mod_stage (zip with tools/pack_scs.ps1)
@@ -22,8 +25,17 @@ MODEL_DIR = 'model/rto_guides'
 HALF_WIDTH = 0.06  # base model is 0.0375 (7.5 cm wide); 12 cm reads better at distance
 BASE_HALF_WIDTH = 0.0375
 BASE_HALF_LENGTH = 0.18
-DOT_TILE = 0.12  # forward dot tile edge; must match DotOptions::tile in src/core/dots.hpp
+DOT_TILE = 0.12  # forward dot tile edge, for plugins 0.2.0 - 0.3.0
 DOT_COLOURS = ('red', 'green')  # left, right
+# Forward line piece; must match ForwardOptions::piece_width and the 1 m model
+# length behind ForwardOptions::spacing in src/core/forward.hpp.
+FORWARD_HALF_WIDTH = 0.075
+FORWARD_HALF_LENGTH = 0.5
+FORWARD_COLOURS = {'blue': (110, 185, 255), 'teal': (90, 220, 200)}  # truck, trailer
+FORWARD_OPACITY = 0.75  # from the texture alpha, with the alpha-blended .over effect
+# Glow at night. The reverse lines use 4 / 600; the forward line is on screen
+# all the time while driving, so it glows less.
+FORWARD_LUMINANCE = (2.0, 250.0)
 
 # name -> sRGB colour. The material diffuse is the linear equivalent, as in the
 # original assets (texture and diffuse multiply).
@@ -44,11 +56,11 @@ def srgb_to_linear(c):
     return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
 
 
-def make_dds(rgb):
+def make_dds(rgb, alpha=255):
     base = (BASE / 'guide_color.dds').read_bytes()
     header = base[:128]  # 4x4 A8R8G8B8, no mips
     r, g, b = rgb
-    pixel = bytes([b, g, r, 255])
+    pixel = bytes([b, g, r, alpha])
     return header + pixel * 16
 
 
@@ -59,14 +71,14 @@ def make_tobj(dds_path):
     return header + struct.pack('<Q', len(path)) + path
 
 
-def make_material(rgb, tobj_path):
+def make_material(rgb, tobj_path, luminance=(4.0, 600.0), effect='eut2.dif.lum'):
     lin = [srgb_to_linear(c) for c in rgb]
     return (
-        'effect : "eut2.dif.lum.rfx" {\n'
+        f'effect : "{effect}.rfx" {{\n'
         '\tadditional_ambient : 1.000000\n'
         f'\tdiffuse : {{ {lin[0]:.6f} , {lin[1]:.6f} , {lin[2]:.6f} }}\n'
-        '\tluminance_night : 4.000000\n'
-        '\tluminance_output : 600.000000\n'
+        f'\tluminance_night : {luminance[0]:.6f}\n'
+        f'\tluminance_output : {luminance[1]:.6f}\n'
         '\treflection : 0.000000\n'
         '\tshininess : 8.000000\n'
         '\tspecular : { 0.000000 , 0.000000 , 0.000000 }\n'
@@ -142,10 +154,10 @@ DESCRIPTION = f'''{DISPLAY_NAME} (v{VERSION})
 
 Backup-camera style guide lines shown on the ground while reversing:
 red, yellow and green by distance, visible in every camera and the mirrors.
-In a forward gear, two square dots show where the truck's front corners
-will be in a moment (red left, green right), to help with lane position.
+In a forward gear, a blue line runs from the front axle along the path the
+truck will take, to help with lane position.
 
-Ctrl+Shift+F9 cycles what is shown: forward dots only, reverse lines only,
+Ctrl+Shift+F9 cycles what is shown: forward line only, reverse lines only,
 both, nothing. The choice is remembered.
 
 This package contains only the models. They are drawn by the
@@ -171,6 +183,16 @@ def model_files():
     for name in DOT_COLOURS:
         files[f'{MODEL_DIR}/dot_{name}.pmd'] = make_pmd(MATERIAL_PATHS[name])
         files[f'{MODEL_DIR}/dot_{name}.pmg'] = dot_pmg
+    forward_pmg = make_pmg(FORWARD_HALF_WIDTH, FORWARD_HALF_LENGTH, 0.56)
+    for name, rgb in FORWARD_COLOURS.items():
+        dds = f'/{MODEL_DIR}/line_{name}.dds'
+        tobj = f'/{MODEL_DIR}/line_{name}.tobj'
+        mat = f'/{MODEL_DIR}/line_{name}.mat'
+        files[dds[1:]] = make_dds(rgb, round(FORWARD_OPACITY * 255))
+        files[tobj[1:]] = make_tobj(dds)
+        files[mat[1:]] = make_material(rgb, tobj, FORWARD_LUMINANCE, 'eut2.dif.lum.over')
+        files[f'{MODEL_DIR}/line_{name}.pmd'] = make_pmd(mat)
+        files[f'{MODEL_DIR}/line_{name}.pmg'] = forward_pmg
     return files
 
 

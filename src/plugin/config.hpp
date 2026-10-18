@@ -14,14 +14,14 @@ struct Config
     float red_until_m = 3.0f;
     float yellow_until_m = 8.0f;
     float line_height_m = 0.35f;        // above the rear unit's placement origin
-    // Forward dots: where the truck's front corners will be (forward gears).
-    float lookahead_s = 1.5f;
-    float min_distance_m = 14.0f;
-    float max_distance_m = 80.0f;
-    float dot_size_m = 0.5f;
-    float line_time_s = 0.5f;           // with speed a dot stretches into a line this long in seconds
-    float max_line_m = 15.0f;
-    float dot_height_m = 0.35f;         // above the truck's placement origin
+    // Forward line: the front axle's path (forward gears).
+    float min_length_m = 25.0f;
+    float length_time_s = 1.2f;         // seconds of travel at the current speed
+    float max_length_m = 40.0f;
+    float forward_width_m = 0.3f;
+    float forward_height_m = 0.35f;     // above the truck's placement origin
+    bool trailer_line = true;           // the last trailer's inner wheels, on turns
+    float trailer_offtrack_m = 0.5f;    // shown when they run this far inside the truck's line
     float steering_smoothing_s = 0.25f; // time constant; 0 = none
     // Hotkey cycling forward only / reverse only / both / off. Virtual-key
     // code plus modifiers; vk 0 disables.

@@ -2,7 +2,7 @@
 
 // What the hotkey shows. Each press moves to the next mode:
 // forward only -> reverse only -> both -> off -> forward only.
-// "Both" means forward dots in a forward gear and guide lines in reverse.
+// "Both" means the forward line in a forward gear and guide lines in reverse.
 
 #include <optional>
 #include <string_view>

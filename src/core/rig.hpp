@@ -107,6 +107,8 @@ struct UnitGeometry
     double half_width = 1.3;
     // Tractor: virtual rear axle. Trailer: equivalent axle.
     Vec2 axle;
+    // Tractor: centre of the front (steering) axle group.
+    Vec2 front_axle;
     // Trailer only: kingpin (local) and where it couples on the parent (parent local).
     Vec2 kingpin;
     Vec2 coupling_on_parent;
@@ -163,6 +165,7 @@ inline UnitGeometry derive_tractor(const RigInput &input)
     {
         g.wheelbase = 5.0;
         g.axle = {0.0, 0.0};
+        g.front_axle = {0.0, -g.wheelbase};
         g.front_z = -6.5;
         g.rear_z = 1.0;
         g.curvature = std::tan(std::clamp(input.steering_input, -1.0, 1.0) *
@@ -208,6 +211,7 @@ inline UnitGeometry derive_tractor(const RigInput &input)
     }
 
     g.axle = {0.0, rear_z};
+    g.front_axle = {0.0, front_z};
     g.wheelbase = std::max(rear_z - front_z, 1.5);
 
     // Curvature from the actual wheel angles. For a wheel at lateral offset x
@@ -310,7 +314,7 @@ inline Rig build_rig(const RigInput &input)
 
 struct PredictedStep
 {
-    double distance = 0.0;      // metres travelled in reverse
+    double distance = 0.0;      // metres travelled (in the direction predicted)
     std::vector<Pose> poses;    // per unit
 };
 
@@ -326,16 +330,17 @@ inline double articulation(const Pose &parent, const Pose &child)
     return normalize_angle(child.heading - parent.heading);
 }
 
-// Integrate the rig backwards by `horizon` metres with constant steering.
+// Integrate the rig `horizon` metres with constant steering, backwards
+// (direction -1) or forwards (+1).
 // Tractor: kinematic bicycle about its virtual rear axle.
 // Trailers: no-side-slip constraint at the equivalent axle, driven by the
-// actual displacement of the coupling point (handles off-axle hitches).
-inline Prediction predict_reverse(const Rig &rig, double horizon = 15.0,
-                                  double step = 0.05, double sample_every = 0.25)
+// actual displacement of the coupling point (handles off-axle hitches). The
+// constraint holds either way, so the same update serves both directions.
+inline Prediction predict_motion(const Rig &rig, double horizon, double direction,
+                                 double step, double sample_every)
 {
     Prediction out;
-    if (rig.units.empty()) return out;
-    horizon = std::clamp(horizon, 1.0, 60.0);
+    if (rig.units.empty() || horizon <= 0.0) return out;
     step = std::clamp(step, 0.01, 0.25);
     sample_every = std::max(sample_every, step);
 
@@ -348,7 +353,7 @@ inline Prediction predict_reverse(const Rig &rig, double horizon = 15.0,
     for (int i = 1; i <= steps; ++i)
     {
         const double travelled = std::min(i * step, horizon);
-        const double ds = -(travelled - (i - 1) * step); // negative: reversing
+        const double ds = direction * (travelled - (i - 1) * step);
         const std::vector<Pose> before = poses;
 
         // Tractor rear axle.
@@ -400,6 +405,12 @@ inline Prediction predict_reverse(const Rig &rig, double horizon = 15.0,
         if (out.jackknife_distance >= 0.0) break;
     }
     return out;
+}
+
+inline Prediction predict_reverse(const Rig &rig, double horizon = 15.0,
+                                  double step = 0.05, double sample_every = 0.25)
+{
+    return predict_motion(rig, std::clamp(horizon, 1.0, 60.0), -1.0, step, sample_every);
 }
 
 // Body corners in world space: front-left, front-right, rear-right, rear-left.

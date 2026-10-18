@@ -1,7 +1,7 @@
 // SCS telemetry plugin entry points. Collects official SDK telemetry for the
 // truck and up to ten trailers. In reverse it predicts the rig's path and
-// draws guide lines; in a forward gear it draws two dots where the truck's
-// front corners will be. The hotkey picks which of the two are shown.
+// draws guide lines; in a forward gear it draws a line along the path of the
+// truck's front axle. The hotkey picks which of the two are shown.
 
 #include <windows.h>
 #include <shlobj.h>
@@ -26,7 +26,7 @@
 #include <common/scssdk_telemetry_truck_common_channels.h>
 
 #include "core/display_mode.hpp"
-#include "core/dots.hpp"
+#include "core/forward.hpp"
 #include "core/guides.hpp"
 #include "core/rig.hpp"
 #include "plugin/config.hpp"
@@ -88,6 +88,7 @@ enum Field : std::uintptr_t
     field_wheel_lift,
     field_wheel_steering,
     field_speed,
+    field_yaw_rate,
 };
 
 // Channel context packs (field, unit, wheel) into the pointer value.
@@ -103,6 +104,8 @@ struct State
     bool gear_valid = false;
     float steering_input = 0.0f;
     float speed = 0.0f; // m/s, negative when moving backwards
+    bool yaw_rate_valid = false;
+    double yaw_rate = 0.0; // rad/s, positive turning left
     bool driving = false; // between "started" and "paused"
     bool seen_indexed_trailer_config = false;
 
@@ -115,10 +118,11 @@ struct State
     rto::DisplayMode mode = rto::DisplayMode::both; // hotkey, saved in mode_path
     std::filesystem::path mode_path;
     bool hotkey_was_down = false;
-    // Forward dots: smoothed tractor curvature and when it was last updated.
+    // Forward line: smoothed tractor curvature and when it was last updated.
     bool forward_active = false;
     double forward_curvature = 0.0;
     std::chrono::steady_clock::time_point forward_time{};
+    bool trailer_line_shown = false; // with hysteresis, so it doesn't flicker
 };
 
 State state;
@@ -226,7 +230,7 @@ void publish_world(const rto::Rig &rig, const rto::Prediction &prediction)
                                   state.config.line_height_m));
 }
 
-void publish_dots(rto::Rig rig)
+void publish_forward(rto::Rig rig)
 {
     if (!state.world_ready || !state.config.world_enabled)
     {
@@ -234,9 +238,17 @@ void publish_dots(rto::Rig rig)
         return;
     }
     // Smooth the curvature so steering corrections at speed don't make the
-    // far-away dots jitter. Snap after a gap (first frame, pause, reverse).
+    // far end of the line jitter. Snap after a gap (first frame, pause, reverse).
+    rto::ForwardOptions options;
+    options.min_length = state.config.min_length_m;
+    options.length_time = state.config.length_time_s;
+    options.max_length = state.config.max_length_m;
+    options.width = state.config.forward_width_m;
+
     const auto now = std::chrono::steady_clock::now();
-    const double target = rig.units[0].curvature;
+    const double target = state.yaw_rate_valid
+        ? rto::forward_curvature(rig.units[0].curvature, state.yaw_rate, state.speed, options)
+        : rig.units[0].curvature;
     const double dt = std::chrono::duration<double>(now - state.forward_time).count();
     state.forward_curvature = state.forward_active && dt < 0.5
         ? rto::smooth_toward(state.forward_curvature, target, dt, state.config.steering_smoothing_s)
@@ -245,36 +257,28 @@ void publish_dots(rto::Rig rig)
     state.forward_time = now;
     rig.units[0].curvature = state.forward_curvature;
 
-    rto::DotOptions options;
-    options.lookahead_s = state.config.lookahead_s;
-    options.min_distance = state.config.min_distance_m;
-    options.max_distance = state.config.max_distance_m;
-    options.size = state.config.dot_size_m;
-    options.line_time = state.config.line_time_s;
-    options.max_line = state.config.max_line_m;
-    const double distance = rto::lookahead_distance(state.speed, options);
-    const double span = rto::line_length(state.speed, options);
+    const double span = rto::forward_length(state.speed, options);
+    auto pieces = to_pieces(rto::build_forward(rig, span, options), state.units[0].placement,
+                            state.config.forward_height_m);
 
-    const auto &anchor = state.units[0].placement;
-    const double offset = state.config.dot_height_m;
-    // Fast enough for the dot to stretch: draw lines along the corner paths.
-    if (span > options.size)
+    // The trailer line comes on once the trailer cuts inside the blue line by
+    // the threshold and goes off below 60 % of it.
+    if (state.config.trailer_line && rig.units.size() > 1)
     {
-        rto::world::publish(to_pieces(rto::build_lines(rig, distance, span, options), anchor, offset));
-        return;
+        const auto trailer = rto::build_trailer_forward(rig, span, options);
+        const double on = state.config.trailer_offtrack_m;
+        state.trailer_line_shown = state.trailer_line_shown ? trailer.offtrack >= on * 0.6
+                                                            : trailer.offtrack > on;
+        if (state.trailer_line_shown)
+        {
+            auto more = to_pieces(trailer.segments, state.units[rig.units.size() - 1].placement,
+                                  state.config.forward_height_m);
+            pieces.insert(pieces.end(), more.begin(), more.end());
+        }
     }
-    std::vector<rto::world::Piece> pieces;
-    const auto tiles = rto::build_dots(rig, distance, options);
-    pieces.reserve(tiles.size());
-    for (const auto &t : tiles)
+    else
     {
-        // A tile is placed like a line piece one tile long, so it lines up
-        // with the predicted heading and follows the slope.
-        const rto::Vec2 half = rto::forward_dir(t.heading) * (options.tile * 0.5);
-        const rto::Vec2 a = t.centre - half, b = t.centre + half;
-        pieces.push_back({rto::world::piece_transform(a.x, ground_height(anchor, a, offset), a.z,
-                                                      b.x, ground_height(anchor, b, offset), b.z),
-                          t.band});
+        state.trailer_line_shown = false;
     }
     rto::world::publish(std::move(pieces));
 }
@@ -307,9 +311,9 @@ const char *mode_description(rto::DisplayMode m)
 {
     switch (m)
     {
-    case rto::DisplayMode::forward: return "forward dots only";
+    case rto::DisplayMode::forward: return "forward line only";
     case rto::DisplayMode::reverse: return "reverse guide lines only";
-    case rto::DisplayMode::both: return "forward dots and reverse guide lines";
+    case rto::DisplayMode::both: return "forward line and reverse guide lines";
     case rto::DisplayMode::off: break;
     }
     return "nothing (hidden)";
@@ -349,7 +353,11 @@ void update_frame()
         state.gear_valid && state.gear < 0 && rto::shows_reverse(state.mode);
     const bool forward =
         state.gear_valid && state.gear > 0 && rto::shows_forward(state.mode);
-    if (!forward) state.forward_active = false;
+    if (!forward)
+    {
+        state.forward_active = false;
+        state.trailer_line_shown = false;
+    }
     if (!state.driving || !(reversing || forward) || !truck.placement_valid || !truck.configured)
     {
         rto::world::publish({});
@@ -374,7 +382,7 @@ void update_frame()
     if (reversing)
         publish_world(rig, rto::predict_reverse(rig, state.config.horizon_m));
     else
-        publish_dots(rig);
+        publish_forward(rig);
 
     if (!state.logged_first_rig)
     {
@@ -538,6 +546,12 @@ SCSAPI_VOID channel_callback(const scs_string_t, const scs_u32_t, const scs_valu
     case field_speed:
         state.speed = value ? value->value_float.value : 0.0f;
         break;
+    case field_yaw_rate:
+        // Vehicle-space angular velocity in rotations per second; +Y is up,
+        // so a positive value turns left like a positive curvature.
+        state.yaw_rate_valid = value != nullptr;
+        state.yaw_rate = value ? value->value_fvector.y * 2.0 * rto::kPi : 0.0;
+        break;
     }
 }
 
@@ -598,6 +612,8 @@ int register_channels(const scs_telemetry_init_params_v101_t *api)
         make_context(field_placement, 0));
     reg(SCS_TELEMETRY_TRUCK_CHANNEL_speed, SCS_U32_NIL, SCS_VALUE_TYPE_float,
         make_context(field_speed, 0));
+    reg(SCS_TELEMETRY_TRUCK_CHANNEL_local_angular_velocity, SCS_U32_NIL, SCS_VALUE_TYPE_fvector,
+        make_context(field_yaw_rate, 0));
     for (scs_u32_t w = 0; w < truck_wheel_channels; ++w)
     {
         reg(SCS_TELEMETRY_TRUCK_CHANNEL_wheel_on_ground, w, SCS_VALUE_TYPE_bool,
