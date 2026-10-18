@@ -25,6 +25,8 @@ the path the rig will actually take if you hold the current steering:
 | 🟨 **3 – 8 m** | yellow |
 | 🟩 **8 – 15 m** | green, with ticks where each band ends |
 
+<p align="center"><img src="assets/images/screenshot-cab-mirror.jpg" width="820" alt="Cab view while reversing: the red, yellow and green guide lines are visible in the side mirror"></p>
+
 ## Features
 
 - **In the world, not on the screen:** the lines are real objects, so they show
