@@ -10,6 +10,8 @@ Backup-camera style guide lines for reversing. While you are in reverse, two lin
 [*]Distances and line height adjustable in a settings file
 [/list]
 
+Open source (MIT): read the full README, user guide and source code on GitHub before installing: [b][url=https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS]Reverse Overlay for ATS on GitHub[/url][/b]
+
 [hr][/hr]
 [h2]IMPORTANT: two parts are needed[/h2]
 [olist]
