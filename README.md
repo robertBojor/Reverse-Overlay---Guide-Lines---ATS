@@ -10,6 +10,7 @@ drawn in the game world and visible in the mirrors.**
 ![Version](https://img.shields.io/badge/version-0.1.0-2ea44f)
 ![Status](https://img.shields.io/badge/status-early%20release-orange)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Steam Workshop](https://img.shields.io/badge/Steam%20Workshop-subscribe-171a21?logo=steam)](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979)
 
 </div>
 
@@ -50,7 +51,7 @@ the path the rig will actually take if you hold the current steering:
 You need **two parts**. Steam Workshop can't install plugins, so the DLL is a
 separate download.
 
-1. **Line models:** subscribe to **Reverse Overlay - Guide Lines - ATS** on the
+1. **Line models:** subscribe to [**Reverse Overlay - Guide Lines - ATS**](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979) on the
    Steam Workshop, *or* use the `.scs` included in the download.
 2. **Plugin:** download the latest zip from
    [**Releases**](../../releases), exit the game and run `Install.bat`. It

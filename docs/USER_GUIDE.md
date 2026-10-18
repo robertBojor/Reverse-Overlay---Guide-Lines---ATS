@@ -41,7 +41,7 @@ Steam Workshop can only deliver mod files. It cannot install the plugin, so
 ### Step 1: Get the line models (choose one)
 
 **A. Steam Workshop (recommended)**
-1. Subscribe to **Reverse Overlay - Guide Lines - ATS** on the Steam Workshop.
+1. Subscribe to [**Reverse Overlay - Guide Lines - ATS**](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979) on the Steam Workshop.
 2. Wait until Steam has downloaded it.
 
 **B. Without the Workshop**
