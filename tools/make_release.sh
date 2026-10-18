@@ -68,7 +68,9 @@ You need BOTH parts:
      <ATS folder>\\bin\\win_x64\\plugins  (the folder is created if needed).
 
 Start the game. It will mention "advanced SDK features" - that is expected.
-Shift into reverse to see the lines. Ctrl+Shift+F9 hides and shows them.
+Shift into reverse to see the lines; in a forward gear, two dots show where
+the truck's front corners will be. Ctrl+Shift+F9 steps through forward
+only / reverse only / both / off.
 
 Full instructions, settings and troubleshooting: User_Guide.md
 (open it with any text editor or a Markdown viewer).

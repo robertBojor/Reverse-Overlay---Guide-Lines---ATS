@@ -16,6 +16,8 @@ enum class Band
     red,
     yellow,
     green,
+    dot_red,   // forward dots: left side of the truck
+    dot_green, // forward dots: right side
 };
 
 struct GuideSegment

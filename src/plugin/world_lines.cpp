@@ -17,11 +17,14 @@ namespace rto::world
 {
 namespace
 {
-constexpr std::size_t pool_size = 192; // per colour
-constexpr std::array<const char *, 3> model_paths{
+constexpr std::size_t pool_size = 192; // per model; a 1 m forward dot is 81 tiles
+// Indexed by Band.
+constexpr std::array<const char *, 5> model_paths{
     "/model/rto_guides/line_red.pmd",
     "/model/rto_guides/line_yellow.pmd",
     "/model/rto_guides/line_green.pmd",
+    "/model/rto_guides/dot_red.pmd",
+    "/model/rto_guides/dot_green.pmd",
 };
 
 engine::Functions fn;
@@ -34,7 +37,7 @@ std::vector<Piece> latest;
 
 // Guarded by models_mutex (render thread draws, game thread releases).
 std::mutex models_mutex;
-std::array<std::array<std::uint64_t *, pool_size>, 3> pools{};
+std::array<std::array<std::uint64_t *, pool_size>, model_paths.size()> pools{};
 std::atomic<bool> suspended{false}; // between release_models() and resume()
 std::atomic<bool> faulted{false};
 bool logged_first_render = false;
@@ -87,7 +90,7 @@ void render_pieces(std::uint64_t context)
         pieces = latest;
     }
     std::lock_guard lock(models_mutex);
-    std::array<std::size_t, 3> used{};
+    std::array<std::size_t, model_paths.size()> used{};
     for (const auto &piece : pieces)
     {
         const auto band = static_cast<std::size_t>(piece.band);

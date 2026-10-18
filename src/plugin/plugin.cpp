@@ -1,18 +1,21 @@
 // SCS telemetry plugin entry points. Collects official SDK telemetry for the
-// truck and up to ten trailers, predicts the reverse path every frame and
-// hands the guide-line pieces to the in-world renderer.
+// truck and up to ten trailers. In reverse it predicts the rig's path and
+// draws guide lines; in a forward gear it draws two dots where the truck's
+// front corners will be. The hotkey picks which of the two are shown.
 
 #include <windows.h>
 #include <shlobj.h>
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <deque>
 #include <filesystem>
+#include <fstream>
 #include <optional>
 #include <string>
 #include <vector>
@@ -22,6 +25,8 @@
 #include <common/scssdk_telemetry_trailer_common_channels.h>
 #include <common/scssdk_telemetry_truck_common_channels.h>
 
+#include "core/display_mode.hpp"
+#include "core/dots.hpp"
 #include "core/guides.hpp"
 #include "core/rig.hpp"
 #include "plugin/config.hpp"
@@ -82,6 +87,7 @@ enum Field : std::uintptr_t
     field_wheel_on_ground,
     field_wheel_lift,
     field_wheel_steering,
+    field_speed,
 };
 
 // Channel context packs (field, unit, wheel) into the pointer value.
@@ -96,6 +102,7 @@ struct State
     int gear = 0;
     bool gear_valid = false;
     float steering_input = 0.0f;
+    float speed = 0.0f; // m/s, negative when moving backwards
     bool driving = false; // between "started" and "paused"
     bool seen_indexed_trailer_config = false;
 
@@ -105,8 +112,13 @@ struct State
     ULONGLONG next_config_check = 0;
     bool logged_first_rig = false;
     bool world_ready = false; // engine functions found and render hook installed
-    bool hidden_by_hotkey = false;
+    rto::DisplayMode mode = rto::DisplayMode::both; // hotkey, saved in mode_path
+    std::filesystem::path mode_path;
     bool hotkey_was_down = false;
+    // Forward dots: smoothed tractor curvature and when it was last updated.
+    bool forward_active = false;
+    double forward_curvature = 0.0;
+    std::chrono::steady_clock::time_point forward_time{};
 };
 
 State state;
@@ -208,7 +220,87 @@ void publish_world(const rto::Rig &rig, const rto::Prediction &prediction)
     rto::world::publish(std::move(pieces));
 }
 
-// Toggles the guide lines on the key's press edge. Only while the game window
+void publish_dots(rto::Rig rig)
+{
+    if (!state.world_ready || !state.config.world_enabled)
+    {
+        rto::world::publish({});
+        return;
+    }
+    // Smooth the curvature so steering corrections at speed don't make the
+    // far-away dots jitter. Snap after a gap (first frame, pause, reverse).
+    const auto now = std::chrono::steady_clock::now();
+    const double target = rig.units[0].curvature;
+    const double dt = std::chrono::duration<double>(now - state.forward_time).count();
+    state.forward_curvature = state.forward_active && dt < 0.5
+        ? rto::smooth_toward(state.forward_curvature, target, dt, state.config.steering_smoothing_s)
+        : target;
+    state.forward_active = true;
+    state.forward_time = now;
+    rig.units[0].curvature = state.forward_curvature;
+
+    rto::DotOptions options;
+    options.lookahead_s = state.config.lookahead_s;
+    options.min_distance = state.config.min_distance_m;
+    options.max_distance = state.config.max_distance_m;
+    options.size = state.config.dot_size_m;
+    const double distance = rto::lookahead_distance(state.speed, options);
+    const auto tiles = rto::build_dots(rig, distance, options);
+
+    const auto &anchor = state.units[0].placement;
+    const double offset = state.config.dot_height_m;
+    std::vector<rto::world::Piece> pieces;
+    pieces.reserve(tiles.size());
+    for (const auto &t : tiles)
+    {
+        // A tile is placed like a line piece one tile long, so it lines up
+        // with the predicted heading and follows the slope.
+        const rto::Vec2 half = rto::forward_dir(t.heading) * (options.tile * 0.5);
+        const rto::Vec2 a = t.centre - half, b = t.centre + half;
+        pieces.push_back({rto::world::piece_transform(a.x, ground_height(anchor, a, offset), a.z,
+                                                      b.x, ground_height(anchor, b, offset), b.z),
+                          t.band});
+    }
+    rto::world::publish(std::move(pieces));
+}
+
+// The hotkey mode survives restarts in a one-line file next to the settings,
+// so the commented settings file is never rewritten by the plugin.
+void load_mode()
+{
+    std::ifstream in(state.mode_path);
+    std::string line;
+    while (std::getline(in, line))
+    {
+        const auto eq = line.find('=');
+        if (eq == std::string::npos) continue;
+        std::string value = line.substr(eq + 1);
+        value.erase(0, value.find_first_not_of(" \t"));
+        value.erase(value.find_last_not_of(" \t\r") + 1);
+        if (const auto mode = rto::parse_mode(value)) state.mode = *mode;
+    }
+}
+
+void save_mode()
+{
+    std::ofstream(state.mode_path, std::ios::trunc)
+        << "; Written by the plugin when the hotkey changes what is shown.\n"
+        << "mode = " << rto::mode_name(state.mode) << "\n";
+}
+
+const char *mode_description(rto::DisplayMode m)
+{
+    switch (m)
+    {
+    case rto::DisplayMode::forward: return "forward dots only";
+    case rto::DisplayMode::reverse: return "reverse guide lines only";
+    case rto::DisplayMode::both: return "forward dots and reverse guide lines";
+    case rto::DisplayMode::off: break;
+    }
+    return "nothing (hidden)";
+}
+
+// Cycles the display mode on the key's press edge. Only while the game window
 // has focus, so the same combination typed in another application is ignored.
 void poll_hotkey()
 {
@@ -225,9 +317,9 @@ void poll_hotkey()
                          down(VK_SHIFT) == c.toggle_shift && down(VK_MENU) == c.toggle_alt;
     if (pressed && !state.hotkey_was_down)
     {
-        state.hidden_by_hotkey = !state.hidden_by_hotkey;
-        rto::log::info(state.hidden_by_hotkey ? "Guide lines hidden by hotkey."
-                                              : "Guide lines shown by hotkey.");
+        state.mode = rto::next_mode(state.mode);
+        save_mode();
+        rto::log::info(std::string("Hotkey: showing ") + mode_description(state.mode) + ".");
     }
     state.hotkey_was_down = pressed;
 }
@@ -238,9 +330,12 @@ void update_frame()
     poll_hotkey();
 
     const Unit &truck = state.units[0];
-    const bool reversing = state.gear_valid && state.gear < 0;
-    if (!state.driving || !reversing || state.hidden_by_hotkey || !truck.placement_valid ||
-        !truck.configured)
+    const bool reversing =
+        state.gear_valid && state.gear < 0 && rto::shows_reverse(state.mode);
+    const bool forward =
+        state.gear_valid && state.gear > 0 && rto::shows_forward(state.mode);
+    if (!forward) state.forward_active = false;
+    if (!state.driving || !(reversing || forward) || !truck.placement_valid || !truck.configured)
     {
         rto::world::publish({});
         return;
@@ -261,8 +356,10 @@ void update_frame()
     }
 
     const rto::Rig rig = rto::build_rig(input);
-    const rto::Prediction prediction = rto::predict_reverse(rig, state.config.horizon_m);
-    publish_world(rig, prediction);
+    if (reversing)
+        publish_world(rig, rto::predict_reverse(rig, state.config.horizon_m));
+    else
+        publish_dots(rig);
 
     if (!state.logged_first_rig)
     {
@@ -270,7 +367,7 @@ void update_frame()
         const auto &g = rig.units[0];
         char message[256];
         std::snprintf(message, sizeof(message),
-                      "First reverse frame: truck '%s' wheels=%zu wheelbase=%.2f m "
+                      "First frame: truck '%s' wheels=%zu wheelbase=%.2f m "
                       "per-wheel steering=%s trailers=%zu",
                       truck.id.c_str(), g.wheels.size(), g.wheelbase,
                       steering_valid ? "yes" : "no (fallback)", input.trailers.size());
@@ -423,6 +520,9 @@ SCSAPI_VOID channel_callback(const scs_string_t, const scs_u32_t, const scs_valu
         unit.steering_valid[wheel] = value != nullptr;
         if (value) unit.steering[wheel] = value->value_float.value;
         break;
+    case field_speed:
+        state.speed = value ? value->value_float.value : 0.0f;
+        break;
     }
 }
 
@@ -481,6 +581,8 @@ int register_channels(const scs_telemetry_init_params_v101_t *api)
         make_context(field_steering, 0));
     reg(SCS_TELEMETRY_TRUCK_CHANNEL_world_placement, SCS_U32_NIL, SCS_VALUE_TYPE_dplacement,
         make_context(field_placement, 0));
+    reg(SCS_TELEMETRY_TRUCK_CHANNEL_speed, SCS_U32_NIL, SCS_VALUE_TYPE_float,
+        make_context(field_speed, 0));
     for (scs_u32_t w = 0; w < truck_wheel_channels; ++w)
     {
         reg(SCS_TELEMETRY_TRUCK_CHANNEL_wheel_on_ground, w, SCS_VALUE_TYPE_bool,
@@ -535,6 +637,10 @@ SCSAPI_RESULT scs_telemetry_init(const scs_u32_t version, const scs_telemetry_in
 
     state.config_path = folder / "ats_reverse_overlay.ini";
     reload_config_if_changed(true);
+    state.mode_path = folder / "ats_reverse_overlay.mode";
+    load_mode();
+    rto::log::info(std::string("Showing ") + mode_description(state.mode) +
+                   " (Ctrl+Shift+F9 changes this).");
 
     const bool events =
         api->register_for_event(SCS_TELEMETRY_EVENT_frame_end, event_callback, nullptr) == SCS_RESULT_ok &&

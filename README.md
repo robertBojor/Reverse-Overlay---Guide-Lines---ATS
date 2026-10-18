@@ -3,7 +3,8 @@
 # Reverse Overlay · Guide Lines for ATS
 
 **Backup-camera style guide lines for reversing in American Truck Simulator,
-drawn in the game world and visible in the mirrors.**
+plus forward dots for lane position, drawn in the game world and visible in
+the mirrors.**
 
 ![Game](https://img.shields.io/badge/game-American%20Truck%20Simulator%201.61-1f6feb)
 ![Platform](https://img.shields.io/badge/platform-Windows%20x64-555)
@@ -28,6 +29,23 @@ the path the rig will actually take if you hold the current steering:
 
 <p align="center"><img src="assets/images/screenshot-cab-mirror.jpg" width="820" alt="Cab view while reversing: the red, yellow and green guide lines are visible in the side mirror"></p>
 
+In a **forward gear**, two square dots appear ahead of the truck where its
+front corners will be about 1.5 seconds from now (at least 6 m ahead): 🟥 red
+for the front-left corner, 🟩 green for the front-right. Keep red inside the
+left lane line and green inside the right one.
+
+**Ctrl+Shift+F9** steps through what is shown:
+
+| Press | Shows |
+|---|---|
+| 1st | **Forward dots only** |
+| 2nd | **Reverse lines only** |
+| 3rd | **Both**: dots in a forward gear, lines in reverse |
+| 4th | **Nothing** (everything hidden) |
+
+The next press starts again with forward dots only. The plugin remembers the
+mode between game sessions (it starts on **Both** the very first time).
+
 ## Features
 
 - **In the world, not on the screen:** the lines are real objects, so they show
@@ -41,10 +59,12 @@ the path the rig will actually take if you hold the current steering:
 - **Patch-tolerant:** game functions are found by code patterns, not fixed
   addresses. If an update breaks them, the lines switch off cleanly instead of
   crashing the game, and a bundled tool regenerates the patterns.
-- **Lightweight:** about 140 small line pieces while reversing, nothing
-  otherwise. No network access, and save games are never touched.
-- **Configurable:** band distances, path length and line height, all changeable
-  while you drive. **Ctrl+Shift+F9** hides and shows the lines.
+- **Forward dots:** the same steering model run forward for the truck, with a
+  time-based look-ahead and smoothing so the dots stay steady at speed.
+- **Lightweight:** about 140 small line pieces while reversing, 2 small tiles
+  while driving forward. No network access, and save games are never touched.
+- **Configurable:** band distances, path length, look-ahead, dot size and
+  heights, all changeable while you drive.
 
 ## Installation
 
@@ -58,7 +78,7 @@ separate download.
    copies `ats_reverse_overlay.dll` into
    `American Truck Simulator\bin\win_x64\plugins`.
 3. Start ATS, accept the *advanced SDK features* notice, enable the mod in the
-   Mod Manager, and reverse.
+   Mod Manager, and drive.
 
 The **[user guide](docs/USER_GUIDE.md)** covers settings, troubleshooting, game
 updates and uninstalling.
@@ -72,9 +92,11 @@ updates and uninstalling.
 
 ```mermaid
 flowchart LR
-    T["SCS Telemetry SDK<br/>wheels · steering · placement · hitches"] --> P["Prediction<br/>src/core/rig.hpp"]
-    P --> G["Guide lines<br/>src/core/guides.hpp"]
+    T["SCS Telemetry SDK<br/>gear · speed · wheels · steering · placement · hitches"] --> P["Prediction<br/>src/core/rig.hpp"]
+    P -->|reverse| G["Guide lines<br/>src/core/guides.hpp"]
+    P -->|forward| D["Forward dots<br/>src/core/dots.hpp"]
     G --> W["World renderer<br/>src/plugin/world_lines.cpp"]
+    D --> W
     E["Pattern scan<br/>src/plugin/engine.cpp"] --> W
     W --> R["Game render pass<br/>(all cameras + mirrors)"]
 ```
@@ -86,6 +108,11 @@ flowchart LR
   movement of its coupling point. Integration stops at 85° articulation.
 - **Guide lines:** the rear-corner paths of the last unit, cut into 0.25 m
   pieces and coloured by distance travelled.
+- **Forward dots:** the tractor's pose after `clamp(speed × lookahead_s,
+  min, max)` metres, solved as an exact arc, with the curvature smoothed over
+  0.25 s. Each dot is centred on a predicted front corner. Model instances
+  can't be scaled, so bigger dots are a grid of 12 cm tiles. Trailers are
+  ignored.
 - **Rendering:** plugin-owned model instances submitted from the player
   vehicle's render pass. Five engine functions are located by unique
   wildcarded byte patterns. A function another plugin has already hooked is

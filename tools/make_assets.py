@@ -3,7 +3,9 @@
 The line models are derived from the MIT-licensed "Reverse Posture Assistant"
 sweep_edge model (assets/base): a 0.36 m bar that the runtime lays down every
 0.25 m so consecutive pieces overlap into a continuous line. Variants differ
-only in width and in the material path stored in the .pmd.
+only in width and in the material path stored in the .pmd. The forward dots
+use the same bar shortened to a square tile (DOT_TILE); the runtime tiles it
+for bigger dots, since model instances cannot be scaled.
 
     python3 -I tools/make_assets.py [scs|workshop|all]
       scs       stage files in out/mod_stage (zip with tools/pack_scs.ps1)
@@ -18,6 +20,10 @@ STAGE = ROOT / 'out' / 'mod_stage'
 
 MODEL_DIR = 'model/rto_guides'
 HALF_WIDTH = 0.06  # base model is 0.0375 (7.5 cm wide); 12 cm reads better at distance
+BASE_HALF_WIDTH = 0.0375
+BASE_HALF_LENGTH = 0.18
+DOT_TILE = 0.12  # forward dot tile edge; must match DotOptions::tile in src/core/dots.hpp
+DOT_COLOURS = ('red', 'green')  # left, right
 
 # name -> sRGB colour. The material diffuse is the linear equivalent, as in the
 # original assets (texture and diffuse multiply).
@@ -83,12 +89,15 @@ def make_pmd(material_path):
     return bytes(data[:start]) + new
 
 
-def make_pmg():
+def make_pmg(half_width, half_length, radius):
+    # Vertices and both bounding boxes hold the bar's half-width (x) and
+    # half-length (z); the height (y, 0 to 0.055) stays.
     data = bytearray((BASE / 'sweep_edge.pmg').read_bytes())
-    swaps = {
-        struct.pack('<f', 0.0375): struct.pack('<f', HALF_WIDTH),
-        struct.pack('<f', -0.0375): struct.pack('<f', -HALF_WIDTH),
-    }
+    swaps = {}
+    for old, new in ((BASE_HALF_WIDTH, half_width), (BASE_HALF_LENGTH, half_length)):
+        if old != new:
+            swaps[struct.pack('<f', old)] = struct.pack('<f', new)
+            swaps[struct.pack('<f', -old)] = struct.pack('<f', -new)
     for old, new in swaps.items():
         count = 0
         i = data.find(old)
@@ -98,10 +107,11 @@ def make_pmg():
                 count += 1
             i = data.find(old, i + 4)
         assert count == 14, (old, count)  # 12 vertices + 2 bounding boxes
-    # Bounding sphere radius (two copies) grows with the wider bar.
+    # Bounding sphere radius (two copies). Its centre stays where the base
+    # model put it, about (0.017, 0.009, -0.023), so the radius has margin.
     radius_old = data[0x2C:0x30]
     assert data[0xA8:0xAC] == radius_old
-    data[0x2C:0x30] = data[0xA8:0xAC] = struct.pack('<f', 0.26)
+    data[0x2C:0x30] = data[0xA8:0xAC] = struct.pack('<f', radius)
     return bytes(data)
 
 
@@ -132,10 +142,12 @@ DESCRIPTION = f'''{DISPLAY_NAME} (v{VERSION})
 
 Backup-camera style guide lines shown on the ground while reversing:
 red, yellow and green by distance, visible in every camera and the mirrors.
+In a forward gear, two square dots show where the truck's front corners
+will be in a moment (red left, green right), to help with lane position.
 
-This package contains only the line models. The lines are drawn by the
+This package contains only the models. They are drawn by the
 ats_reverse_overlay.dll plugin, which must be installed separately into
-the game's bin/win_x64/plugins folder (see the Workshop page).
+the game's bin/win_x64/plugins folder.
 
 Line models derived from "Reverse Posture Assistant For ATS" by yyysheng (MIT).
 '''.encode()
@@ -143,7 +155,8 @@ Line models derived from "Reverse Posture Assistant For ATS" by yyysheng (MIT).
 
 def model_files():
     files = {}
-    pmg = make_pmg()
+    pmg = make_pmg(HALF_WIDTH, BASE_HALF_LENGTH, 0.26)
+    dot_pmg = make_pmg(DOT_TILE / 2, DOT_TILE / 2, 0.15)
     for name, rgb in COLOURS.items():
         dds = f'/{MODEL_DIR}/line_{name}.dds'
         tobj = f'/{MODEL_DIR}/line_{name}.tobj'
@@ -152,6 +165,9 @@ def model_files():
         files[MATERIAL_PATHS[name][1:]] = make_material(rgb, tobj)
         files[f'{MODEL_DIR}/line_{name}.pmd'] = make_pmd(MATERIAL_PATHS[name])
         files[f'{MODEL_DIR}/line_{name}.pmg'] = pmg
+    for name in DOT_COLOURS:
+        files[f'{MODEL_DIR}/dot_{name}.pmd'] = make_pmd(MATERIAL_PATHS[name])
+        files[f'{MODEL_DIR}/dot_{name}.pmg'] = dot_pmg
     return files
 
 

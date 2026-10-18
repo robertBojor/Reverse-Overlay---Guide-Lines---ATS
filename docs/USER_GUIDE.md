@@ -15,6 +15,12 @@ go if you keep the steering where it is.
 - They work with one trailer and with doubles and triples. The lines start
   behind the last trailer.
 
+In a **forward gear**, two square dots appear on the road ahead instead: **red**
+where the truck's **front-left** corner will be and **green** where the
+**front-right** corner will be, about 1.5 seconds from now. They help you keep
+the truck centred in its lane. **Ctrl+Shift+F9** chooses whether you see the
+dots, the lines, both or neither.
+
 ---
 
 ## 1. Requirements
@@ -95,16 +101,47 @@ After you first reverse:
 In-world guide lines rendering: 134 pieces.
 ```
 
-(The number varies.) If these lines are missing, see
+(The number varies: about 140 while reversing, 2 for the forward dots.) If these lines are missing, see
 [Troubleshooting](#6-troubleshooting).
 
 ---
 
 ## 3. Using it
 
+### What is shown: Ctrl+Shift+F9
+
+| Press | Shows |
+|---|---|
+| 1st | **Forward dots only** |
+| 2nd | **Reverse lines only** |
+| 3rd | **Both**: dots in a forward gear, lines in reverse |
+| 4th | **Nothing** (everything hidden) |
+
+The next press starts again with forward dots only. The plugin remembers the
+mode between game sessions (it starts on **Both** the very first time).
+
+The log records each change, for example *"Hotkey: showing forward dots only."*
+
+### Forward dots
+
+- They appear in **any forward gear**, even when you're stopped, and
+  disappear in neutral and while the game is paused or in menus.
+- They sit where the truck's front corners will be after **1.5 seconds** at
+  the current speed, and never closer than 6 m. At 90 km/h that's about 37 m
+  ahead.
+- Each dot is **centred on the edge of the truck**. Keep the red one inside
+  the left lane line and the green one inside the right.
+- Steering is **smoothed** a little so the dots don't jump with every small
+  correction at speed. They catch up within about half a second.
+- Only the truck counts. A trailer follows inside the truck's path on curves.
+- **Hills:** the game doesn't tell the plugin where the road surface is ahead,
+  so the dots continue the slope the truck is on now. Before a crest they can
+  float; where the road starts to climb they can sink in and vanish briefly.
+
+### Reverse guide lines
+
 - The lines appear when the **gearbox is in reverse** and disappear when you
   shift out. They are hidden while the game is paused or in menus.
-- **Ctrl+Shift+F9** hides and shows them (see [`[hotkey]`](#hotkey)).
 - The path assumes you **hold the current steering**. Turn the wheel and
   the lines update immediately. Use them to find the steering angle that puts
   the trailer where you want it, then follow that.
@@ -137,7 +174,7 @@ changes apply **while you drive** (within about 2 seconds).
 
 | Setting | Default | Meaning |
 |---|---|---|
-| `enabled` | `1` | `0` turns the guide lines off |
+| `enabled` | `1` | `0` turns off everything drawn in the world (lines and dots) |
 | `red_until_m` | `3` | end of the red band, in metres of travel |
 | `yellow_until_m` | `8` | end of the yellow band; green runs from here to the end |
 | `line_height_m` | `0.35` | height of the lines; lower it if they float, raise it if they sink into the road |
@@ -149,10 +186,22 @@ changes apply **while you drive** (within about 2 seconds).
 |---|---|---|
 | `horizon_m` | `15` | how far ahead (backwards) the path is predicted, 3–60 m |
 
+### `[forward]` forward dots
+
+| Setting | Default | Meaning |
+|---|---|---|
+| `lookahead_s` | `1.5` | how far ahead, in seconds of travel at the current speed |
+| `min_distance_m` | `6` | the dots never come closer than this (slow or stopped) |
+| `max_distance_m` | `80` | and never go further than this |
+| `dot_size_m` | `0.12` | edge length of each dot, 0.12–1.0 m |
+| `dot_height_m` | `0.35` | height of the dots; lower it if they float, raise it if they sink into the road |
+| `steering_smoothing_s` | `0.25` | how calmly the dots follow the steering, in seconds; `0` = no smoothing |
+
 ### `[hotkey]`
 
-**Ctrl+Shift+F9** hides and shows the guide lines while you drive. They start
-visible every time the game starts.
+**Ctrl+Shift+F9** steps through forward dots only, reverse lines only, both,
+and nothing (see [Using it](#3-using-it)). The current mode is saved in
+`ats_reverse_overlay.mode` next to the settings file.
 
 | Setting | Default | Meaning |
 |---|---|---|
@@ -199,7 +248,9 @@ it for `reverse-overlay` or `ats_reverse_overlay`.
 | Lines float above or sink into the road | Height estimate | Adjust `line_height_m` |
 | Lines look too narrow or wide for your trailer | Body size is estimated from the wheels | Known limitation, see [Accuracy notes](#accuracy-notes) |
 | Two sets of lines (blue/orange and red/yellow/green) | "Reverse Posture Assistant" is also installed | Use one or the other. Remove `ATSReverseTrajectoryRuntime.dll` from `plugins` and disable that mod |
-| Lines don't appear in reverse, but the log shows no errors | They were hidden with the hotkey | Press **Ctrl+Shift+F9** again. The log says *"Guide lines hidden by hotkey"* when this happens |
+| Lines or dots don't appear, but the log shows no errors | The hotkey mode doesn't include them | Press **Ctrl+Shift+F9** until the log says *"Hotkey: showing forward dots and reverse guide lines."* The mode is remembered across restarts |
+| Dots appear and then vanish for a moment | The road climbs ahead (see [Forward dots](#forward-dots)) | Expected on hills. Raising `dot_height_m` helps a little |
+| Log: *"Could not create /model/rto_guides/dot_red.pmd"* | The mod files are older than the plugin | Update the Workshop item (Steam usually does this on its own) or the local `.scs` |
 | Ctrl+Shift+F9 does nothing | The game window doesn't have focus, or `[hotkey]` was changed | Click into the game first. Check `key`, `ctrl`, `shift` and `alt` in the settings file |
 
 ---
@@ -226,8 +277,9 @@ following:
 
 What the plugin does and doesn't do:
 - It runs only inside ATS, loaded by the game's official plugin system.
-- It reads telemetry, and it only writes `ats_reverse_overlay.log` and
-  `ats_reverse_overlay.ini` in your `Documents\American Truck Simulator` folder.
+- It reads telemetry, and it only writes `ats_reverse_overlay.log`,
+  `ats_reverse_overlay.ini` and `ats_reverse_overlay.mode` in your
+  `Documents\American Truck Simulator` folder.
 - It has **no network access** and doesn't touch your save games.
 
 ---
@@ -239,8 +291,8 @@ What the plugin does and doesn't do:
    `<ATS folder>\bin\win_x64\plugins\ats_reverse_overlay.dll`.
 3. Disable or unsubscribe **Reverse Overlay - Guide Lines - ATS** (or delete
    `Documents\American Truck Simulator\mod\ats_reverse_overlay.scs`).
-4. Optionally delete `ats_reverse_overlay.ini` and `ats_reverse_overlay.log`
-   from `Documents\American Truck Simulator`.
+4. Optionally delete `ats_reverse_overlay.ini`, `ats_reverse_overlay.log` and
+   `ats_reverse_overlay.mode` from `Documents\American Truck Simulator`.
 
 ---
 
@@ -253,7 +305,7 @@ What the plugin does and doesn't do:
 **Mac or Linux?** Not currently.
 
 **Does it affect performance?** Barely. It's about 140 small line pieces while
-reversing and nothing otherwise.
+reversing and 2 small tiles while driving forward.
 
 **Can I change the colours?** Not yet. The band distances can be changed.
 

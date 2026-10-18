@@ -5,6 +5,8 @@
 #include <cmath>
 #include <cstdio>
 
+#include "../src/core/display_mode.hpp"
+#include "../src/core/dots.hpp"
 #include "../src/core/guides.hpp"
 #include "fixtures.hpp"
 
@@ -203,6 +205,109 @@ int main()
         const Rig rig = build_rig(fixtures::single(0.25, 0.0));
         const auto guides = build_guides(rig, predict_reverse(rig, 12.0));
         for (const auto &s : guides) CHECK(length(s.to - s.from) <= 0.25 + 1e-6);
+    }
+
+    // Forward look-ahead: speed x time, never closer than the minimum.
+    {
+        DotOptions o;
+        o.lookahead_s = 1.5;
+        o.min_distance = 6.0;
+        o.max_distance = 80.0;
+        CHECK(near(lookahead_distance(0.0, o), 6.0, 1e-12));
+        CHECK(near(lookahead_distance(-3.0, o), 6.0, 1e-12)); // rolling back in a forward gear
+        CHECK(near(lookahead_distance(25.0, o), 37.5, 1e-12));
+        CHECK(near(lookahead_distance(100.0, o), 80.0, 1e-12));
+    }
+
+    // Straight ahead: the truck moves forward, the dots sit on its front
+    // corners, red on the left and green on the right.
+    {
+        const Rig rig = build_rig(fixtures::bobtail(0.0));
+        const auto &g = rig.units[0];
+        const Pose end = predict_forward(g, rig.poses[0], 20.0);
+        CHECK(near(end.heading, 0.0, 1e-12));
+        CHECK(near(to_local(rig.poses[0], end.p).z, -20.0, 1e-9));
+        const auto dots = build_dots(rig, 20.0);
+        CHECK(dots.size() == 2); // one 12 cm tile per dot
+        CHECK(dots[0].band == Band::dot_red && dots[1].band == Band::dot_green);
+        const Vec2 left = to_local(rig.poses[0], dots[0].centre);
+        const Vec2 right = to_local(rig.poses[0], dots[1].centre);
+        CHECK(near(left.x, -g.half_width, 1e-9) && near(right.x, g.half_width, 1e-9));
+        CHECK(near(left.z, g.front_z - 20.0, 1e-9) && near(right.z, g.front_z - 20.0, 1e-9));
+    }
+
+    // Steering left: the rear axle follows a circle about the turn centre,
+    // the truck turns counter-clockwise and both dots move left.
+    {
+        const Rig rig = build_rig(fixtures::bobtail(0.3));
+        const auto &g = rig.units[0];
+        const Pose end = predict_forward(g, rig.poses[0], 10.0);
+        CHECK(near(end.heading, g.curvature * 10.0, 1e-9));
+        const double R = 1.0 / g.curvature;
+        const Vec2 centre = to_world(rig.poses[0], {-R, g.axle.z});
+        CHECK(near(length(to_world(end, g.axle) - centre), R, 1e-9));
+        const auto dots = build_dots(rig, 10.0);
+        CHECK(to_local(rig.poses[0], dots[0].centre).x < -g.half_width - 0.5);
+        CHECK(to_local(rig.poses[0], dots[1].centre).x < g.half_width - 0.5);
+        CHECK(near(dots[0].heading, end.heading, 1e-12));
+    }
+
+    // The closed-form arc matches the integrated reverse model run backwards:
+    // reversing from the predicted pose returns to the start.
+    {
+        const Rig rig = build_rig(fixtures::bobtail(0.25, 0.7));
+        const Pose end = predict_forward(rig.units[0], rig.poses[0], 12.0);
+        Rig back = rig;
+        back.poses[0] = end;
+        const Pose home = predict_reverse(back, 12.0).steps.back().poses[0];
+        CHECK(length(home.p - rig.poses[0].p) < 1e-4); // reverse uses 5 cm midpoint steps
+        CHECK(near(normalize_angle(home.heading - rig.poses[0].heading), 0.0, 1e-9));
+    }
+
+    // Bigger dots are an n x n grid of overlapping tiles spanning the size.
+    {
+        const Rig rig = build_rig(fixtures::bobtail(0.0));
+        DotOptions o;
+        o.size = 0.3;
+        const auto dots = build_dots(rig, 8.0, o);
+        CHECK(dots.size() == 2 * 9);
+        double min_x = 1e9, max_x = -1e9, min_z = 1e9, max_z = -1e9;
+        for (std::size_t i = 0; i < 9; ++i)
+        {
+            const Vec2 c = to_local(rig.poses[0], dots[i].centre);
+            min_x = std::min(min_x, c.x);
+            max_x = std::max(max_x, c.x);
+            min_z = std::min(min_z, c.z);
+            max_z = std::max(max_z, c.z);
+        }
+        CHECK(near(max_x - min_x + o.tile, 0.3, 1e-9) && near(max_z - min_z + o.tile, 0.3, 1e-9));
+        CHECK(near((min_x + max_x) * 0.5, -rig.units[0].half_width, 1e-9));
+        o.size = 0.05; // never smaller than one tile
+        CHECK(build_dots(rig, 8.0, o).size() == 2);
+    }
+
+    // Steering smoothing.
+    {
+        CHECK(near(smooth_toward(0.0, 1.0, 0.0, 0.25), 0.0, 1e-12));
+        CHECK(near(smooth_toward(0.0, 1.0, 0.016, 0.0), 1.0, 1e-12));
+        CHECK(near(smooth_toward(0.0, 1.0, 0.25, 0.25), 1.0 - std::exp(-1.0), 1e-12));
+        CHECK(smooth_toward(0.0, 1.0, 10.0, 0.25) > 0.999);
+    }
+
+    // Hotkey cycle: forward only -> reverse only -> both -> off -> forward only.
+    {
+        DisplayMode m = DisplayMode::forward;
+        CHECK(shows_forward(m) && !shows_reverse(m));
+        m = next_mode(m);
+        CHECK(m == DisplayMode::reverse && !shows_forward(m) && shows_reverse(m));
+        m = next_mode(m);
+        CHECK(m == DisplayMode::both && shows_forward(m) && shows_reverse(m));
+        m = next_mode(m);
+        CHECK(m == DisplayMode::off && !shows_forward(m) && !shows_reverse(m));
+        CHECK(next_mode(m) == DisplayMode::forward);
+        for (const auto mode : {DisplayMode::forward, DisplayMode::reverse, DisplayMode::both, DisplayMode::off})
+            CHECK(parse_mode(mode_name(mode)) == mode);
+        CHECK(!parse_mode("sideways"));
     }
 
     std::printf("core_tests: %d checks passed\n", checks);
