@@ -17,7 +17,10 @@ namespace rto::world
 {
 namespace
 {
-constexpr std::size_t pool_size = 192; // per model; a 1 m forward dot is 81 tiles
+// Per model. The largest user is a forward line at the setting limits: 1 m
+// wide (9 strips) and 20 m long in 0.3 m pieces, about 600 pieces per side.
+// Instances are created on first use, so unused slots cost a pointer.
+constexpr std::size_t pool_size = 640;
 // Indexed by Band.
 constexpr std::array<const char *, 5> model_paths{
     "/model/rto_guides/line_red.pmd",

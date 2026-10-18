@@ -195,6 +195,22 @@ double ground_height(const scs_value_dplacement_t &anchor, rto::Vec2 world, doub
     return anchor.position.y + offset + local.x * std::tan(roll) - local.z * std::tan(pitch);
 }
 
+// Line pieces for ground segments, `offset` above the anchor's ground plane.
+std::vector<rto::world::Piece> to_pieces(const std::vector<rto::GuideSegment> &segments,
+                                         const scs_value_dplacement_t &anchor, double offset)
+{
+    std::vector<rto::world::Piece> pieces;
+    pieces.reserve(segments.size());
+    for (const auto &s : segments)
+    {
+        const double y0 = ground_height(anchor, s.from, offset);
+        const double y1 = ground_height(anchor, s.to, offset);
+        pieces.push_back({rto::world::piece_transform(s.from.x, y0, s.from.z, s.to.x, y1, s.to.z),
+                          s.band});
+    }
+    return pieces;
+}
+
 void publish_world(const rto::Rig &rig, const rto::Prediction &prediction)
 {
     if (!state.world_ready || !state.config.world_enabled)
@@ -206,18 +222,8 @@ void publish_world(const rto::Rig &rig, const rto::Prediction &prediction)
     options.red_until = state.config.red_until_m;
     options.yellow_until = std::max(state.config.yellow_until_m, state.config.red_until_m);
     const auto segments = rto::build_guides(rig, prediction, options);
-    const auto &anchor = state.units[rig.units.size() - 1].placement;
-    const double offset = state.config.line_height_m;
-    std::vector<rto::world::Piece> pieces;
-    pieces.reserve(segments.size());
-    for (const auto &s : segments)
-    {
-        const double y0 = ground_height(anchor, s.from, offset);
-        const double y1 = ground_height(anchor, s.to, offset);
-        pieces.push_back({rto::world::piece_transform(s.from.x, y0, s.from.z, s.to.x, y1, s.to.z),
-                          s.band});
-    }
-    rto::world::publish(std::move(pieces));
+    rto::world::publish(to_pieces(segments, state.units[rig.units.size() - 1].placement,
+                                  state.config.line_height_m));
 }
 
 void publish_dots(rto::Rig rig)
@@ -244,12 +250,21 @@ void publish_dots(rto::Rig rig)
     options.min_distance = state.config.min_distance_m;
     options.max_distance = state.config.max_distance_m;
     options.size = state.config.dot_size_m;
+    options.line_time = state.config.line_time_s;
+    options.max_line = state.config.max_line_m;
     const double distance = rto::lookahead_distance(state.speed, options);
-    const auto tiles = rto::build_dots(rig, distance, options);
+    const double span = rto::line_length(state.speed, options);
 
     const auto &anchor = state.units[0].placement;
     const double offset = state.config.dot_height_m;
+    // Fast enough for the dot to stretch: draw lines along the corner paths.
+    if (span > options.size)
+    {
+        rto::world::publish(to_pieces(rto::build_lines(rig, distance, span, options), anchor, offset));
+        return;
+    }
     std::vector<rto::world::Piece> pieces;
+    const auto tiles = rto::build_dots(rig, distance, options);
     pieces.reserve(tiles.size());
     for (const auto &t : tiles)
     {

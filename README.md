@@ -8,7 +8,7 @@ the mirrors.**
 
 ![Game](https://img.shields.io/badge/game-American%20Truck%20Simulator%201.61-1f6feb)
 ![Platform](https://img.shields.io/badge/platform-Windows%20x64-555)
-![Version](https://img.shields.io/badge/version-0.2.0-2ea44f)
+![Version](https://img.shields.io/badge/version-0.3.0-2ea44f)
 ![Status](https://img.shields.io/badge/status-early%20release-orange)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Steam Workshop](https://img.shields.io/badge/Steam%20Workshop-subscribe-171a21?logo=steam)](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979)
@@ -32,8 +32,10 @@ the path the rig will actually take if you hold the current steering:
 <p align="center"><img src="assets/images/screenshot-cab-mirror.jpg" width="820" alt="Cab view while reversing: the red, yellow and green guide lines are visible in the side mirror"></p>
 
 In a **forward gear**, two square dots appear ahead of the truck where its
-front corners will be about 1.5 seconds from now (at least 6 m ahead): 🟥 red
-for the front-left corner, 🟩 green for the front-right. Keep red inside the
+front corners will be about 1.5 seconds from now (at least 14 m ahead, so
+they clear the hood from the cab): 🟥 red for the front-left corner, 🟩 green
+for the front-right. As you speed up, each dot stretches into a line along the
+path that corner will take, curving with the steering. Keep red inside the
 left lane line and green inside the right one.
 
 ## Keyboard shortcut: Ctrl+Shift+F9
@@ -55,13 +57,16 @@ One shortcut chooses what you see. Each press moves to the next mode:
 - To use a different key, edit `[hotkey]` in the settings file
   ([details](docs/USER_GUIDE.md#hotkey)).
 
-## What's new in 0.2.0
+## What's new in 0.3.0
 
-- **Forward dots** for lane position in any forward gear.
-- **Ctrl+Shift+F9** now cycles forward only / reverse only / both / off, and
-  remembers the choice.
-- The optional top-down panel was removed. The plugin no longer hooks DirectX
-  at all.
+- **The forward dots stretch into lines with speed.** Each line follows the
+  path its corner will take and curves with the steering: half a second of
+  travel long, at most 15 m.
+- **The dots are visible from the cab.** They now sit at least 14 m ahead, so
+  they clear a long hood, and are 0.5 m squares.
+- Plugin-only update: the Workshop mod is unchanged.
+
+0.2.0 added the forward dots and the four-step Ctrl+Shift+F9 cycle.
 
 Full history: [CHANGELOG.md](CHANGELOG.md).
 
@@ -78,10 +83,12 @@ Full history: [CHANGELOG.md](CHANGELOG.md).
 - **Patch-tolerant:** game functions are found by code patterns, not fixed
   addresses. If an update breaks them, the lines switch off cleanly instead of
   crashing the game, and a bundled tool regenerates the patterns.
-- **Forward dots:** the same steering model run forward for the truck, with a
-  time-based look-ahead and smoothing so the dots stay steady at speed.
-- **Lightweight:** about 140 small line pieces while reversing, 2 small tiles
-  while driving forward. No network access, and save games are never touched.
+- **Forward dots and lines:** the same steering model run forward for the
+  truck, with a time-based look-ahead and smoothing so they stay steady at
+  speed.
+- **Lightweight:** about 140 small line pieces while reversing; driving
+  forward, 50 small tiles for the dots and up to about 500 pieces for
+  full-length lines. No network access, and save games are never touched.
 - **Configurable:** band distances, path length, look-ahead, dot size and
   heights, all changeable while you drive.
 
@@ -92,7 +99,7 @@ separate download.
 
 1. **Line models:** subscribe to [**Backing & Lane Prediction - ATS**](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979) on the
    Steam Workshop, *or* use the `.scs` included in the download.
-2. **Plugin:** download `Backing_Lane_Prediction_ATS_v0.2.0.zip` from the
+2. **Plugin:** download `Backing_Lane_Prediction_ATS_v0.3.0.zip` from the
    [**latest release**](../../releases/latest), exit the game and run `Install.bat`. It
    copies `ats_reverse_overlay.dll` into
    `American Truck Simulator\bin\win_x64\plugins`.
@@ -101,6 +108,10 @@ separate download.
    ([see above](#keyboard-shortcut-ctrlshiftf9)).
 
 > [!IMPORTANT]
+> **Updating from 0.2.0:** update the plugin only. Your settings file keeps
+> the old dot distance and size; set `min_distance_m = 14` and
+> `dot_size_m = 0.5` under `[forward]`, or delete the file for fresh defaults.
+>
 > **Updating from 0.1.0:** update both parts. The plugin needs the new dot
 > models from the Workshop item (Steam updates it on its own) or the new
 > `.scs`. Until then the reverse lines still work, the dots are missing, and
@@ -137,8 +148,11 @@ flowchart LR
 - **Forward dots:** the tractor's pose after `clamp(speed × lookahead_s,
   min, max)` metres, solved as an exact arc, with the curvature smoothed over
   0.25 s. Each dot is centred on a predicted front corner. Model instances
-  can't be scaled, so bigger dots are a grid of 12 cm tiles. Trailers are
-  ignored.
+  can't be scaled, so bigger dots are a grid of 12 cm tiles. Above
+  `dot_size_m / line_time_s` (1 m/s by default) each dot becomes a line
+  `speed × line_time_s` long (at most `max_line_m`), centred on the same
+  point: the predicted corner path, resampled into 0.3 m pieces and laid as
+  parallel strips to the dot's width. Trailers are ignored.
 - **Rendering:** plugin-owned model instances submitted from the player
   vehicle's render pass. Five engine functions are located by unique
   wildcarded byte patterns. A function another plugin has already hooked is

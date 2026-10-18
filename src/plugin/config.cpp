@@ -36,10 +36,15 @@ allow_unverified = 1
 ; Look-ahead time in seconds: the dots are speed x this far ahead
 lookahead_s = 1.5
 ; Distance limits in metres (the minimum applies when slow or stopped)
-min_distance_m = 6
+min_distance_m = 14
 max_distance_m = 80
-; Dot edge length in metres (0.12 - 1.0)
-dot_size_m = 0.12
+; Dot edge length in metres (0.12 - 1.0); also the width of the lines
+dot_size_m = 0.5
+; With speed each dot stretches into a line along the predicted path, centred
+; on the same point: speed x line_time_s long, at most max_line_m (0 - 20).
+; line_time_s = 0 keeps square dots at every speed.
+line_time_s = 0.5
+max_line_m = 15
 ; Dot height above the truck's reference point, in metres
 dot_height_m = 0.35
 ; Steering smoothing in seconds, so the dots don't jitter at speed (0 = off)
@@ -137,6 +142,8 @@ Config load_config(const std::filesystem::path &path, std::string *report)
         else if (id == "forward.min_distance_m") c.min_distance_m = parse_float(value, c.min_distance_m, 1.0f, 50.0f);
         else if (id == "forward.max_distance_m") c.max_distance_m = parse_float(value, c.max_distance_m, 1.0f, 200.0f);
         else if (id == "forward.dot_size_m") c.dot_size_m = parse_float(value, c.dot_size_m, 0.12f, 1.0f);
+        else if (id == "forward.line_time_s") c.line_time_s = parse_float(value, c.line_time_s, 0.0f, 2.0f);
+        else if (id == "forward.max_line_m") c.max_line_m = parse_float(value, c.max_line_m, 0.0f, 20.0f);
         else if (id == "forward.dot_height_m") c.dot_height_m = parse_float(value, c.dot_height_m, -1.0f, 2.0f);
         else if (id == "forward.steering_smoothing_s") c.steering_smoothing_s = parse_float(value, c.steering_smoothing_s, 0.0f, 2.0f);
         else if (id == "prediction.horizon_m") c.horizon_m = parse_float(value, c.horizon_m, 3.0f, 60.0f);

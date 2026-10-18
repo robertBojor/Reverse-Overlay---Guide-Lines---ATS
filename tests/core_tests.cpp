@@ -227,8 +227,10 @@ int main()
         const Pose end = predict_forward(g, rig.poses[0], 20.0);
         CHECK(near(end.heading, 0.0, 1e-12));
         CHECK(near(to_local(rig.poses[0], end.p).z, -20.0, 1e-9));
-        const auto dots = build_dots(rig, 20.0);
-        CHECK(dots.size() == 2); // one 12 cm tile per dot
+        DotOptions one_tile;
+        one_tile.size = one_tile.tile;
+        const auto dots = build_dots(rig, 20.0, one_tile);
+        CHECK(dots.size() == 2); // one tile per dot
         CHECK(dots[0].band == Band::dot_red && dots[1].band == Band::dot_green);
         const Vec2 left = to_local(rig.poses[0], dots[0].centre);
         const Vec2 right = to_local(rig.poses[0], dots[1].centre);
@@ -246,7 +248,9 @@ int main()
         const double R = 1.0 / g.curvature;
         const Vec2 centre = to_world(rig.poses[0], {-R, g.axle.z});
         CHECK(near(length(to_world(end, g.axle) - centre), R, 1e-9));
-        const auto dots = build_dots(rig, 10.0);
+        DotOptions one_tile;
+        one_tile.size = one_tile.tile;
+        const auto dots = build_dots(rig, 10.0, one_tile);
         CHECK(to_local(rig.poses[0], dots[0].centre).x < -g.half_width - 0.5);
         CHECK(to_local(rig.poses[0], dots[1].centre).x < g.half_width - 0.5);
         CHECK(near(dots[0].heading, end.heading, 1e-12));
@@ -284,6 +288,103 @@ int main()
         CHECK(near((min_x + max_x) * 0.5, -rig.units[0].half_width, 1e-9));
         o.size = 0.05; // never smaller than one tile
         CHECK(build_dots(rig, 8.0, o).size() == 2);
+    }
+
+    // Line length grows with speed up to the cap; 0 s keeps dots.
+    {
+        DotOptions o;
+        o.line_time = 0.5;
+        o.max_line = 15.0;
+        CHECK(near(line_length(0.0, o), 0.0, 1e-12));
+        CHECK(near(line_length(-2.0, o), 0.0, 1e-12));
+        CHECK(near(line_length(10.0, o), 5.0, 1e-12));
+        CHECK(near(line_length(40.0, o), 15.0, 1e-12));
+        o.line_time = 0.0;
+        CHECK(near(line_length(40.0, o), 0.0, 1e-12));
+    }
+
+    // Straight ahead: each line runs along its corner's path, centred on the
+    // look-ahead point, cut into equal pieces.
+    {
+        const Rig rig = build_rig(fixtures::bobtail(0.0));
+        const auto &g = rig.units[0];
+        DotOptions o;
+        o.size = o.tile;
+        const auto lines = build_lines(rig, 20.0, 9.0, o);
+        double red_length = 0.0, min_z = 1e9, max_z = -1e9;
+        std::size_t red = 0, green = 0;
+        for (const auto &s : lines)
+        {
+            const Vec2 a = to_local(rig.poses[0], s.from), b = to_local(rig.poses[0], s.to);
+            if (s.band == Band::red)
+            {
+                ++red;
+                red_length += length(s.to - s.from);
+                CHECK(near(a.x, -g.half_width, 1e-9) && near(b.x, -g.half_width, 1e-9));
+                min_z = std::min({min_z, a.z, b.z});
+                max_z = std::max({max_z, a.z, b.z});
+            }
+            else
+            {
+                ++green;
+                CHECK(s.band == Band::green);
+                CHECK(near(a.x, g.half_width, 1e-9) && near(b.x, g.half_width, 1e-9));
+            }
+            CHECK(length(s.to - s.from) <= o.line_spacing + 1e-9);
+        }
+        CHECK(red == 30 && green == 30); // 9 m in 0.3 m pieces
+        CHECK(near(red_length, 9.0, 1e-6));
+        CHECK(near(max_z, g.front_z - 15.5, 1e-6) && near(min_z, g.front_z - 24.5, 1e-6));
+    }
+
+    // A line as wide as the dot is parallel strips, centred on the corner path.
+    {
+        const Rig rig = build_rig(fixtures::bobtail(0.0));
+        DotOptions o;
+        o.size = 0.5;
+        const auto lines = build_lines(rig, 20.0, 9.0, o);
+        CHECK(lines.size() == 2 * 30 * 5);
+        double min_x = 1e9, max_x = -1e9;
+        for (const auto &s : lines)
+            if (s.band == Band::red)
+            {
+                const double x = to_local(rig.poses[0], s.from).x;
+                min_x = std::min(min_x, x);
+                max_x = std::max(max_x, x);
+            }
+        CHECK(near(max_x - min_x + o.tile, 0.5, 1e-9));
+        CHECK(near((min_x + max_x) * 0.5, -rig.units[0].half_width, 1e-9));
+    }
+
+    // Steering left: the corners turn rigidly about the turn centre, so each
+    // line follows a circle through its corner; the left one is the inner.
+    {
+        const Rig rig = build_rig(fixtures::bobtail(0.3));
+        const auto &g = rig.units[0];
+        DotOptions o;
+        o.size = o.tile;
+        const double R = 1.0 / g.curvature;
+        const Vec2 centre = to_world(rig.poses[0], {-R, g.axle.z});
+        const auto corners = body_corners(g, rig.poses[0]);
+        const double r_left = length(corners[0] - centre), r_right = length(corners[1] - centre);
+        CHECK(r_left < r_right);
+        const auto lines = build_lines(rig, 15.0, 10.0, o);
+        CHECK(!lines.empty());
+        for (const auto &s : lines)
+        {
+            const double r = s.band == Band::red ? r_left : r_right;
+            CHECK(near(length(s.from - centre), r, 1e-3) && near(length(s.to - centre), r, 1e-3));
+        }
+    }
+
+    // A line never starts behind the truck's front.
+    {
+        const Rig rig = build_rig(fixtures::bobtail(0.0));
+        DotOptions o;
+        o.size = o.tile;
+        for (const auto &s : build_lines(rig, 2.0, 10.0, o))
+            CHECK(to_local(rig.poses[0], s.from).z <= rig.units[0].front_z + 1e-9);
+        CHECK(build_lines(rig, 20.0, 0.0, o).empty());
     }
 
     // Steering smoothing.

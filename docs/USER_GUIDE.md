@@ -29,9 +29,12 @@ dots, the lines, both or neither.
 > → both → nothing**, then back to forward dots only. Your choice is
 > remembered. Details in [section 3](#what-is-shown-ctrlshiftf9).
 
-**New in 0.2.0:** forward dots, the four-step shortcut, and the top-down panel
-removed. See the [changelog](../CHANGELOG.md). Updating from 0.1.0? Update the
-plugin **and** the mod, because the plugin needs the new dot models.
+**New in 0.3.0:** the forward dots stretch into lines with speed, and sit
+further ahead so they clear the hood. Updating from 0.2.0? Update the plugin
+only; your settings file keeps the old dot distance and size (see
+[`[forward]`](#forward-forward-dots)). Updating from 0.1.0? Update the plugin
+**and** the mod, because the plugin needs the dot models. See the
+[changelog](../CHANGELOG.md).
 
 ---
 
@@ -104,7 +107,7 @@ Open `Documents\American Truck Simulator\ats_reverse_overlay.log`. After
 starting the game you should see:
 
 ```
-Backing & Lane Prediction 0.2.0 starting in American Truck Simulator ...
+Backing & Lane Prediction 0.3.0 starting in American Truck Simulator ...
 Showing forward dots and reverse guide lines (the hotkey changes this).
 engine functions located: ...
 In-world guide lines ready (vehicle render hook installed).
@@ -147,10 +150,16 @@ these lines are missing, see [Troubleshooting](#6-troubleshooting).
 - They appear in **any forward gear**, even when you're stopped, and
   disappear in neutral and while the game is paused or in menus.
 - They sit where the truck's front corners will be after **1.5 seconds** at
-  the current speed, and never closer than 6 m. At 90 km/h that's about 37 m
-  ahead.
+  the current speed, and never closer than 14 m, so they show over the hood
+  from the cab. Below about 34 km/h (21 mph) they stay at 14 m; at 90 km/h
+  they are about 37 m ahead.
 - Each dot is **centred on the edge of the truck**. Keep the red one inside
   the left lane line and the green one inside the right.
+- As you speed up, each dot **stretches into a line** along the path its
+  corner will take, centred on the same point. The line is half a second of
+  travel long, at most 15 m: about 12 m at 90 km/h. It curves with the
+  steering, so on a bend you can see whether the corner stays in its lane all
+  the way round. Below walking pace they are square dots.
 - Steering is **smoothed** a little so the dots don't jump with every small
   correction at speed. They catch up within about half a second.
 - Only the truck counts. A trailer follows inside the truck's path on curves.
@@ -211,9 +220,11 @@ changes apply **while you drive** (within about 2 seconds).
 | Setting | Default | Meaning |
 |---|---|---|
 | `lookahead_s` | `1.5` | how far ahead, in seconds of travel at the current speed |
-| `min_distance_m` | `6` | the dots never come closer than this (slow or stopped) |
+| `min_distance_m` | `14` | the dots never come closer than this (slow or stopped); lower it on a short-hood truck if you want them nearer |
 | `max_distance_m` | `80` | and never go further than this |
-| `dot_size_m` | `0.12` | edge length of each dot, 0.12–1.0 m |
+| `dot_size_m` | `0.5` | edge length of each dot, 0.12–1.0 m; also the width of the lines |
+| `line_time_s` | `0.5` | with speed, each dot becomes a line this many seconds of travel long, 0–2; `0` keeps square dots |
+| `max_line_m` | `15` | the lines are never longer than this, 0–20 m |
 | `dot_height_m` | `0.35` | height of the dots; lower it if they float, raise it if they sink into the road |
 | `steering_smoothing_s` | `0.25` | how calmly the dots follow the steering, in seconds; `0` = no smoothing |
 

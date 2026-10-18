@@ -71,7 +71,8 @@ You need BOTH parts:
 
 Start the game. It will mention "advanced SDK features" - that is expected.
 In a forward gear, two dots show where the truck's front corners will be
-(red = front-left, green = front-right). In reverse, the guide lines show
+(red = front-left, green = front-right); with speed they stretch into lines
+along the path those corners will take. In reverse, the guide lines show
 the path of the rear corners.
 
 KEYBOARD SHORTCUT: Ctrl+Shift+F9 (only while the game window has focus)
@@ -83,8 +84,12 @@ Each press moves to the next mode:
 ...then back to forward dots only. The choice is remembered between games
 (the first start is on "both"). Another key can be set in the settings file.
 
+Updating from 0.2.0? Only the plugin changes; the mod stays as it is. Your
+settings file keeps the old dot distance and size: set min_distance_m = 14
+and dot_size_m = 0.5 under [forward], or delete the file for fresh defaults.
+
 Updating from 0.1.0? Update the mod as well as the plugin: the plugin needs
-the new dot models.
+the dot models.
 
 Full instructions, settings and troubleshooting: User_Guide.md
 (open it with any text editor or a Markdown viewer).

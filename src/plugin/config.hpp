@@ -16,9 +16,11 @@ struct Config
     float line_height_m = 0.35f;        // above the rear unit's placement origin
     // Forward dots: where the truck's front corners will be (forward gears).
     float lookahead_s = 1.5f;
-    float min_distance_m = 6.0f;
+    float min_distance_m = 14.0f;
     float max_distance_m = 80.0f;
-    float dot_size_m = 0.12f;
+    float dot_size_m = 0.5f;
+    float line_time_s = 0.5f;           // with speed a dot stretches into a line this long in seconds
+    float max_line_m = 15.0f;
     float dot_height_m = 0.35f;         // above the truck's placement origin
     float steering_smoothing_s = 0.25f; // time constant; 0 = none
     // Hotkey cycling forward only / reverse only / both / off. Virtual-key

@@ -11,8 +11,8 @@ Backup-camera style guide lines for reversing, and forward dots for lane positio
 [*]Distances and line height adjustable in a settings file
 [/list]
 
-[h2]New in 0.2.0: forward dots for lane position[/h2]
-In a forward gear, two square dots appear on the road ahead: [b]red[/b] where your truck's front-left corner will be and [b]green[/b] where the front-right corner will be, about 1.5 seconds from now. Keep red inside the left lane line and green inside the right one. Trailers are ignored, because they follow inside the truck's path.
+[h2]Forward dots and lines for lane position[/h2]
+In a forward gear, two square dots appear on the road ahead: [b]red[/b] where your truck's front-left corner will be and [b]green[/b] where the front-right corner will be, about 1.5 seconds from now. Keep red inside the left lane line and green inside the right one. As you speed up, each dot stretches into a line along the path that corner will take, curving with the steering (new in plugin 0.3.0). Trailers are ignored, because they follow inside the truck's path.
 
 [h2]Keyboard shortcut: Ctrl+Shift+F9[/h2]
 Each press moves to the next mode (only while the game window has focus):

@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.3.0
+
+**New**
+- **The forward dots stretch into lines with speed.** Each dot becomes a line
+  along the path its corner will take, centred on the same point and curving
+  with the steering: half a second of travel long, at most 15 m. New
+  `[forward]` settings `line_time_s` and `max_line_m`; `line_time_s = 0`
+  keeps square dots.
+
+**Changed**
+- **Forward dots are visible from the cab.** They now sit at least 14 m
+  ahead (was 6 m), so they clear a long hood such as the W900's, and are
+  0.5 m squares (was 0.12 m), so they still read as dots at the shallow
+  viewing angle from the driver's seat.
+
+**Upgrading**
+- From 0.2.0: update the plugin only. The mod is unchanged, so the Workshop
+  item stays at 0.2.0. From 0.1.0: update the mod as well.
+- A settings file written by 0.2.0 keeps the old values. Set
+  `min_distance_m = 14` and `dot_size_m = 0.5` under `[forward]`, or delete
+  the file to get a fresh copy.
+
 ## 0.2.0
 
 **Renamed** from *Reverse Overlay - Guide Lines - ATS* to
