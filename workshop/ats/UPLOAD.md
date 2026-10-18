@@ -5,7 +5,7 @@
 | Path | What it is | Upload? |
 |---|---|---|
 | `upload/` | **Select this folder** as "Mod data" in the uploader. It holds only `versions.sii` and the `universal` package, as the uploader requires. | yes |
-| `mod_icon.jpg` | Mod Manager icon, **exactly 276×162 JPEG**, under 1 MB. **You supply it.** Run `python3 -I tools/make_assets.py workshop` afterwards to copy it into `upload/universal/`. | via `upload/` |
+| `mod_icon.jpg` | Mod Manager icon, **exactly 276×162 JPEG**, under 1 MB, cropped from the preview banner. After replacing it, run `python3 -I tools/make_assets.py workshop` to copy it into `upload/universal/`. | via `upload/` |
 | `images/` | Your preview image and screenshots, **not** part of `upload/`. The preview is commonly 640×360 JPEG/PNG. Screenshots are added on the Workshop page after the first upload. | separately |
 | `description.bbcode.txt` | Text for the uploader's description field (Steam BBCode). Its plugin link points to the latest GitHub release. | paste |
 

@@ -27,13 +27,9 @@ COLOURS = {
     'green': (40, 215, 80),
 }
 
-# Material paths must keep the original length (32 chars) because the .pmd
-# stores string offsets. Names follow the engine's automat convention.
-MATERIAL_PATHS = {
-    'red': '/automat/e1/e10ad5e0000000r1.mat',
-    'yellow': '/automat/e1/e10ad5e0000000y1.mat',
-    'green': '/automat/e1/e10ad5e0000000g1.mat',
-}
+# Materials sit next to the models. /automat/ is reserved for files named by
+# their content hash; the Workshop uploader rejects anything else there.
+MATERIAL_PATHS = {name: f'/{MODEL_DIR}/line_{name}.mat' for name in COLOURS}
 BASE_MATERIAL = b'/automat/f5/f57370b76733c5aa.mat'
 
 
@@ -76,11 +72,15 @@ def make_material(rgb, tobj_path):
 
 
 def make_pmd(material_path):
-    data = (BASE / 'sweep_edge.pmd').read_bytes()
-    new = material_path.encode()
-    assert len(new) == len(BASE_MATERIAL), material_path
-    assert data.count(BASE_MATERIAL) == 1
-    return data.replace(BASE_MATERIAL, new)
+    # The material path is the last thing in the file, a NUL-terminated string
+    # whose size (with the NUL) is stored at 0x20, so it can change length.
+    data = bytearray((BASE / 'sweep_edge.pmd').read_bytes())
+    start = len(data) - len(BASE_MATERIAL) - 1
+    assert data[start:] == BASE_MATERIAL + b'\0'
+    assert struct.unpack_from('<I', data, 0x20)[0] == len(BASE_MATERIAL) + 1
+    new = material_path.encode() + b'\0'
+    struct.pack_into('<I', data, 0x20, len(new))
+    return bytes(data[:start]) + new
 
 
 def make_pmg():
