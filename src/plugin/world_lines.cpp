@@ -40,6 +40,9 @@ std::mutex models_mutex;
 std::array<std::array<std::uint64_t *, pool_size>, model_paths.size()> pools{};
 std::atomic<bool> suspended{false}; // between release_models() and resume()
 std::atomic<bool> faulted{false};
+// A model that failed to load (e.g. a mod older than the plugin, without the
+// dot models) is skipped for the session; the other models keep drawing.
+std::array<bool, model_paths.size()> missing{};
 bool logged_first_render = false;
 
 const engine::PrismTransform hidden_transform{0.0f, -10000.0f, 0.0f, 0, 0, 1.0f, 0.0f, 0.0f, 0.0f};
@@ -96,16 +99,17 @@ void render_pieces(std::uint64_t context)
         const auto band = static_cast<std::size_t>(piece.band);
         auto &pool = pools[band];
         std::size_t &index = used[band];
-        if (index >= pool.size()) continue;
+        if (index >= pool.size() || missing[band]) continue;
         if (!pool[index])
         {
             pool[index] = create_model(model_paths[band], piece.transform);
             if (!pool[index])
             {
                 log::error(std::string("Could not create ") + model_paths[band] +
-                           " - is the \"Backing & Lane Prediction - ATS\" mod enabled in the Mod Manager?");
-                faulted = true;
-                return;
+                           " - is the \"Backing & Lane Prediction - ATS\" mod enabled in the Mod Manager,"
+                           " and as new as the plugin? Skipping this model until the game restarts.");
+                missing[band] = true;
+                continue;
             }
         }
         render_model(pool[index], piece.transform, context);

@@ -92,8 +92,8 @@ separate download.
 
 1. **Line models:** subscribe to [**Backing & Lane Prediction - ATS**](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979) on the
    Steam Workshop, *or* use the `.scs` included in the download.
-2. **Plugin:** download the latest zip from
-   [**Releases**](../../releases), exit the game and run `Install.bat`. It
+2. **Plugin:** download `Backing_Lane_Prediction_ATS_v0.2.0.zip` from the
+   [**latest release**](../../releases/latest), exit the game and run `Install.bat`. It
    copies `ats_reverse_overlay.dll` into
    `American Truck Simulator\bin\win_x64\plugins`.
 3. Start ATS, accept the *advanced SDK features* notice, enable the mod in the
@@ -103,8 +103,8 @@ separate download.
 > [!IMPORTANT]
 > **Updating from 0.1.0:** update both parts. The plugin needs the new dot
 > models from the Workshop item (Steam updates it on its own) or the new
-> `.scs`, otherwise the log reports *"Could not create
-> /model/rto_guides/dot_red.pmd"*.
+> `.scs`. Until then the reverse lines still work, the dots are missing, and
+> the log reports *"Could not create /model/rto_guides/dot_red.pmd"*.
 
 The **[user guide](docs/USER_GUIDE.md)** covers settings, troubleshooting, game
 updates and uninstalling.

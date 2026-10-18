@@ -71,7 +71,8 @@ Use **A or B, not both**.
 ### Step 2: Install the plugin
 
 1. **Exit the game completely.**
-2. Download `Backing_Lane_Prediction_ATS_v<version>.zip`.
+2. Download `Backing_Lane_Prediction_ATS_v<version>.zip` from the
+   [latest release](https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS/releases/latest).
 3. Before extracting, right-click the zip → **Properties**, tick **Unblock**
    if it's there, then click **OK**. This avoids extra Windows security prompts
    (see [section 7](#7-windows-security-unsigned-plugin)).
@@ -271,7 +272,7 @@ it for `lane-prediction` or `ats_reverse_overlay`.
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | No `ats_reverse_overlay.log` at all, or it isn't updated | The plugin isn't loaded | Check that the DLL is in `bin\win_x64\plugins\` (not just `bin\win_x64\`). In `game.log.txt`, look for `loading 'ats_reverse_overlay'`. If the game log shows the plugin failing to load, see [section 7](#7-windows-security-unsigned-plugin) |
-| Log: *"Could not create /model/rto_guides/… - is the … mod enabled in the Mod Manager?"* | The line models aren't loaded | Enable **Backing & Lane Prediction - ATS** in the Mod Manager. Then restart the game, because after this error the lines stay off for the session |
+| Log: *"Could not create /model/rto_guides/… - is the … mod enabled in the Mod Manager?"* | The line models aren't loaded | Enable **Backing & Lane Prediction - ATS** in the Mod Manager. Then restart the game, because a model that failed to load stays off for the session |
 | Log: *"engine functions missing"* | Unsupported game version | See [Game updates](#5-game-updates) |
 | Log: *"In-world guide lines skipped: build not verified and allow_unverified = 0"* | Safety mode is on | Set `allow_unverified = 1` if you want to try it on this version |
 | Log: *"In-world rendering raised an exception…"* | Something went wrong while drawing. The lines are switched off for the session | Restart the game. If it repeats, send the log with your report |
@@ -280,7 +281,7 @@ it for `lane-prediction` or `ats_reverse_overlay`.
 | Two sets of lines (blue/orange and red/yellow/green) | "Reverse Posture Assistant" is also installed | Use one or the other. Remove `ATSReverseTrajectoryRuntime.dll` from `plugins` and disable that mod |
 | Lines or dots don't appear, but the log shows no errors | The hotkey mode doesn't include them | Press **Ctrl+Shift+F9** until the log says *"Hotkey: showing forward dots and reverse guide lines."* The mode is remembered across restarts |
 | Dots appear and then vanish for a moment | The road climbs ahead (see [Forward dots](#forward-dots)) | Expected on hills. Raising `dot_height_m` helps a little |
-| Log: *"Could not create /model/rto_guides/dot_red.pmd"* | The mod files are older than the plugin | Update the Workshop item (Steam usually does this on its own) or the local `.scs` |
+| Log: *"Could not create /model/rto_guides/dot_red.pmd"* | The mod files are older than the plugin. The reverse lines keep working; only the dots are missing | Update the Workshop item (Steam usually does this on its own) or the local `.scs`, then restart the game |
 | Ctrl+Shift+F9 does nothing | The game window doesn't have focus, or `[hotkey]` was changed | Click into the game first. Check `key`, `ctrl`, `shift` and `alt` in the settings file |
 
 ---
