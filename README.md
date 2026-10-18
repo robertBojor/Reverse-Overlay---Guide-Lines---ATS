@@ -13,7 +13,7 @@ drawn in the game world and visible in the mirrors.**
 
 </div>
 
-<p align="center"><img src="assets/images/preview-image-original.jpg" width="820" alt="Backing Prediction: reversing and trailer trajectory guide lines behind a truck and trailer at night"></p>
+<p align="center"><img src="assets/images/preview-image-large.jpg" width="820" alt="Backing Prediction: reversing and trailer trajectory guide lines behind a truck and trailer at night"></p>
 
 When you shift into reverse, two lines appear on the ground from the rear
 corners of your trailer, or of the truck when you drive without one. They follow
