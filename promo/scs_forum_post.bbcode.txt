@@ -1,0 +1,56 @@
+TITLE:
+[ATS 1.61] Backing & Lane Prediction - reverse guide lines + forward lane line (v0.4.0)
+
+POST:
+[size=150][b]Backing & Lane Prediction - ATS[/b][/size]
+[i]Current version: 0.4.0 · ATS 1.61 · Windows x64 · open source (MIT)[/i]
+
+Backup-camera style guide lines when you reverse, and a calm blue line for lane position when you drive forward. Both are drawn on the road in the game world, not on the screen, so you see them from every camera [b]and in your mirrors[/b], which is where you actually back a trailer.
+
+[img]https://raw.githubusercontent.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS/main/assets/images/screenshot-cab-mirror.jpg[/img]
+[img]https://raw.githubusercontent.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS/main/assets/images/screenshot-outside-view.jpg[/img]
+
+[size=120][b]Reversing[/b][/size]
+In reverse, two lines run from the rear corners of your trailer (or of the truck, bobtail) along the path the rig will really take if you hold the steering:
+[list]
+[*][color=#e02d23][b]red[/b][/color] for the first 3 m, [color=#d9a400][b]yellow[/b][/color] to 8 m, [color=#28c050][b]green[/b][/color] out to 15 m, with ticks where the colour changes
+[*]computed from your [b]actual front-wheel angles[/b], so different steering locks, lift axles and multi-steer trucks are handled
+[*]single trailers, doubles and triples, off-axle fifth wheels and self-steering trailer axles
+[/list]
+
+[size=120][b]Driving forward (new in 0.4.0)[/b][/size]
+A light, see-through [color=#6eb9ff][b]blue line[/b][/color] runs from the middle of your front axle along the path the truck will take. It is 25 m long when slow and up to 40 m at highway speed. At speed its curve comes from how the truck is actually turning, so it stays true on long bends. Keep it in the middle of your lane.
+
+[size=120][b]Ctrl+Shift+F9[/b][/size]
+Each press moves to the next mode: [b]forward line only → reverse lines only → both → nothing[/b]. Your choice is remembered. Another key can be set in the settings file.
+
+[size=120][b]Installation: two parts are needed[/b][/size]
+Steam Workshop cannot install plugins, so the plugin is a separate download. [b]Subscribing alone shows nothing.[/b]
+[list=1]
+[*][b]Models:[/b] subscribe to [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979]Backing & Lane Prediction - ATS on the Steam Workshop[/url] and enable it in the Mod Manager. (No Workshop? The plugin download also contains the mod as an .scs file.)
+[*][b]Plugin:[/b] download the zip from [url=https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS/releases/latest]the latest GitHub release[/url]. Exit the game, unblock the zip (right-click → Properties → Unblock), extract it and run [i]Install.bat[/i]. It copies [i]ats_reverse_overlay.dll[/i] into [i]American Truck Simulator\bin\win_x64\plugins[/i].
+[*]Start ATS, accept the [i]advanced SDK features[/i] notice (normal for any telemetry plugin), and drive.
+[/list]
+Settings: [i]Documents\American Truck Simulator\ats_reverse_overlay.ini[/i]. Changes apply while you drive. The full user guide with every setting and a troubleshooting table is in the zip and [url=https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS/blob/main/docs/USER_GUIDE.md]on GitHub[/url].
+
+[size=120][b]Good to know[/b][/size]
+[list]
+[*][b]Not code-signed yet.[/b] The certificate is on its way. Until then Windows Smart App Control or antivirus software may flag the DLL. All the source code is on GitHub if you want to check it or build it yourself.
+[*][b]Hills:[/b] the game doesn't report the road surface ahead, so the lines continue the slope you are on. Before a crest the far end can float; where the road starts to climb it can sink in.
+[*][b]Game updates:[/b] if an update changes what the plugin hooks into, the lines switch themselves off and the game keeps running normally until the plugin is updated.
+[*][b]Multiplayer (Convoy, TruckersMP):[/b] not tested.
+[*]Don't use it together with "Reverse Posture Assistant", which hooks the same part of the game.
+[/list]
+
+[size=120][b]Changelog[/b][/size]
+[list]
+[*][b]0.4.0:[/b] one calm, see-through blue line from the front axle replaces the red and green forward markers; at speed it follows the truck's real turn rate
+[*][b]0.3.0:[/b] forward markers stretch into lines with speed and clear the hood from the cab
+[*][b]0.2.0:[/b] forward markers for lane position; Ctrl+Shift+F9 mode cycle; renamed from "Reverse Overlay - Guide Lines"
+[*][b]0.1.0:[/b] first release: reverse guide lines for the truck and up to ten trailers
+[/list]
+Next on the [url=https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS#roadmap]roadmap[/url]: code-signed plugin, Euro Truck Simulator 2 version, better line height on uneven ground, configurable colours.
+
+Feedback and bug reports are very welcome here or [url=https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS/issues]on GitHub[/url]. If something doesn't show up, please attach [i]Documents\American Truck Simulator\ats_reverse_overlay.log[/i]. The first lines say whether the plugin found what it needs on your game version.
+
+[i]Credits: in-world drawing technique and base line model from "Reverse Posture Assistant For ATS" by yyysheng (MIT). Uses the SCS Telemetry SDK and MinHook.[/i]
