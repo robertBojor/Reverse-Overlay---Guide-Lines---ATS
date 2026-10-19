@@ -41,7 +41,7 @@ void init(const std::filesystem::path &file, void (*game_log)(int, const char *)
     game_logger = game_log;
     std::error_code ignored;
     std::filesystem::create_directories(path.parent_path(), ignored);
-    std::ofstream(path, std::ios::trunc) << "Backing & Lane Prediction - ATS log\n";
+    std::ofstream(path, std::ios::trunc) << "Backing & Lane Prediction log\n";
 }
 
 void shutdown()

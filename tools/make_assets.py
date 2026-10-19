@@ -10,16 +10,18 @@ parallel strips for wider lines, since model instances cannot be scaled. The
 square dot tiles used by plugins 0.2.0 - 0.3.0 stay in the package so those
 plugins keep working with this mod.
 
-    python3 -I tools/make_assets.py [scs|workshop|all]
-      scs       stage files in out/mod_stage (zip with tools/pack_scs.ps1)
-      workshop  write the uploader layout to workshop/ats/upload
+    python3 -I tools/make_assets.py [scs|workshop|all] [ats|ets2]
+      scs       stage files in out/mod_stage (ETS2: out/mod_stage_ets2), zipped
+                by tools/pack_scs.ps1
+      workshop  write the uploader layout to workshop/<game>/upload
+The models are the same for both games; only the name, icon and Workshop
+item differ.
 """
 import struct
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 BASE = ROOT / 'assets' / 'base'
-STAGE = ROOT / 'out' / 'mod_stage'
 
 MODEL_DIR = 'model/rto_guides'
 HALF_WIDTH = 0.06  # base model is 0.0375 (7.5 cm wide); 12 cm reads better at distance
@@ -128,18 +130,28 @@ def make_pmg(half_width, half_length, radius):
 
 
 VERSION = (ROOT / 'VERSION').read_text().strip()
-DISPLAY_NAME = 'Backing & Lane Prediction - ATS'
-WORKSHOP_DIR = ROOT / 'workshop' / 'ats'
-ICON = WORKSHOP_DIR / 'mod_icon.jpg'  # 276x162 JPEG, supplied by hand
+
+GAMES = {
+    'ats': {'display_name': 'Backing & Lane Prediction - ATS', 'stage': 'mod_stage'},
+    'ets2': {'display_name': 'Backing & Lane Prediction - ETS2', 'stage': 'mod_stage_ets2'},
+}
 
 
-def manifest(workshop, with_icon):
+def workshop_dir(game):
+    return ROOT / 'workshop' / game
+
+
+def icon_path(game):
+    return workshop_dir(game) / 'mod_icon.jpg'  # 276x162 JPEG, supplied by hand
+
+
+def manifest(game, workshop, with_icon):
     # The Workshop uploader manages display_name and compatible_versions
     # (from the item title and versions.sii); they must not be in the manifest.
     lines = ['SiiNunit', '{', 'mod_package : .package_name {',
              f' package_version: "{VERSION}"']
     if not workshop:
-        lines.append(f' display_name: "{DISPLAY_NAME}"')
+        lines.append(f' display_name: "{GAMES[game]["display_name"]}"')
     lines += [' author: "Telemichus"', ' category[]: "interior"']
     if with_icon:
         lines.append(' icon: "mod_icon.jpg"')
@@ -150,7 +162,9 @@ def manifest(workshop, with_icon):
     return '\n'.join(lines).encode()
 
 
-DESCRIPTION = f'''{DISPLAY_NAME} (v{VERSION})
+def description(game):
+    name = GAMES[game]['display_name']
+    return f'''{name} (v{VERSION})
 
 Backup-camera style guide lines shown on the ground while reversing:
 red, yellow and green by distance, visible in every camera and the mirrors.
@@ -163,7 +177,7 @@ both, nothing. The choice is remembered.
 SUBSCRIBING ALONE SHOWS NOTHING. This package contains only the models.
 They are drawn by the ats_reverse_overlay.dll plugin, which must be
 installed separately: download it from the GitHub releases page linked on
-the Workshop page (Backing & Lane Prediction - ATS), exit the game and run
+the Workshop page ({name}), exit the game and run
 Install.bat.
 
 Line models derived from "Reverse Posture Assistant For ATS" by yyysheng (MIT).
@@ -198,11 +212,11 @@ def model_files():
     return files
 
 
-def package_files(workshop):
-    icon = ICON.read_bytes() if ICON.exists() else None
+def package_files(game, workshop):
+    icon = icon_path(game).read_bytes() if icon_path(game).exists() else None
     files = model_files()
-    files['manifest.sii'] = manifest(workshop, icon is not None)
-    files['description.txt'] = DESCRIPTION
+    files['manifest.sii'] = manifest(game, workshop, icon is not None)
+    files['description.txt'] = description(game)
     if icon is not None:
         files['mod_icon.jpg'] = icon
     return files, icon is not None
@@ -227,34 +241,38 @@ package_version_info : .universal {
 '''
 
 
-def build_scs_stage():
+def build_scs_stage(game):
     # tools/pack_scs.ps1 zips this with .NET's ZipFile (deflate); the game
     # rejects stored zip entries.
-    files, _ = package_files(workshop=False)
-    write_tree(STAGE, files)
-    print(f'staged {len(files)} files in {STAGE}')
+    stage = ROOT / 'out' / GAMES[game]['stage']
+    files, _ = package_files(game, workshop=False)
+    write_tree(stage, files)
+    print(f'staged {len(files)} files in {stage}')
 
 
-def build_workshop():
+def build_workshop(game):
     # Uploader layout: the selected folder may contain only versions.sii and
     # version packages. One universal package serves every game version.
-    upload = WORKSHOP_DIR / 'upload'
-    files, has_icon = package_files(workshop=True)
+    upload = workshop_dir(game) / 'upload'
+    files, has_icon = package_files(game, workshop=True)
     write_tree(upload / 'universal', files)
     (upload / 'versions.sii').write_text(VERSIONS_SII)
     print(f'wrote {upload} ({len(files)} files in universal/)')
     if not has_icon:
-        print(f'WARNING: {ICON.relative_to(ROOT)} is missing; the uploader requires a '
+        print(f'WARNING: {icon_path(game).relative_to(ROOT)} is missing; the uploader requires a '
               '276x162 JPEG icon. Add it and run this again.')
 
 
 def main():
     import sys
     target = sys.argv[1] if len(sys.argv) > 1 else 'scs'
+    game = sys.argv[2] if len(sys.argv) > 2 else 'ats'
+    if game not in GAMES:
+        sys.exit(f'unknown game {game!r}; use one of {", ".join(GAMES)}')
     if target in ('scs', 'all'):
-        build_scs_stage()
+        build_scs_stage(game)
     if target in ('workshop', 'all'):
-        build_workshop()
+        build_workshop(game)
 
 
 if __name__ == '__main__':

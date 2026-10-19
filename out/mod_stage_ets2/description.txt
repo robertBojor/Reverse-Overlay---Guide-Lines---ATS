@@ -1,0 +1,17 @@
+Backing & Lane Prediction - ETS2 (v0.4.0)
+
+Backup-camera style guide lines shown on the ground while reversing:
+red, yellow and green by distance, visible in every camera and the mirrors.
+In a forward gear, a light blue line runs from the front axle along the
+path the truck will take, to help with lane position.
+
+Ctrl+Shift+F9 cycles what is shown: forward line only, reverse lines only,
+both, nothing. The choice is remembered.
+
+SUBSCRIBING ALONE SHOWS NOTHING. This package contains only the models.
+They are drawn by the ats_reverse_overlay.dll plugin, which must be
+installed separately: download it from the GitHub releases page linked on
+the Workshop page (Backing & Lane Prediction - ETS2), exit the game and run
+Install.bat.
+
+Line models derived from "Reverse Posture Assistant For ATS" by yyysheng (MIT).

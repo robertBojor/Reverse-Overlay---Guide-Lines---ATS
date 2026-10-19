@@ -24,6 +24,7 @@
 #include <common/scssdk_telemetry_common_configs.h>
 #include <common/scssdk_telemetry_trailer_common_channels.h>
 #include <common/scssdk_telemetry_truck_common_channels.h>
+#include <eurotrucks2/scssdk_eut2.h>
 
 #include "core/display_mode.hpp"
 #include "core/forward.hpp"
@@ -617,6 +618,14 @@ int register_channels(const scs_telemetry_init_params_v101_t *api)
     return failures;
 }
 
+// The plugin runs in both games; settings, log and mode file go next to the
+// game's own files in Documents.
+const char *documents_subfolder(const char *game_id)
+{
+    if (game_id && std::strcmp(game_id, SCS_GAME_ID_EUT2) == 0) return "Euro Truck Simulator 2";
+    return "American Truck Simulator";
+}
+
 void game_log_bridge(int type, const char *message);
 scs_log_t sdk_log = nullptr;
 void game_log_bridge(int type, const char *message)
@@ -631,7 +640,7 @@ SCSAPI_RESULT scs_telemetry_init(const scs_u32_t version, const scs_telemetry_in
     const auto *api = static_cast<const scs_telemetry_init_params_v101_t *>(params);
     sdk_log = api->common.log;
 
-    const auto folder = documents_folder() / "American Truck Simulator";
+    const auto folder = documents_folder() / documents_subfolder(api->common.game_id);
     rto::log::init(folder / "ats_reverse_overlay.log", &game_log_bridge);
     char message[256];
     std::snprintf(message, sizeof(message), "Backing & Lane Prediction %s starting in %s %u.%u", RTO_VERSION,

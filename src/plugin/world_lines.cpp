@@ -108,7 +108,7 @@ void render_pieces(std::uint64_t context)
             if (!pool[index])
             {
                 log::error(std::string("Could not create ") + model_paths[band] +
-                           " - is the \"Backing & Lane Prediction - ATS\" mod enabled in the Mod Manager,"
+                           " - is the \"Backing & Lane Prediction\" mod enabled in the Mod Manager,"
                            " and as new as the plugin? Skipping this model until the game restarts.");
                 missing[band] = true;
                 continue;

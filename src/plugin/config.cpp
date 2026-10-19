@@ -12,7 +12,7 @@ namespace rto
 {
 namespace
 {
-constexpr const char *default_file = R"(; Backing & Lane Prediction - ATS settings. Most changes apply while the game runs.
+constexpr const char *default_file = R"(; Backing & Lane Prediction settings. Most changes apply while the game runs.
 
 [prediction]
 ; How far back to predict, in metres
@@ -20,7 +20,7 @@ horizon_m = 15
 
 [world]
 ; Reverse guide lines and the forward line drawn on the ground (also visible in mirrors).
-; Needs the "Backing & Lane Prediction - ATS" mod enabled in the Mod Manager.
+; Needs the "Backing & Lane Prediction" mod (ATS or ETS2) enabled in the Mod Manager.
 enabled = 1
 ; Colour bands by distance travelled: red, then yellow, then green
 red_until_m = 3
