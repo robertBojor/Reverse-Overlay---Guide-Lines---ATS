@@ -17,7 +17,6 @@ enum class Band
     yellow,
     green,
     blue, // forward line
-    teal, // trailer's forward line
 };
 
 struct GuideSegment

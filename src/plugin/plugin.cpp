@@ -122,7 +122,6 @@ struct State
     bool forward_active = false;
     double forward_curvature = 0.0;
     std::chrono::steady_clock::time_point forward_time{};
-    bool trailer_line_shown = false; // with hysteresis, so it doesn't flicker
 };
 
 State state;
@@ -258,29 +257,8 @@ void publish_forward(rto::Rig rig)
     rig.units[0].curvature = state.forward_curvature;
 
     const double span = rto::forward_length(state.speed, options);
-    auto pieces = to_pieces(rto::build_forward(rig, span, options), state.units[0].placement,
-                            state.config.forward_height_m);
-
-    // The trailer line comes on once the trailer cuts inside the blue line by
-    // the threshold and goes off below 60 % of it.
-    if (state.config.trailer_line && rig.units.size() > 1)
-    {
-        const auto trailer = rto::build_trailer_forward(rig, span, options);
-        const double on = state.config.trailer_offtrack_m;
-        state.trailer_line_shown = state.trailer_line_shown ? trailer.offtrack >= on * 0.6
-                                                            : trailer.offtrack > on;
-        if (state.trailer_line_shown)
-        {
-            auto more = to_pieces(trailer.segments, state.units[rig.units.size() - 1].placement,
-                                  state.config.forward_height_m);
-            pieces.insert(pieces.end(), more.begin(), more.end());
-        }
-    }
-    else
-    {
-        state.trailer_line_shown = false;
-    }
-    rto::world::publish(std::move(pieces));
+    rto::world::publish(to_pieces(rto::build_forward(rig, span, options), state.units[0].placement,
+                                  state.config.forward_height_m));
 }
 
 // The hotkey mode survives restarts in a one-line file next to the settings,
@@ -353,11 +331,7 @@ void update_frame()
         state.gear_valid && state.gear < 0 && rto::shows_reverse(state.mode);
     const bool forward =
         state.gear_valid && state.gear > 0 && rto::shows_forward(state.mode);
-    if (!forward)
-    {
-        state.forward_active = false;
-        state.trailer_line_shown = false;
-    }
+    if (!forward) state.forward_active = false;
     if (!state.driving || !(reversing || forward) || !truck.placement_valid || !truck.configured)
     {
         rto::world::publish({});

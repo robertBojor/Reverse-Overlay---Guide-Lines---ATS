@@ -18,23 +18,20 @@ go if you keep the steering where it is.
 - They work with one trailer and with doubles and triples. The lines start
   behind the last trailer.
 
-In a **forward gear**, two square dots appear on the road ahead instead: **red**
-where the truck's **front-left** corner will be and **green** where the
-**front-right** corner will be, about 1.5 seconds from now. They help you keep
-the truck centred in its lane. **Ctrl+Shift+F9** chooses whether you see the
-dots, the lines, both or neither.
+In a **forward gear**, a light **blue line** runs on the road from the middle
+of the truck's front axle along the path it will take. It helps you keep the
+truck centred in its lane. **Ctrl+Shift+F9** chooses whether you see the
+forward line, the reverse lines, both or neither.
 
 > **Keyboard shortcut: Ctrl+Shift+F9**
-> Each press moves to the next mode: **forward dots only → reverse lines only
-> → both → nothing**, then back to forward dots only. Your choice is
+> Each press moves to the next mode: **forward line only → reverse lines only
+> → both → nothing**, then back to forward line only. Your choice is
 > remembered. Details in [section 3](#what-is-shown-ctrlshiftf9).
 
-**New in 0.3.0:** the forward dots stretch into lines with speed, and sit
-further ahead so they clear the hood. Updating from 0.2.0? Update the plugin
-only; your settings file keeps the old dot distance and size (see
-[`[forward]`](#forward-forward-dots)). Updating from 0.1.0? Update the plugin
-**and** the mod, because the plugin needs the dot models. See the
-[changelog](../CHANGELOG.md).
+**New in 0.4.0:** one calm, see-through blue line from the front axle replaces
+the red and green forward markers, and at speed it follows how the truck is
+actually turning. Update the plugin **and** the mod: the plugin needs the new
+line model. See the [changelog](../CHANGELOG.md).
 
 ---
 
@@ -53,8 +50,8 @@ The mod comes in **two parts**, and you need both:
 
 | Part | What it does | Where it comes from |
 |---|---|---|
-| **Models** | The coloured line pieces and dots the game draws | Steam Workshop item *or* `optional\ats_reverse_overlay.scs` in the download |
-| **Plugin** (`ats_reverse_overlay.dll`) | Predicts the path and places the lines and dots | The plugin download (zip) |
+| **Models** | The coloured line pieces the game draws | Steam Workshop item *or* `optional\ats_reverse_overlay.scs` in the download |
+| **Plugin** (`ats_reverse_overlay.dll`) | Predicts the path and places the lines | The plugin download (zip) |
 
 Steam Workshop can only deliver mod files. It cannot install the plugin, so
 **subscribing on its own does nothing**.
@@ -98,8 +95,8 @@ missing. The game only loads plugins from that exact folder.
    expected for any telemetry plugin. Confirm it.
 3. Open the **Mod Manager**, enable **Backing & Lane Prediction - ATS**, and
    confirm the changes.
-4. Load your profile and drive: the dots appear in a forward gear, the
-   lines in reverse. Press **Ctrl+Shift+F9** to choose what is shown.
+4. Load your profile and drive: the blue line appears in a forward gear, the
+   guide lines in reverse. Press **Ctrl+Shift+F9** to choose what is shown.
 
 ### Check it's working
 
@@ -107,8 +104,8 @@ Open `Documents\American Truck Simulator\ats_reverse_overlay.log`. After
 starting the game you should see:
 
 ```
-Backing & Lane Prediction 0.3.0 starting in American Truck Simulator ...
-Showing forward dots and reverse guide lines (the hotkey changes this).
+Backing & Lane Prediction 0.4.0 starting in American Truck Simulator ...
+Showing forward line and reverse guide lines (the hotkey changes this).
 engine functions located: ...
 In-world guide lines ready (vehicle render hook installed).
 ```
@@ -116,10 +113,11 @@ In-world guide lines ready (vehicle render hook installed).
 The first time something is drawn:
 
 ```
-In-world guide lines rendering: 2 pieces.
+In-world guide lines rendering: 50 pieces.
 ```
 
-(The number varies: 2 for the forward dots, about 140 while reversing.) If
+(The number varies: 50 to 80 for the forward line, about 140 while
+reversing.) If
 these lines are missing, see [Troubleshooting](#6-troubleshooting).
 
 ---
@@ -130,42 +128,43 @@ these lines are missing, see [Troubleshooting](#6-troubleshooting).
 
 | Press | Shows |
 |---|---|
-| 1st | **Forward dots only** |
+| 1st | **Forward line only** |
 | 2nd | **Reverse lines only** |
-| 3rd | **Both**: dots in a forward gear, lines in reverse |
+| 3rd | **Both**: the forward line in a forward gear, guide lines in reverse |
 | 4th | **Nothing** (everything hidden) |
 
-- The next press starts again with forward dots only.
+- The next press starts again with the forward line only.
 - The mode is **remembered** between game sessions, in
   `Documents\American Truck Simulator\ats_reverse_overlay.mode`. The very
   first start is on **Both**. To reset, delete that file.
 - The shortcut works only while the **game window has focus**. It does nothing
   in the Windows desktop or another program.
-- The log records each change, for example *"Hotkey: showing forward dots
+- The log records each change, for example *"Hotkey: showing forward line
   only."*
 - To use another key combination, see [`[hotkey]`](#hotkey).
 
-### Forward dots
+### Forward line
 
-- They appear in **any forward gear**, even when you're stopped, and
-  disappear in neutral and while the game is paused or in menus.
-- They sit where the truck's front corners will be after **1.5 seconds** at
-  the current speed, and never closer than 14 m, so they show over the hood
-  from the cab. Below about 34 km/h (21 mph) they stay at 14 m; at 90 km/h
-  they are about 37 m ahead.
-- Each dot is **centred on the edge of the truck**. Keep the red one inside
-  the left lane line and the green one inside the right.
-- As you speed up, each dot **stretches into a line** along the path its
-  corner will take, centred on the same point. The line is half a second of
-  travel long, at most 15 m: about 12 m at 90 km/h. It curves with the
-  steering, so on a bend you can see whether the corner stays in its lane all
-  the way round. Below walking pace they are square dots.
-- Steering is **smoothed** a little so the dots don't jump with every small
-  correction at speed. They catch up within about half a second.
+- It appears in **any forward gear**, even when you're stopped, and
+  disappears in neutral and while the game is paused or in menus.
+- It starts under the **middle of the front axle** and follows the path the
+  truck will take if you hold the steering, so on a bend its curve starts
+  where the truck is. Its first metres are hidden under the hood.
+- **Length:** 25 m when slow or stopped. From about 75 km/h (47 mph) it grows
+  with speed, 1.2 seconds of travel, up to 40 m at 120 km/h (75 mph). On a
+  tight turn it stops after a quarter turn instead of curling round.
+- **At speed it follows how the truck is really turning.** Up to about
+  18 km/h (11 mph) the curve comes from the front-wheel angles. Above about
+  36 km/h (22 mph) it comes from the truck's measured turn rate, because at
+  speed the tyres slip and the wheel angle alone would over-bend the line.
+- Steering is **smoothed** a little so the line doesn't jump with every small
+  correction. It catches up within about half a second.
+- It is light blue, 0.3 m wide and **see-through** (75 % opacity), and glows
+  softly at night.
 - Only the truck counts. A trailer follows inside the truck's path on curves.
 - **Hills:** the game doesn't tell the plugin where the road surface is ahead,
-  so the dots continue the slope the truck is on now. Before a crest they can
-  float; where the road starts to climb they can sink in and vanish briefly.
+  so the line continues the slope the truck is on now. Before a crest its far
+  end can float; where the road starts to climb it can sink into the road.
 
 ### Reverse guide lines
 
@@ -203,7 +202,7 @@ changes apply **while you drive** (within about 2 seconds).
 
 | Setting | Default | Meaning |
 |---|---|---|
-| `enabled` | `1` | `0` turns off everything drawn in the world (lines and dots) |
+| `enabled` | `1` | `0` turns off everything drawn in the world (reverse and forward lines) |
 | `red_until_m` | `3` | end of the red band, in metres of travel |
 | `yellow_until_m` | `8` | end of the yellow band; green runs from here to the end |
 | `line_height_m` | `0.35` | height of the lines; lower it if they float, raise it if they sink into the road |
@@ -215,22 +214,25 @@ changes apply **while you drive** (within about 2 seconds).
 |---|---|---|
 | `horizon_m` | `15` | how far ahead (backwards) the path is predicted, 3–60 m |
 
-### `[forward]` forward dots
+### `[forward]` forward line
 
 | Setting | Default | Meaning |
 |---|---|---|
-| `lookahead_s` | `1.5` | how far ahead, in seconds of travel at the current speed |
-| `min_distance_m` | `14` | the dots never come closer than this (slow or stopped); lower it on a short-hood truck if you want them nearer |
-| `max_distance_m` | `80` | and never go further than this |
-| `dot_size_m` | `0.5` | edge length of each dot, 0.12–1.0 m; also the width of the lines |
-| `line_time_s` | `0.5` | with speed, each dot becomes a line this many seconds of travel long, 0–2; `0` keeps square dots |
-| `max_line_m` | `15` | the lines are never longer than this, 0–20 m |
-| `dot_height_m` | `0.35` | height of the dots; lower it if they float, raise it if they sink into the road |
-| `steering_smoothing_s` | `0.25` | how calmly the dots follow the steering, in seconds; `0` = no smoothing |
+| `min_length_m` | `25` | length when slow or stopped, from the front axle (the first part is under the truck), 5–100 m |
+| `length_time_s` | `1.2` | with speed the line is this many seconds of travel long, 0–5 |
+| `max_length_m` | `40` | and never longer than this, 5–100 m |
+| `width_m` | `0.3` | line width, in steps of 0.15 m, 0.15–0.6 m |
+| `height_m` | `0.35` | height of the line; lower it if it floats, raise it if it sinks into the road |
+| `steering_smoothing_s` | `0.25` | how calmly the line follows the steering, in seconds; `0` = no smoothing |
+
+Settings files from 0.2.0 and 0.3.0 contain the forward dot settings
+(`lookahead_s`, `min_distance_m`, `dot_size_m` and so on). They are ignored;
+`dot_height_m` still sets the height. Delete the file to get a fresh commented
+copy.
 
 ### `[hotkey]`
 
-**Ctrl+Shift+F9** steps through forward dots only, reverse lines only, both,
+**Ctrl+Shift+F9** steps through forward line only, reverse lines only, both,
 and nothing (see [Using it](#3-using-it)). The current mode is saved in
 `ats_reverse_overlay.mode` next to the settings file.
 
@@ -290,9 +292,9 @@ it for `lane-prediction` or `ats_reverse_overlay`.
 | Lines float above or sink into the road | Height estimate | Adjust `line_height_m` |
 | Lines look too narrow or wide for your trailer | Body size is estimated from the wheels | Known limitation, see [Accuracy notes](#accuracy-notes) |
 | Two sets of lines (blue/orange and red/yellow/green) | "Reverse Posture Assistant" is also installed | Use one or the other. Remove `ATSReverseTrajectoryRuntime.dll` from `plugins` and disable that mod |
-| Lines or dots don't appear, but the log shows no errors | The hotkey mode doesn't include them | Press **Ctrl+Shift+F9** until the log says *"Hotkey: showing forward dots and reverse guide lines."* The mode is remembered across restarts |
-| Dots appear and then vanish for a moment | The road climbs ahead (see [Forward dots](#forward-dots)) | Expected on hills. Raising `dot_height_m` helps a little |
-| Log: *"Could not create /model/rto_guides/dot_red.pmd"* | The mod files are older than the plugin. The reverse lines keep working; only the dots are missing | Update the Workshop item (Steam usually does this on its own) or the local `.scs`, then restart the game |
+| Lines don't appear, but the log shows no errors | The hotkey mode doesn't include them | Press **Ctrl+Shift+F9** until the log says *"Hotkey: showing forward line and reverse guide lines."* The mode is remembered across restarts |
+| The far end of the blue line sinks into the road or floats | The road climbs or drops ahead (see [Forward line](#forward-line)) | Expected on hills. A lower `max_length_m` keeps it closer to the truck |
+| Log: *"Could not create /model/rto_guides/line_blue.pmd"* | The mod files are older than the plugin. The reverse lines keep working; only the forward line is missing | Update the Workshop item (Steam usually does this on its own) or the local `.scs`, then restart the game |
 | Ctrl+Shift+F9 does nothing | The game window doesn't have focus, or `[hotkey]` was changed | Click into the game first. Check `key`, `ctrl`, `shift` and `alt` in the settings file |
 
 ---

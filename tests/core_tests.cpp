@@ -321,66 +321,7 @@ int main()
         CHECK(build_forward(rig, 0.0, o).empty());
     }
 
-    // Trailer line, straight: the trailer follows the truck, nothing to show.
-    {
-        const Rig rig = build_rig(fixtures::single(0.0, 0.0));
-        ForwardOptions o;
-        o.width = o.piece_width;
-        const auto t = build_trailer_forward(rig, 30.0, o);
-        CHECK(t.offtrack < 1e-6);
-        CHECK(!t.segments.empty());
-        for (const auto &s : t.segments) CHECK(s.band == Band::teal);
-        CHECK(build_trailer_forward(build_rig(fixtures::bobtail(0.2)), 30.0, o).segments.empty());
-    }
-
-    // Trailer line on a steady left turn: the trailer axle settles on radius
-    // sqrt(Rk^2 - d^2) about the turn centre (Rk: kingpin radius, d: kingpin to
-    // axle), so it runs inside the front axle's circle by the difference. The
-    // line follows the inner (left) wheels.
-    {
-        const Rig rig = build_rig(fixtures::single(0.1, 0.0));
-        const auto &tr = rig.units[0];
-        const auto &tl = rig.units[1];
-        ForwardOptions o;
-        o.width = o.piece_width;
-        const double R = 1.0 / tr.curvature;
-        const Vec2 centre = to_world(rig.poses[0], {-R, tr.axle.z});
-        const double r_front = std::hypot(R, tr.wheelbase);
-        const double r_kingpin = length(to_world(rig.poses[0], tl.coupling_on_parent) - centre);
-        const double d = tl.axle.z - tl.kingpin.z;
-        const double r_trailer = std::sqrt(r_kingpin * r_kingpin - d * d);
-        const double span = 200.0; // capped at a quarter turn, about 90 m: settled
-        const auto t = build_trailer_forward(rig, span, o);
-        CHECK(near(t.offtrack, r_front - r_trailer, 0.05));
-        CHECK(t.offtrack > 1.0);
-        const Prediction p = predict_motion(rig, std::min(span, o.max_turn * R), 1.0, 0.05, 0.2);
-        CHECK(near(length(to_world(p.steps.back().poses[1], tl.axle) - centre), r_trailer, 0.02));
-        const double r_line = length(t.segments.back().to - centre);
-        CHECK(near(r_line, r_trailer - tl.half_width, 0.05)); // the inner wheels
-        CHECK(to_local(rig.poses[0], t.segments.front().from).z < tr.front_axle.z + 1.0); // ahead
-    }
-
-    // Turning right: the line runs ahead of the truck, alongside the forward
-    // line and inside it, along the trailer's right-hand wheels.
-    {
-        const Rig rig = build_rig(fixtures::single(-0.2, 0.0));
-        const auto &tr = rig.units[0];
-        ForwardOptions o;
-        o.width = o.piece_width;
-        const auto t = build_trailer_forward(rig, 25.0, o);
-        CHECK(t.offtrack > 0.5);
-        CHECK(!t.segments.empty());
-        const double R = 1.0 / tr.curvature; // negative: centre on the right
-        const Vec2 centre = to_world(rig.poses[0], {-R, tr.axle.z});
-        const double r_front = std::hypot(R, tr.wheelbase);
-        for (const auto &s : t.segments)
-            CHECK(length(s.from - centre) < r_front - 0.5 && length(s.to - centre) < r_front - 0.5);
-        // It starts level with the front axle, not back at the trailer.
-        const Vec2 first = to_local(rig.poses[0], t.segments.front().from);
-        CHECK(first.z < tr.front_axle.z + 1.0);
-    }
-
-
+    // The closed-form arc matches the integrated reverse model run backwards:
     // reversing from the predicted pose returns to the start.
     {
         const Rig rig = build_rig(fixtures::bobtail(0.25, 0.7));

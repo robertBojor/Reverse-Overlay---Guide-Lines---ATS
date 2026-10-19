@@ -314,7 +314,7 @@ inline Rig build_rig(const RigInput &input)
 
 struct PredictedStep
 {
-    double distance = 0.0;      // metres travelled (in the direction predicted)
+    double distance = 0.0;      // metres travelled in reverse
     std::vector<Pose> poses;    // per unit
 };
 
@@ -330,17 +330,16 @@ inline double articulation(const Pose &parent, const Pose &child)
     return normalize_angle(child.heading - parent.heading);
 }
 
-// Integrate the rig `horizon` metres with constant steering, backwards
-// (direction -1) or forwards (+1).
+// Integrate the rig backwards by `horizon` metres with constant steering.
 // Tractor: kinematic bicycle about its virtual rear axle.
 // Trailers: no-side-slip constraint at the equivalent axle, driven by the
-// actual displacement of the coupling point (handles off-axle hitches). The
-// constraint holds either way, so the same update serves both directions.
-inline Prediction predict_motion(const Rig &rig, double horizon, double direction,
-                                 double step, double sample_every)
+// actual displacement of the coupling point (handles off-axle hitches).
+inline Prediction predict_reverse(const Rig &rig, double horizon = 15.0,
+                                  double step = 0.05, double sample_every = 0.25)
 {
     Prediction out;
-    if (rig.units.empty() || horizon <= 0.0) return out;
+    if (rig.units.empty()) return out;
+    horizon = std::clamp(horizon, 1.0, 60.0);
     step = std::clamp(step, 0.01, 0.25);
     sample_every = std::max(sample_every, step);
 
@@ -353,7 +352,7 @@ inline Prediction predict_motion(const Rig &rig, double horizon, double directio
     for (int i = 1; i <= steps; ++i)
     {
         const double travelled = std::min(i * step, horizon);
-        const double ds = direction * (travelled - (i - 1) * step);
+        const double ds = -(travelled - (i - 1) * step); // negative: reversing
         const std::vector<Pose> before = poses;
 
         // Tractor rear axle.
@@ -407,11 +406,6 @@ inline Prediction predict_motion(const Rig &rig, double horizon, double directio
     return out;
 }
 
-inline Prediction predict_reverse(const Rig &rig, double horizon = 15.0,
-                                  double step = 0.05, double sample_every = 0.25)
-{
-    return predict_motion(rig, std::clamp(horizon, 1.0, 60.0), -1.0, step, sample_every);
-}
 
 // Body corners in world space: front-left, front-right, rear-right, rear-left.
 inline std::array<Vec2, 4> body_corners(const UnitGeometry &g, const Pose &pose)

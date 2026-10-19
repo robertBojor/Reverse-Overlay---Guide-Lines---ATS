@@ -42,6 +42,18 @@ Run `tools/make_assets.py workshop`, then in the uploader select the existing it
 
 Publish the matching plugin release on GitHub **at the same time**. The Workshop description links to the latest release.
 
+### 0.4.0 checklist
+
+1. Run `python3 -I tools/make_assets.py workshop` (the package gains `line_blue`; the dot models stay for older plugins).
+2. Uploader: select the existing item, check the folder and preview paths, paste the new `description.bbcode.txt`.
+3. Change note:
+
+   ```
+   v0.4.0: The red and green forward markers are replaced by one light, see-through blue line from the front axle along the path the truck will take. At speed it follows how the truck is actually turning, so it stays true on long bends. Update the plugin DLL too: download it from the GitHub releases page.
+   ```
+
+4. Replace the screenshots on the Workshop page with ones that show the blue line.
+
 ### 0.2.0 checklist
 
 1. Replace the preview images in `assets/images/` and the icon `mod_icon.jpg`, then run `python3 -I tools/make_assets.py workshop`.

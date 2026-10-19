@@ -3,12 +3,12 @@
 # Backing & Lane Prediction · ATS
 
 **Backup-camera style guide lines for reversing in American Truck Simulator,
-plus forward dots for lane position, drawn in the game world and visible in
+plus a forward line for lane position, drawn in the game world and visible in
 the mirrors.**
 
 ![Game](https://img.shields.io/badge/game-American%20Truck%20Simulator%201.61-1f6feb)
 ![Platform](https://img.shields.io/badge/platform-Windows%20x64-555)
-![Version](https://img.shields.io/badge/version-0.3.0-2ea44f)
+![Version](https://img.shields.io/badge/version-0.4.0-2ea44f)
 ![Status](https://img.shields.io/badge/status-early%20release-orange)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Steam Workshop](https://img.shields.io/badge/Steam%20Workshop-subscribe-171a21?logo=steam)](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979)
@@ -31,12 +31,11 @@ the path the rig will actually take if you hold the current steering:
 
 <p align="center"><img src="assets/images/screenshot-cab-mirror.jpg" width="820" alt="Cab view while reversing: the red, yellow and green guide lines are visible in the side mirror"></p>
 
-In a **forward gear**, two square dots appear ahead of the truck where its
-front corners will be about 1.5 seconds from now (at least 14 m ahead, so
-they clear the hood from the cab): 🟥 red for the front-left corner, 🟩 green
-for the front-right. As you speed up, each dot stretches into a line along the
-path that corner will take, curving with the steering. Keep red inside the
-left lane line and green inside the right one.
+In a **forward gear**, a light 🟦 **blue line** runs from the middle of your
+front axle along the path the truck will take, curving with the steering. It
+is see-through and 25 m long when slow, growing to 40 m at highway speed. At
+speed its curve comes from how the truck is actually turning, so it stays true
+on long bends. Keep it in the middle of your lane.
 
 ## Keyboard shortcut: Ctrl+Shift+F9
 
@@ -44,29 +43,32 @@ One shortcut chooses what you see. Each press moves to the next mode:
 
 | Press | Shows |
 |---|---|
-| 1st | **Forward dots only** |
+| 1st | **Forward line only** |
 | 2nd | **Reverse lines only** |
-| 3rd | **Both**: dots in a forward gear, lines in reverse |
+| 3rd | **Both**: the forward line in a forward gear, guide lines in reverse |
 | 4th | **Nothing** (everything hidden) |
 
-- The next press starts again with forward dots only.
+- The next press starts again with the forward line only.
 - The mode is **remembered** between game sessions. The very first start
   is on **Both**.
 - The shortcut works only while the game window has focus.
-- The log confirms each change, e.g. *"Hotkey: showing forward dots only."*
+- The log confirms each change, e.g. *"Hotkey: showing forward line only."*
 - To use a different key, edit `[hotkey]` in the settings file
   ([details](docs/USER_GUIDE.md#hotkey)).
 
-## What's new in 0.3.0
+## What's new in 0.4.0
 
-- **The forward dots stretch into lines with speed.** Each line follows the
-  path its corner will take and curves with the steering: half a second of
-  travel long, at most 15 m.
-- **The dots are visible from the cab.** They now sit at least 14 m ahead, so
-  they clear a long hood, and are 0.5 m squares.
-- Plugin-only update: the Workshop mod is unchanged.
+- **One calm blue line instead of the red and green markers.** It starts under
+  the middle of the front axle and follows the path the truck will take, so
+  its curve begins where the truck is. It is light blue and see-through.
+- **True at highway speed.** Above about 36 km/h (22 mph) the curve comes from
+  how fast the truck is actually turning, not from the wheel angle, which
+  over-bends at speed because the tyres slip.
+- **Update both parts:** the plugin and the Workshop mod (it has the new line
+  model). The `[forward]` settings are new; old dot settings are ignored.
 
-0.2.0 added the forward dots and the four-step Ctrl+Shift+F9 cycle.
+0.3.0 stretched the forward dots into lines; 0.2.0 added them and the
+four-step Ctrl+Shift+F9 cycle.
 
 Full history: [CHANGELOG.md](CHANGELOG.md).
 
@@ -83,14 +85,13 @@ Full history: [CHANGELOG.md](CHANGELOG.md).
 - **Patch-tolerant:** game functions are found by code patterns, not fixed
   addresses. If an update breaks them, the lines switch off cleanly instead of
   crashing the game, and a bundled tool regenerates the patterns.
-- **Forward dots and lines:** the same steering model run forward for the
-  truck, with a time-based look-ahead and smoothing so they stay steady at
-  speed.
-- **Lightweight:** about 140 small line pieces while reversing; driving
-  forward, 50 small tiles for the dots and up to about 500 pieces for
-  full-length lines. No network access, and save games are never touched.
-- **Configurable:** band distances, path length, look-ahead, dot size and
-  heights, all changeable while you drive.
+- **Forward line:** the same steering model run forward for the truck,
+  switching to the measured turn rate at speed, with smoothing so it stays
+  steady.
+- **Lightweight:** about 140 small line pieces while reversing and at most 80
+  driving forward. No network access, and save games are never touched.
+- **Configurable:** band distances, path length, forward line length, width
+  and heights, all changeable while you drive.
 
 ## Installation
 
@@ -99,7 +100,7 @@ separate download.
 
 1. **Line models:** subscribe to [**Backing & Lane Prediction - ATS**](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979) on the
    Steam Workshop, *or* use the `.scs` included in the download.
-2. **Plugin:** download `Backing_Lane_Prediction_ATS_v0.3.0.zip` from the
+2. **Plugin:** download `Backing_Lane_Prediction_ATS_v0.4.0.zip` from the
    [**latest release**](../../releases/latest), exit the game and run `Install.bat`. It
    copies `ats_reverse_overlay.dll` into
    `American Truck Simulator\bin\win_x64\plugins`.
@@ -108,14 +109,13 @@ separate download.
    ([see above](#keyboard-shortcut-ctrlshiftf9)).
 
 > [!IMPORTANT]
-> **Updating from 0.2.0:** update the plugin only. Your settings file keeps
-> the old dot distance and size; set `min_distance_m = 14` and
-> `dot_size_m = 0.5` under `[forward]`, or delete the file for fresh defaults.
->
-> **Updating from 0.1.0:** update both parts. The plugin needs the new dot
-> models from the Workshop item (Steam updates it on its own) or the new
-> `.scs`. Until then the reverse lines still work, the dots are missing, and
-> the log reports *"Could not create /model/rto_guides/dot_red.pmd"*.
+> **Updating to 0.4.0:** update both parts. The plugin needs the new blue line
+> model from the Workshop item (Steam updates it on its own) or the new
+> `.scs`. Until then the reverse lines still work, the forward line is
+> missing, and the log reports
+> *"Could not create /model/rto_guides/line_blue.pmd"*. Your settings file is
+> kept; the new `[forward]` settings use their defaults until you add them, or
+> delete the file to get a fresh commented copy.
 
 The **[user guide](docs/USER_GUIDE.md)** covers settings, troubleshooting, game
 updates and uninstalling.
@@ -131,7 +131,7 @@ updates and uninstalling.
 flowchart LR
     T["SCS Telemetry SDK<br/>gear · speed · wheels · steering · placement · hitches"] --> P["Prediction<br/>src/core/rig.hpp"]
     P -->|reverse| G["Guide lines<br/>src/core/guides.hpp"]
-    P -->|forward| D["Forward dots<br/>src/core/dots.hpp"]
+    P -->|forward| D["Forward line<br/>src/core/forward.hpp"]
     G --> W["World renderer<br/>src/plugin/world_lines.cpp"]
     D --> W
     E["Pattern scan<br/>src/plugin/engine.cpp"] --> W
@@ -145,14 +145,14 @@ flowchart LR
   movement of its coupling point. Integration stops at 85° articulation.
 - **Guide lines:** the rear-corner paths of the last unit, cut into 0.25 m
   pieces and coloured by distance travelled.
-- **Forward dots:** the tractor's pose after `clamp(speed × lookahead_s,
-  min, max)` metres, solved as an exact arc, with the curvature smoothed over
-  0.25 s. Each dot is centred on a predicted front corner. Model instances
-  can't be scaled, so bigger dots are a grid of 12 cm tiles. Above
-  `dot_size_m / line_time_s` (1 m/s by default) each dot becomes a line
-  `speed × line_time_s` long (at most `max_line_m`), centred on the same
-  point: the predicted corner path, resampled into 0.3 m pieces and laid as
-  parallel strips to the dot's width. Trailers are ignored.
+- **Forward line:** the path of the front axle's centre while the truck
+  drives `clamp(speed × length_time_s, min, max)` metres, solved as an exact
+  arc and stopped after a quarter turn. The curvature comes from the wheel
+  angles up to 5 m/s and from the measured yaw rate over speed from 10 m/s,
+  blended in between, then smoothed over 0.25 s. The path is cut into 1 m
+  pieces laid edge to edge (model instances can't be scaled, and overlaps
+  would show darker through the 75 % opacity), in side-by-side 15 cm strips
+  for the width. Trailers are ignored.
 - **Rendering:** plugin-owned model instances submitted from the player
   vehicle's render pass. Five engine functions are located by unique
   wildcarded byte patterns. A function another plugin has already hooked is
@@ -203,7 +203,7 @@ Workshop publishing steps: [workshop/ats/UPLOAD.md](workshop/ats/UPLOAD.md).
 <summary><b>Repository layout</b></summary>
 
 ```
-src/core/       platform-neutral prediction, guide lines, forward dots, hotkey modes (unit tested)
+src/core/       platform-neutral prediction, guide lines, forward line, hotkey modes (unit tested)
 src/plugin/     SDK plugin, pattern scan, world renderer, settings, log
 assets/base/    base line model the coloured variants are generated from
 tests/          core unit tests
@@ -225,13 +225,12 @@ third_party/    SCS SDK headers, MinHook, licences
   only / reverse only / both / off; renamed to Backing & Lane Prediction.
 - [x] **0.3.0:** the forward dots stretch into lines with speed, and sit far
   enough ahead to clear the hood from the cab.
+- [x] **0.4.0:** one calm, see-through blue line from the front axle instead
+  of the red and green markers, curved from how the truck is actually turning
+  so it stays true at highway speed.
 
 **Next**
 
-- [ ] **0.4.0 (in testing):** one calmer, see-through blue line from the front
-  axle instead of the red and green markers, curved from how the truck is
-  actually turning so it stays true at highway speed. On tight turns a second
-  line shows where the trailer's inner wheels will cut the corner.
 - [ ] Code-signed releases
 - [ ] Euro Truck Simulator 2 version
 - [ ] Better height on uneven ground (wheel-based ground fit)

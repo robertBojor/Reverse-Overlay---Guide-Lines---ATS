@@ -4,8 +4,8 @@ The line models are derived from the MIT-licensed "Reverse Posture Assistant"
 sweep_edge model (assets/base): a 0.36 m bar that the runtime lays down every
 0.25 m so consecutive pieces overlap into a continuous line. Variants differ
 only in width and in the material path stored in the .pmd. The forward line
-uses the same bar, longer and see-through, in blue for the truck and teal for
-the trailer (FORWARD_*); the runtime lays
+uses the same bar, longer and see-through, in a light blue (FORWARD_*); the
+runtime lays
 parallel strips for wider lines, since model instances cannot be scaled. The
 square dot tiles used by plugins 0.2.0 - 0.3.0 stay in the package so those
 plugins keep working with this mod.
@@ -31,7 +31,7 @@ DOT_COLOURS = ('red', 'green')  # left, right
 # length behind ForwardOptions::spacing in src/core/forward.hpp.
 FORWARD_HALF_WIDTH = 0.075
 FORWARD_HALF_LENGTH = 0.5
-FORWARD_COLOURS = {'blue': (110, 185, 255), 'teal': (90, 220, 200)}  # truck, trailer
+FORWARD_COLOURS = {'blue': (110, 185, 255)}
 FORWARD_OPACITY = 0.75  # from the texture alpha, with the alpha-blended .over effect
 # Glow at night. The reverse lines use 4 / 600; the forward line is on screen
 # all the time while driving, so it glows less.
@@ -154,15 +154,17 @@ DESCRIPTION = f'''{DISPLAY_NAME} (v{VERSION})
 
 Backup-camera style guide lines shown on the ground while reversing:
 red, yellow and green by distance, visible in every camera and the mirrors.
-In a forward gear, a blue line runs from the front axle along the path the
-truck will take, to help with lane position.
+In a forward gear, a light blue line runs from the front axle along the
+path the truck will take, to help with lane position.
 
 Ctrl+Shift+F9 cycles what is shown: forward line only, reverse lines only,
 both, nothing. The choice is remembered.
 
-This package contains only the models. They are drawn by the
-ats_reverse_overlay.dll plugin, which must be installed separately into
-the game's bin/win_x64/plugins folder.
+SUBSCRIBING ALONE SHOWS NOTHING. This package contains only the models.
+They are drawn by the ats_reverse_overlay.dll plugin, which must be
+installed separately: download it from the GitHub releases page linked on
+the Workshop page (Backing & Lane Prediction - ATS), exit the game and run
+Install.bat.
 
 Line models derived from "Reverse Posture Assistant For ATS" by yyysheng (MIT).
 '''.encode()

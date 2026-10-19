@@ -55,7 +55,7 @@ readme = f'''Backing & Lane Prediction - ATS  v{version}
 (formerly "Reverse Overlay - Guide Lines - ATS")
 
 Backup-camera style guide lines while reversing in American Truck Simulator,
-and forward dots for lane position.
+and a forward line for lane position.
 
 You need BOTH parts:
 
@@ -70,26 +70,24 @@ You need BOTH parts:
      <ATS folder>\\bin\\win_x64\\plugins  (the folder is created if needed).
 
 Start the game. It will mention "advanced SDK features" - that is expected.
-In a forward gear, two dots show where the truck's front corners will be
-(red = front-left, green = front-right); with speed they stretch into lines
-along the path those corners will take. In reverse, the guide lines show
-the path of the rear corners.
+In a forward gear, a light blue line runs from the middle of the front axle
+along the path the truck will take. In reverse, the guide lines show the
+path of the rear corners.
 
 KEYBOARD SHORTCUT: Ctrl+Shift+F9 (only while the game window has focus)
 Each press moves to the next mode:
-  1st press   forward dots only
+  1st press   forward line only
   2nd press   reverse lines only
-  3rd press   both (dots forward, lines in reverse)
+  3rd press   both (forward line when driving, lines in reverse)
   4th press   nothing
-...then back to forward dots only. The choice is remembered between games
+...then back to forward line only. The choice is remembered between games
 (the first start is on "both"). Another key can be set in the settings file.
 
-Updating from 0.2.0? Only the plugin changes; the mod stays as it is. Your
-settings file keeps the old dot distance and size: set min_distance_m = 14
-and dot_size_m = 0.5 under [forward], or delete the file for fresh defaults.
-
-Updating from 0.1.0? Update the mod as well as the plugin: the plugin needs
-the dot models.
+Updating? Update the mod as well as the plugin: this plugin needs the blue
+line model (let Steam update the Workshop item, or use the new .scs).
+Your settings file is kept. The forward dot settings in it are ignored and
+the new [forward] settings use their defaults; delete the file to get a
+fresh commented copy.
 
 Full instructions, settings and troubleshooting: User_Guide.md
 (open it with any text editor or a Markdown viewer).

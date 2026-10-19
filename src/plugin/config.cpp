@@ -42,11 +42,6 @@ max_length_m = 40
 width_m = 0.3
 ; Line height above the truck's reference point, in metres
 height_m = 0.35
-; With a trailer, a teal line shows where the last trailer's inner wheels will
-; go, on turns where they cut inside the blue line by more than
-; trailer_offtrack_m metres. 1 = on, 0 = off.
-trailer_line = 1
-trailer_offtrack_m = 0.5
 ; Steering smoothing in seconds, so the line doesn't jitter at speed (0 = off)
 steering_smoothing_s = 0.25
 
@@ -143,8 +138,6 @@ Config load_config(const std::filesystem::path &path, std::string *report)
         else if (id == "forward.length_time_s") c.length_time_s = parse_float(value, c.length_time_s, 0.0f, 5.0f);
         else if (id == "forward.max_length_m") c.max_length_m = parse_float(value, c.max_length_m, 5.0f, 100.0f);
         else if (id == "forward.width_m") c.forward_width_m = parse_float(value, c.forward_width_m, 0.15f, 0.6f);
-        else if (id == "forward.trailer_line") c.trailer_line = parse_bool(value);
-        else if (id == "forward.trailer_offtrack_m") c.trailer_offtrack_m = parse_float(value, c.trailer_offtrack_m, 0.0f, 10.0f);
         // dot_height_m is the 0.2.0 - 0.3.0 name for the same height.
         else if (id == "forward.height_m" || id == "forward.dot_height_m")
             c.forward_height_m = parse_float(value, c.forward_height_m, -1.0f, 2.0f);

@@ -20,8 +20,6 @@ struct Config
     float max_length_m = 40.0f;
     float forward_width_m = 0.3f;
     float forward_height_m = 0.35f;     // above the truck's placement origin
-    bool trailer_line = true;           // the last trailer's inner wheels, on turns
-    float trailer_offtrack_m = 0.5f;    // shown when they run this far inside the truck's line
     float steering_smoothing_s = 0.25f; // time constant; 0 = none
     // Hotkey cycling forward only / reverse only / both / off. Virtual-key
     // code plus modifiers; vk 0 disables.

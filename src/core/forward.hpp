@@ -111,24 +111,6 @@ inline void lay_strips(const std::vector<TracePoint> &trace, Band band, const Fo
         }
     }
 }
-
-// Shortest distance from `p` to the polyline, counting only points that
-// project inside one of its segments; negative when none does.
-inline double distance_alongside(const std::vector<Vec2> &line, Vec2 p)
-{
-    double best = -1.0;
-    for (std::size_t i = 0; i + 1 < line.size(); ++i)
-    {
-        const Vec2 ab = line[i + 1] - line[i];
-        const double len2 = dot(ab, ab);
-        if (len2 < 1e-12) continue;
-        const double t = dot(p - line[i], ab) / len2;
-        if (t < 0.0 || t > 1.0) continue;
-        const double d = length(p - (line[i] + ab * t));
-        if (best < 0.0 || d < best) best = d;
-    }
-    return best;
-}
 }
 
 // The path of the front axle's centre while the truck drives `span` metres
@@ -152,59 +134,6 @@ inline std::vector<GuideSegment> build_forward(const Rig &rig, double span,
         trace.push_back({to_world(predict_forward(tractor, rig.poses[0], d), tractor.front_axle), d});
     }
     detail::lay_strips(trace, Band::blue, o, out);
-    return out;
-}
-
-struct TrailerLine
-{
-    std::vector<GuideSegment> segments;
-    // How far the last trailer's axle runs inside the front axle's path,
-    // at most, over that stretch of road (metres).
-    double offtrack = 0.0;
-};
-
-// Where the last trailer's inner wheels (on the inside of the turn) will run
-// over the stretch of road the forward line covers. The rig is driven on
-// until the trailer has crossed that stretch, and only the part alongside
-// the forward line is kept, so it sits ahead of the truck next to it. On a
-// turn a trailer cuts inside the truck: around a kingpin circling at radius
-// R, its axle settles on radius sqrt(R^2 - d^2), d = kingpin to axle.
-inline TrailerLine build_trailer_forward(const Rig &rig, double span,
-                                         const ForwardOptions &o = {})
-{
-    TrailerLine out;
-    if (rig.units.size() < 2 || rig.poses.size() != rig.units.size() || span <= 0.0) return out;
-    const UnitGeometry &tractor = rig.units[0];
-    span = detail::capped_span(tractor, span, o);
-
-    const std::size_t last = rig.units.size() - 1;
-    const UnitGeometry &g = rig.units[last];
-    // Straight-line distance the trailer axle trails the front axle by: the
-    // extra travel it needs to reach the far end of the forward line.
-    const double reach = length(to_world(rig.poses[0], tractor.front_axle) -
-                                to_world(rig.poses[last], g.axle));
-    const Prediction p = predict_motion(rig, span + reach + 1.0, 1.0, 0.05, 0.2);
-    if (p.steps.empty()) return out;
-
-    std::vector<Vec2> front;
-    for (const auto &step : p.steps)
-        if (step.distance <= span + 1e-9) front.push_back(to_world(step.poses[0], tractor.front_axle));
-
-    const double side = tractor.curvature >= 0.0 ? -1.0 : 1.0; // left turn: left wheels
-    const Vec2 wheels{g.axle.x + side * g.half_width, g.axle.z};
-    std::vector<detail::TracePoint> trace;
-    for (const auto &step : p.steps)
-    {
-        const double d = detail::distance_alongside(front, to_world(step.poses[last], g.axle));
-        if (d < 0.0)
-        {
-            if (!trace.empty()) break; // past the far end
-            continue;                  // not yet level with the front axle's start
-        }
-        out.offtrack = std::max(out.offtrack, d);
-        trace.push_back({to_world(step.poses[last], wheels), step.distance});
-    }
-    detail::lay_strips(trace, Band::teal, o, out.segments);
     return out;
 }
 }

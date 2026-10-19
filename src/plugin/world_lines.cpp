@@ -22,12 +22,11 @@ namespace
 // Instances are created on first use, so unused slots cost a pointer.
 constexpr std::size_t pool_size = 512;
 // Indexed by Band.
-constexpr std::array<const char *, 5> model_paths{
+constexpr std::array<const char *, 4> model_paths{
     "/model/rto_guides/line_red.pmd",
     "/model/rto_guides/line_yellow.pmd",
     "/model/rto_guides/line_green.pmd",
     "/model/rto_guides/line_blue.pmd",
-    "/model/rto_guides/line_teal.pmd",
 };
 
 engine::Functions fn;
@@ -44,7 +43,7 @@ std::array<std::array<std::uint64_t *, pool_size>, model_paths.size()> pools{};
 std::atomic<bool> suspended{false}; // between release_models() and resume()
 std::atomic<bool> faulted{false};
 // A model that failed to load (e.g. a mod older than the plugin, without the
-// forward-line models) is skipped for the session; the other models keep drawing.
+// forward-line model) is skipped for the session; the other models keep drawing.
 std::array<bool, model_paths.size()> missing{};
 bool logged_first_render = false;
 

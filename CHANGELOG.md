@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.4.0
+
+**Changed**
+- **One blue forward line replaces the red and green forward markers.** In a
+  forward gear a light blue, see-through line (75 % opacity) runs from the
+  middle of the front axle along the path the truck will take, so its curve
+  starts where the truck is. It is 25 m long when slow and
+  `speed × 1.2 s` at speed, at most 40 m, and stops after a quarter turn.
+- **True at highway speed.** Up to 5 m/s the curve comes from the front-wheel
+  angles; from 10 m/s it comes from the truck's measured turn rate over its
+  speed, blended in between. At speed the tyres slip, so the wheel angles
+  alone over-bent the line on long curves.
+- **New `[forward]` settings:** `min_length_m`, `length_time_s`,
+  `max_length_m`, `width_m`, `height_m`, `steering_smoothing_s`. The forward
+  dot settings of 0.2.0 - 0.3.0 are ignored without complaint;
+  `dot_height_m` still sets the height.
+- The mod description in the Mod Manager and the top of the Workshop page now
+  say that the plugin is a separate download.
+
+**Upgrading**
+- **Update both parts.** The plugin needs the new `line_blue` model from the
+  Workshop item (Steam updates it on its own) or the new `.scs`. Until then
+  the reverse lines still work and the log reports *"Could not create
+  /model/rto_guides/line_blue.pmd"*. The updated mod keeps the dot models, so
+  older plugins keep working with it.
+- Your settings file is kept; delete it to get a fresh commented copy with
+  the new `[forward]` settings.
+
 ## 0.3.0
 
 **New**
