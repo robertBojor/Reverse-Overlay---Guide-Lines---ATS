@@ -28,7 +28,7 @@ Each press moves to the next mode: [b]forward line only → reverse lines only �
 [size=120][b]Installation: two parts are needed[/b][/size]
 Steam Workshop cannot install plugins, so the plugin is a separate download. [b]Subscribing alone shows nothing.[/b]
 [list=1]
-[*][b]Models:[/b] subscribe to the Workshop item for your game and enable it in the Mod Manager: [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979]Backing & Lane Prediction - ATS[/url] or [url=https://steamcommunity.com/sharedfiles/filedetails/?id=ETS2_ITEM_ID]Backing & Lane Prediction - ETS2[/url]. (No Workshop? The plugin download also contains both mods as .scs files.)
+[*][b]Models:[/b] subscribe to the Workshop item for your game and enable it in the Mod Manager: [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979]Backing & Lane Prediction - ATS[/url] or [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3823038411]Backing & Lane Prediction - ETS2[/url]. (No Workshop? The plugin download also contains both mods as .scs files.)
 [*][b]Plugin:[/b] download the zip from [url=https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS/releases/latest]the latest GitHub release[/url]. Exit the game, unblock the zip (right-click → Properties → Unblock), extract it and run [i]Install.bat[/i]. It copies [i]ats_reverse_overlay.dll[/i] into [i]bin\win_x64\plugins[/i] of every game it finds, ATS and ETS2.
 [*]Start ATS, accept the [i]advanced SDK features[/i] notice (normal for any telemetry plugin), and drive.
 [/list]

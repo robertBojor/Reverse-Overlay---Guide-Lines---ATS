@@ -70,7 +70,7 @@ Steam Workshop can only deliver mod files. It cannot install the plugin, so
 **A. Steam Workshop (recommended)**
 1. Subscribe to the item for your game:
    - ATS: [**Backing & Lane Prediction - ATS**](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979)
-   - ETS2: [**Backing & Lane Prediction - ETS2**](https://steamcommunity.com/sharedfiles/filedetails/?id=ETS2_ITEM_ID)
+   - ETS2: [**Backing & Lane Prediction - ETS2**](https://steamcommunity.com/sharedfiles/filedetails/?id=3823038411)
 2. Wait until Steam has downloaded it.
 
 **B. Without the Workshop**

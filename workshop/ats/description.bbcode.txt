@@ -1,7 +1,7 @@
 [h1]Backing & Lane Prediction - ATS[/h1]
 [b]Subscribing alone shows nothing.[/b] The lines are drawn by a small plugin that Steam cannot install: [b][url=https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS/releases/latest]download the plugin here[/url][/b], exit the game and run [i]Install.bat[/i]. Already have it? [b]0.5.0 is out[/b] with a new installer that also covers Euro Truck Simulator 2.
 
-[b]Now also for ETS2:[/b] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=ETS2_ITEM_ID]Backing & Lane Prediction - ETS2[/url]. The same plugin works in both games.
+[b]Now also for ETS2:[/b] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3823038411]Backing & Lane Prediction - ETS2[/url]. The same plugin works in both games.
 
 Backup-camera style guide lines for reversing, and a forward line for lane position. While you are in reverse, two lines are drawn on the ground from the rear corners of your trailer (or truck, when bobtail) along the path it will actually take:
 

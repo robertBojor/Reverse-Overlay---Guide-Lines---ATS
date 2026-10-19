@@ -12,7 +12,7 @@ the game world and visible in the mirrors.**
 ![Status](https://img.shields.io/badge/status-early%20release-orange)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![ATS Workshop](https://img.shields.io/badge/ATS%20Workshop-subscribe-171a21?logo=steam)](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979)
-[![ETS2 Workshop](https://img.shields.io/badge/ETS2%20Workshop-subscribe-171a21?logo=steam)](https://steamcommunity.com/sharedfiles/filedetails/?id=ETS2_ITEM_ID)
+[![ETS2 Workshop](https://img.shields.io/badge/ETS2%20Workshop-subscribe-171a21?logo=steam)](https://steamcommunity.com/sharedfiles/filedetails/?id=3823038411)
 
 </div>
 
@@ -60,7 +60,7 @@ One shortcut chooses what you see. Each press moves to the next mode:
 ## What's new in 0.5.0
 
 - **Euro Truck Simulator 2.** The same plugin works in both games; ETS2 has its
-  own Workshop item, [**Backing & Lane Prediction - ETS2**](https://steamcommunity.com/sharedfiles/filedetails/?id=ETS2_ITEM_ID).
+  own Workshop item, [**Backing & Lane Prediction - ETS2**](https://steamcommunity.com/sharedfiles/filedetails/?id=3823038411).
 - **One installer for both games:** `Install.bat` finds ATS and ETS2 through
   Steam and installs into every game it finds. `Uninstall.bat` removes it
   from both.
@@ -102,7 +102,7 @@ separate download.
 1. **Line models:** subscribe to the Workshop item for your game, *or* use
    the `.scs` for your game from the download's `optional` folder:
    - ATS: [**Backing & Lane Prediction - ATS**](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979)
-   - ETS2: [**Backing & Lane Prediction - ETS2**](https://steamcommunity.com/sharedfiles/filedetails/?id=ETS2_ITEM_ID)
+   - ETS2: [**Backing & Lane Prediction - ETS2**](https://steamcommunity.com/sharedfiles/filedetails/?id=3823038411)
 2. **Plugin:** download `Backing_Lane_Prediction_v0.5.0.zip` from the
    [**latest release**](../../releases/latest), exit the game(s) and run `Install.bat`. It
    copies `ats_reverse_overlay.dll` into `bin\win_x64\plugins` of every game

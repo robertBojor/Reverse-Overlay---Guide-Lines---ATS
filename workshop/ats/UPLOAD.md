@@ -56,7 +56,7 @@ Steam app). Its files are in `workshop/ets2/`: `description.bbcode.txt` and
    Description: paste `workshop/ets2/description.bbcode.txt`. Change note:
    `Initial release v0.5.0`.
 3. Note the new item's ID from its Workshop URL and replace every
-   `ETS2_ITEM_ID` placeholder with it: `grep -rn ETS2_ITEM_ID README.md docs workshop promo`.
+   `ETS2_ITEM_ID` placeholder in the docs with it (0.5.0: done, ID 3823038411).
    Then paste the ATS description again (it links the ETS2 item) and re-paste
    the ETS2 one.
 4. Test the private item in ETS2 with the local `.scs` removed, add
