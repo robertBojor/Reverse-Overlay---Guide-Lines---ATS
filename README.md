@@ -231,7 +231,7 @@ third_party/    SCS SDK headers, MinHook, licences
 
 **Next**
 
-- [ ] Code-signed releases
+- [ ] Code-signed releases (certificate ordered, waiting for activation)
 - [ ] Euro Truck Simulator 2 version
 - [ ] Better height on uneven ground (wheel-based ground fit)
 - [ ] Configurable colours

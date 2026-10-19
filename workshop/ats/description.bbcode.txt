@@ -64,7 +64,7 @@ Log: [i]Documents\American Truck Simulator\ats_reverse_overlay.log[/i]. The firs
 [/list]
 [b]Next[/b]
 [list]
-[*]Code-signed plugin
+[*]Code-signed plugin (certificate ordered, waiting for activation)
 [*]Euro Truck Simulator 2 version
 [*]Better line height on uneven ground
 [*]Configurable colours
