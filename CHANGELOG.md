@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.5.0
+
+**New**
+- **Euro Truck Simulator 2.** All five engine patterns match ETS2 1.61.1.9
+  exactly once, so the same plugin draws the reverse guide lines and the
+  forward line in ETS2; that build is verified in game. ETS2 has its own
+  Workshop item, **Backing & Lane Prediction - ETS2**, with the same models.
+- **One installer for both games.** `Install.bat` finds ATS and ETS2 through
+  Steam and installs into every game it finds; `install.ps1 -Game ats|ets2`
+  picks one. `Uninstall.bat` removes the plugin from both.
+
+**Changed**
+- Settings, log and mode file go to the Documents folder of the game the
+  plugin runs in (`Documents\Euro Truck Simulator 2` in ETS2). ATS keeps its
+  files where they were.
+- The release zip is now `Backing_Lane_Prediction_v<version>.zip` and carries
+  both local mod packages in `optional/`.
+- The settings header, log header and the missing-model message name the mod
+  without the game.
+
+**Upgrading**
+- ATS: run the new `Install.bat`. The ATS Workshop item is unchanged.
+
 ## 0.4.0
 
 **Changed**

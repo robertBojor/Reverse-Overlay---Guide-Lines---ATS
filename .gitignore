@@ -2,7 +2,7 @@ build/
 out/*.exe
 out/*.dll
 out/*.scs
-out/mod_stage/
+out/mod_stage*/
 .claude/
 __pycache__/
 refs/

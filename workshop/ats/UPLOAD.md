@@ -1,4 +1,4 @@
-# Workshop upload: Backing & Lane Prediction - ATS
+# Workshop upload: Backing & Lane Prediction (ATS and ETS2)
 
 ## Files in this folder
 
@@ -41,6 +41,28 @@ Generated files (`upload/`) are rebuilt by `tools/make_assets.py workshop`. Don'
 Run `tools/make_assets.py workshop`, then in the uploader select the existing item, check the folder and preview paths, write a change note, and upload. Subscribers get it automatically. Bump `VERSION` for every release so the package version and the DLL log line match.
 
 Publish the matching plugin release on GitHub **at the same time**. The Workshop description links to the latest release.
+
+### 0.5.0 checklist (ETS2 first upload)
+
+The ETS2 item is a separate Workshop item (Euro Truck Simulator 2 is its own
+Steam app). Its files are in `workshop/ets2/`: `description.bbcode.txt` and
+`mod_icon.jpg`; the preview is `assets/images/ets2-preview-image.jpg`.
+
+1. Run `python3 -I tools/make_assets.py workshop ets2` (writes `workshop/ets2/upload`).
+2. Uploader: Game **Euro Truck Simulator 2**, Item **New**. Mod data:
+   `\\wsl.localhost\Ubuntu\home\rb\work\ats-reverse-overlay\workshop\ets2\upload`.
+   Preview: `assets/images/ets2-preview-image.jpg`. Title:
+   **Backing & Lane Prediction - ETS2**. Visibility **Private** first.
+   Description: paste `workshop/ets2/description.bbcode.txt`. Change note:
+   `Initial release v0.5.0`.
+3. Note the new item's ID from its Workshop URL and replace every
+   `ETS2_ITEM_ID` placeholder with it: `grep -rn ETS2_ITEM_ID README.md docs workshop promo`.
+   Then paste the ATS description again (it links the ETS2 item) and re-paste
+   the ETS2 one.
+4. Test the private item in ETS2 with the local `.scs` removed, add
+   screenshots, then set it **Public** and publish the GitHub release.
+5. ATS item: no new upload is needed (the models are unchanged); only paste
+   the updated `workshop/ats/description.bbcode.txt`.
 
 ### 0.4.0 checklist
 

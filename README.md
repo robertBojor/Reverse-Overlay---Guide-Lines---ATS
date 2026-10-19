@@ -1,23 +1,24 @@
 <div align="center">
 
-# Backing & Lane Prediction · ATS
+# Backing & Lane Prediction · ATS & ETS2
 
-**Backup-camera style guide lines for reversing in American Truck Simulator,
-plus a forward line for lane position, drawn in the game world and visible in
-the mirrors.**
+**Backup-camera style guide lines for reversing in American Truck Simulator
+and Euro Truck Simulator 2, plus a forward line for lane position, drawn in
+the game world and visible in the mirrors.**
 
-![Game](https://img.shields.io/badge/game-American%20Truck%20Simulator%201.61-1f6feb)
+![Games](https://img.shields.io/badge/games-ATS%201.61%20%C2%B7%20ETS2%201.61-1f6feb)
 ![Platform](https://img.shields.io/badge/platform-Windows%20x64-555)
-![Version](https://img.shields.io/badge/version-0.4.0-2ea44f)
+![Version](https://img.shields.io/badge/version-0.5.0-2ea44f)
 ![Status](https://img.shields.io/badge/status-early%20release-orange)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Steam Workshop](https://img.shields.io/badge/Steam%20Workshop-subscribe-171a21?logo=steam)](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979)
+[![ATS Workshop](https://img.shields.io/badge/ATS%20Workshop-subscribe-171a21?logo=steam)](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979)
+[![ETS2 Workshop](https://img.shields.io/badge/ETS2%20Workshop-subscribe-171a21?logo=steam)](https://steamcommunity.com/sharedfiles/filedetails/?id=ETS2_ITEM_ID)
 
 </div>
 
-*Formerly **Reverse Overlay - Guide Lines - ATS**. Same Workshop item, same plugin file, new name for 0.2.0.*
+*Formerly **Reverse Overlay - Guide Lines - ATS**. Same ATS Workshop item, same plugin file, new name since 0.2.0.*
 
-<p align="center"><img src="assets/images/preview-image-large.jpg" width="820" alt="Backing &amp; Lane Prediction: on the left, red, yellow and green reverse guide lines behind a truck and trailer at night; on the right, a red and a green dot on the highway ahead of a truck, marking where its front corners will be"></p>
+<p align="center"><img src="assets/images/ets2-preview-image-large.jpg" width="820" alt="Backing &amp; Lane Prediction, now for ETS2: on the left, red, yellow and green reverse guide lines behind a European truck and trailer at a warehouse; on the right, a light blue line on the motorway ahead of the truck, showing the path it will take"></p>
 
 When you shift into reverse, two lines appear on the ground from the rear
 corners of your trailer, or of the truck when you drive without one. They follow
@@ -56,19 +57,19 @@ One shortcut chooses what you see. Each press moves to the next mode:
 - To use a different key, edit `[hotkey]` in the settings file
   ([details](docs/USER_GUIDE.md#hotkey)).
 
-## What's new in 0.4.0
+## What's new in 0.5.0
 
-- **One calm blue line instead of the red and green markers.** It starts under
-  the middle of the front axle and follows the path the truck will take, so
-  its curve begins where the truck is. It is light blue and see-through.
-- **True at highway speed.** Above about 36 km/h (22 mph) the curve comes from
-  how fast the truck is actually turning, not from the wheel angle, which
-  over-bends at speed because the tyres slip.
-- **Update both parts:** the plugin and the Workshop mod (it has the new line
-  model). The `[forward]` settings are new; old dot settings are ignored.
+- **Euro Truck Simulator 2.** The same plugin works in both games; ETS2 has its
+  own Workshop item, [**Backing & Lane Prediction - ETS2**](https://steamcommunity.com/sharedfiles/filedetails/?id=ETS2_ITEM_ID).
+- **One installer for both games:** `Install.bat` finds ATS and ETS2 through
+  Steam and installs into every game it finds. `Uninstall.bat` removes it
+  from both.
+- Each game keeps its own settings, log and mode file in its Documents folder.
+- **ATS players:** nothing changes in game. The ATS Workshop item stays as it
+  is; update the plugin whenever you like.
 
-0.3.0 stretched the forward dots into lines; 0.2.0 added them and the
-four-step Ctrl+Shift+F9 cycle.
+0.4.0 replaced the red and green forward markers with one see-through blue
+line from the front axle that stays true at highway speed.
 
 Full history: [CHANGELOG.md](CHANGELOG.md).
 
@@ -98,24 +99,24 @@ Full history: [CHANGELOG.md](CHANGELOG.md).
 You need **two parts**. Steam Workshop can't install plugins, so the DLL is a
 separate download.
 
-1. **Line models:** subscribe to [**Backing & Lane Prediction - ATS**](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979) on the
-   Steam Workshop, *or* use the `.scs` included in the download.
-2. **Plugin:** download `Backing_Lane_Prediction_ATS_v0.4.0.zip` from the
-   [**latest release**](../../releases/latest), exit the game and run `Install.bat`. It
-   copies `ats_reverse_overlay.dll` into
-   `American Truck Simulator\bin\win_x64\plugins`.
-3. Start ATS, accept the *advanced SDK features* notice, enable the mod in the
-   Mod Manager, and drive. Press **Ctrl+Shift+F9** to choose what is shown
+1. **Line models:** subscribe to the Workshop item for your game, *or* use
+   the `.scs` for your game from the download's `optional` folder:
+   - ATS: [**Backing & Lane Prediction - ATS**](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979)
+   - ETS2: [**Backing & Lane Prediction - ETS2**](https://steamcommunity.com/sharedfiles/filedetails/?id=ETS2_ITEM_ID)
+2. **Plugin:** download `Backing_Lane_Prediction_v0.5.0.zip` from the
+   [**latest release**](../../releases/latest), exit the game(s) and run `Install.bat`. It
+   copies `ats_reverse_overlay.dll` into `bin\win_x64\plugins` of every game
+   it finds.
+3. Start the game, accept the *advanced SDK features* notice, enable the mod
+   in the Mod Manager, and drive. Press **Ctrl+Shift+F9** to choose what is shown
    ([see above](#keyboard-shortcut-ctrlshiftf9)).
 
 > [!IMPORTANT]
-> **Updating to 0.4.0:** update both parts. The plugin needs the new blue line
-> model from the Workshop item (Steam updates it on its own) or the new
-> `.scs`. Until then the reverse lines still work, the forward line is
-> missing, and the log reports
-> *"Could not create /model/rto_guides/line_blue.pmd"*. Your settings file is
-> kept; the new `[forward]` settings use their defaults until you add them, or
-> delete the file to get a fresh commented copy.
+> **Updating from 0.4.0:** run the new `Install.bat`; the ATS mod is
+> unchanged. **From 0.3.0 or older:** update the ATS Workshop item too (Steam
+> does it on its own), because the plugin needs the blue line model. Until
+> then the reverse lines still work and the log reports
+> *"Could not create /model/rto_guides/line_blue.pmd"*.
 
 The **[user guide](docs/USER_GUIDE.md)** covers settings, troubleshooting, game
 updates and uninstalling.
@@ -169,6 +170,11 @@ tools/re/update.sh --apply   # find the functions in the new build, rewrite the 
 tools/build.sh Release       # rebuild the plugin
 ```
 
+Both games share the patterns. For ETS2, point the finder at its executable
+and reference: `GAME_EXE=".../Euro Truck Simulator 2/bin/win_x64/eurotrucks2.exe"
+REFERENCE_EXE=refs/eurotrucks2_1.61.1.9.exe tools/re/update.sh`. A pattern
+rewritten for one game must still match the other.
+
 The finder compares the new executable with a known-good reference using four
 independent methods:
 - exact patterns;
@@ -187,8 +193,9 @@ Windows directly.
 
 ```bash
 tools/build.sh Release                  # plugin DLL -> out/
-python3 -I tools/make_assets.py all     # mod files: out/mod_stage + workshop/ats/upload
-tools/make_release.sh                   # release zip -> out/release/
+python3 -I tools/make_assets.py all     # ATS mod files: out/mod_stage + workshop/ats/upload
+python3 -I tools/make_assets.py all ets2  # ETS2: out/mod_stage_ets2 + workshop/ets2/upload
+tools/make_release.sh                   # release zip with both .scs files -> out/release/
 ```
 
 Core tests (platform-neutral, any C++20 compiler):
@@ -197,7 +204,7 @@ Core tests (platform-neutral, any C++20 compiler):
 c++ -std=c++20 -O2 tests/core_tests.cpp -o core_tests && ./core_tests
 ```
 
-Workshop publishing steps: [workshop/ats/UPLOAD.md](workshop/ats/UPLOAD.md).
+Workshop publishing steps: [workshop/ats/UPLOAD.md](workshop/ats/UPLOAD.md) (both games).
 
 <details>
 <summary><b>Repository layout</b></summary>
@@ -209,7 +216,8 @@ assets/base/    base line model the coloured variants are generated from
 tests/          core unit tests
 tools/          build, asset, packaging and install scripts
 tools/re/       pattern generation and the game-update finder
-workshop/ats/   Steam Workshop upload folder, description and checklist
+workshop/ats/   ATS Workshop description, icon and checklist (both games)
+workshop/ets2/  ETS2 Workshop description and icon
 docs/           user guide
 third_party/    SCS SDK headers, MinHook, licences
 ```
@@ -228,11 +236,12 @@ third_party/    SCS SDK headers, MinHook, licences
 - [x] **0.4.0:** one calm, see-through blue line from the front axle instead
   of the red and green markers, curved from how the truck is actually turning
   so it stays true at highway speed.
+- [x] **0.5.0:** Euro Truck Simulator 2, with one plugin and installer for
+  both games.
 
 **Next**
 
 - [ ] Code-signed releases (certificate ordered, waiting for activation)
-- [ ] Euro Truck Simulator 2 version
 - [ ] Better height on uneven ground (wheel-based ground fit)
 - [ ] Configurable colours
 
@@ -249,5 +258,5 @@ third_party/    SCS SDK headers, MinHook, licences
 [MIT](LICENSE) © 2026 Robert Bojor. Third-party components keep their own
 licences; see [third_party/licenses](third_party/licenses).
 
-*Not affiliated with or endorsed by SCS Software. American Truck Simulator is a
-trademark of SCS Software.*
+*Not affiliated with or endorsed by SCS Software. American Truck Simulator and
+Euro Truck Simulator 2 are trademarks of SCS Software.*

@@ -1,9 +1,11 @@
-# Backing & Lane Prediction - ATS · User guide
+# Backing & Lane Prediction · User guide
 
-*Formerly "Reverse Overlay - Guide Lines - ATS". The Workshop item and the
-plugin file (`ats_reverse_overlay.dll`) are the same; only the name changed.*
+*For American Truck Simulator and Euro Truck Simulator 2. Formerly "Reverse
+Overlay - Guide Lines - ATS"; the ATS Workshop item and the plugin file
+(`ats_reverse_overlay.dll`) are the same, only the name changed.*
 
-Backup-camera style guide lines for American Truck Simulator. When you shift
+Backup-camera style guide lines for American Truck Simulator and Euro Truck
+Simulator 2. When you shift
 into reverse, two lines appear on the ground behind your trailer (or behind the
 truck when you drive without a trailer). They show where the rear corners will
 go if you keep the steering where it is.
@@ -28,16 +30,23 @@ forward line, the reverse lines, both or neither.
 > → both → nothing**, then back to forward line only. Your choice is
 > remembered. Details in [section 3](#what-is-shown-ctrlshiftf9).
 
-**New in 0.4.0:** one calm, see-through blue line from the front axle replaces
-the red and green forward markers, and at speed it follows how the truck is
-actually turning. Update the plugin **and** the mod: the plugin needs the new
-line model. See the [changelog](../CHANGELOG.md).
+**New in 0.5.0:** Euro Truck Simulator 2. One plugin serves both games, and
+`Install.bat` installs it into every game it finds. ETS2 has its own Workshop
+item. ATS players only need the new plugin if they want the new installer;
+nothing changes in ATS itself. See the [changelog](../CHANGELOG.md).
+
+**Paths in this guide:** *the game's Documents folder* means
+`Documents\American Truck Simulator` or `Documents\Euro Truck Simulator 2`,
+and *the game folder* means where Steam installed the game, for example
+`...\steamapps\common\Euro Truck Simulator 2`. Settings, log and mode file
+are separate for each game.
 
 ---
 
 ## 1. Requirements
 
-- American Truck Simulator **1.61** on **Windows 64-bit** (Steam).
+- American Truck Simulator **1.61** or Euro Truck Simulator 2 **1.61**, on
+  **Windows 64-bit** (Steam).
 - Tested with the DirectX 11 renderer. The guide lines use the game's own
   rendering, so the renderer shouldn't matter, but the others are untested.
 - Not available for macOS or Linux.
@@ -50,7 +59,7 @@ The mod comes in **two parts**, and you need both:
 
 | Part | What it does | Where it comes from |
 |---|---|---|
-| **Models** | The coloured line pieces the game draws | Steam Workshop item *or* `optional\ats_reverse_overlay.scs` in the download |
+| **Models** | The coloured line pieces the game draws | The Steam Workshop item for your game *or* the `.scs` in the download's `optional` folder |
 | **Plugin** (`ats_reverse_overlay.dll`) | Predicts the path and places the lines | The plugin download (zip) |
 
 Steam Workshop can only deliver mod files. It cannot install the plugin, so
@@ -59,52 +68,59 @@ Steam Workshop can only deliver mod files. It cannot install the plugin, so
 ### Step 1: Get the models (choose one)
 
 **A. Steam Workshop (recommended)**
-1. Subscribe to [**Backing & Lane Prediction - ATS**](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979) on the Steam Workshop.
+1. Subscribe to the item for your game:
+   - ATS: [**Backing & Lane Prediction - ATS**](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979)
+   - ETS2: [**Backing & Lane Prediction - ETS2**](https://steamcommunity.com/sharedfiles/filedetails/?id=ETS2_ITEM_ID)
 2. Wait until Steam has downloaded it.
 
 **B. Without the Workshop**
-1. Copy `optional\ats_reverse_overlay.scs` from the plugin download into
-   `Documents\American Truck Simulator\mod\`.
+1. From the plugin download's `optional` folder, copy the file for your game
+   into the `mod` folder in the game's Documents folder:
+   - ATS: `ats_reverse_overlay.scs` → `Documents\American Truck Simulator\mod\`
+   - ETS2: `backing_lane_prediction_ets2.scs` → `Documents\Euro Truck Simulator 2\mod\`
 
-Use **A or B, not both**.
+Use **A or B, not both**. Playing both games? Do this for each one.
 
 ### Step 2: Install the plugin
 
 1. **Exit the game completely.**
-2. Download `Backing_Lane_Prediction_ATS_v<version>.zip` from the
+2. Download `Backing_Lane_Prediction_v<version>.zip` from the
    [latest release](https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS/releases/latest).
 3. Before extracting, right-click the zip → **Properties**, tick **Unblock**
    if it's there, then click **OK**. This avoids extra Windows security prompts
    (see [section 7](#7-windows-security-unsigned-plugin)).
 4. Extract the zip anywhere.
 5. Double-click **`Install.bat`**.
-   - It finds your ATS installation through Steam.
-   - It copies `ats_reverse_overlay.dll` into
-     `...\steamapps\common\American Truck Simulator\bin\win_x64\plugins\`
-     and creates the `plugins` folder if it doesn't exist.
-   - When it says **Installed …**, you can close the window.
+   - It finds ATS and ETS2 through Steam and installs into **every game it
+     finds**: it copies `ats_reverse_overlay.dll` into the game folder's
+     `bin\win_x64\plugins\` and creates the `plugins` folder if needed.
+   - It prints one **installed …** line per game; then you can close the
+     window.
+   - To install into one game only, run it from a command prompt as
+     `powershell -ExecutionPolicy Bypass -File installer\install.ps1 -Game ets2`
+     (or `-Game ats`).
 
 To install by hand instead, copy `ats_reverse_overlay.dll` into
-`<ATS folder>\bin\win_x64\plugins\`. Create the `plugins` folder if it's
+`<game folder>\bin\win_x64\plugins\`. Create the `plugins` folder if it's
 missing. The game only loads plugins from that exact folder.
 
 ### Step 3: Enable the mod
 
-1. Start ATS.
+1. Start the game.
 2. The game shows a notice that a plugin uses **advanced SDK features**. This is
    expected for any telemetry plugin. Confirm it.
-3. Open the **Mod Manager**, enable **Backing & Lane Prediction - ATS**, and
-   confirm the changes.
+3. Open the **Mod Manager**, enable **Backing & Lane Prediction - ATS** (or
+   **- ETS2**), and confirm the changes.
 4. Load your profile and drive: the blue line appears in a forward gear, the
    guide lines in reverse. Press **Ctrl+Shift+F9** to choose what is shown.
 
 ### Check it's working
 
-Open `Documents\American Truck Simulator\ats_reverse_overlay.log`. After
+Open `ats_reverse_overlay.log` in the game's Documents folder. After
 starting the game you should see:
 
 ```
-Backing & Lane Prediction 0.4.0 starting in American Truck Simulator ...
+Backing & Lane Prediction 0.5.0 starting in Euro Truck Simulator 2 ...
 Showing forward line and reverse guide lines (the hotkey changes this).
 engine functions located: ...
 In-world guide lines ready (vehicle render hook installed).
@@ -135,7 +151,7 @@ these lines are missing, see [Troubleshooting](#6-troubleshooting).
 
 - The next press starts again with the forward line only.
 - The mode is **remembered** between game sessions, in
-  `Documents\American Truck Simulator\ats_reverse_overlay.mode`. The very
+  `ats_reverse_overlay.mode` in the game's Documents folder. The very
   first start is on **Both**. To reset, delete that file.
 - The shortcut works only while the **game window has focus**. It does nothing
   in the Windows desktop or another program.
@@ -194,7 +210,7 @@ these lines are missing, see [Troubleshooting](#6-troubleshooting).
 
 ## 4. Settings
 
-File: `Documents\American Truck Simulator\ats_reverse_overlay.ini`.
+File: `ats_reverse_overlay.ini` in the game's Documents folder, one per game.
 It's created on the first game start. Edit it with any text editor. Most
 changes apply **while you drive** (within about 2 seconds).
 
@@ -271,21 +287,21 @@ update, one of three things happens:
 | No lines. The log says *"engine functions missing"* and *"In-world guide lines unavailable on this game build"* | The update changed the code the plugin uses. The lines switch themselves off, and the game runs normally | Wait for a plugin update, or roll back the game (below) |
 | Problems or crashes when reversing right after an update | Rare: the code still matched but works differently | Set `allow_unverified = 0`, or remove the DLL, until the plugin is updated |
 
-**Rolling back the game:** in Steam, right-click American Truck Simulator →
+**Rolling back the game:** in Steam, right-click the game →
 **Properties → Betas** and pick the previous version, if SCS offers it.
 
 ---
 
 ## 6. Troubleshooting
 
-**Start with the log:** `Documents\American Truck Simulator\ats_reverse_overlay.log`.
-The game's own log is `Documents\American Truck Simulator\game.log.txt`; search
+**Start with the log:** `ats_reverse_overlay.log` in the game's Documents
+folder. The game's own log is `game.log.txt` in the same folder; search
 it for `lane-prediction` or `ats_reverse_overlay`.
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | No `ats_reverse_overlay.log` at all, or it isn't updated | The plugin isn't loaded | Check that the DLL is in `bin\win_x64\plugins\` (not just `bin\win_x64\`). In `game.log.txt`, look for `loading 'ats_reverse_overlay'`. If the game log shows the plugin failing to load, see [section 7](#7-windows-security-unsigned-plugin) |
-| Log: *"Could not create /model/rto_guides/… - is the … mod enabled in the Mod Manager?"* | The line models aren't loaded | Enable **Backing & Lane Prediction - ATS** in the Mod Manager. Then restart the game, because a model that failed to load stays off for the session |
+| Log: *"Could not create /model/rto_guides/… - is the … mod enabled in the Mod Manager?"* | The line models aren't loaded | Enable **Backing & Lane Prediction - ATS** (or **- ETS2**) in the Mod Manager. Then restart the game, because a model that failed to load stays off for the session |
 | Log: *"engine functions missing"* | Unsupported game version | See [Game updates](#5-game-updates) |
 | Log: *"In-world guide lines skipped: build not verified and allow_unverified = 0"* | Safety mode is on | Set `allow_unverified = 1` if you want to try it on this version |
 | Log: *"In-world rendering raised an exception…"* | Something went wrong while drawing. The lines are switched off for the session | Restart the game. If it repeats, send the log with your report |
@@ -320,10 +336,11 @@ following:
   quarantines the DLL, you can add an exception for the `plugins` folder.
 
 What the plugin does and doesn't do:
-- It runs only inside ATS, loaded by the game's official plugin system.
+- It runs only inside ATS or ETS2, loaded by the game's official plugin
+  system.
 - It reads telemetry, and it only writes `ats_reverse_overlay.log`,
-  `ats_reverse_overlay.ini` and `ats_reverse_overlay.mode` in your
-  `Documents\American Truck Simulator` folder.
+  `ats_reverse_overlay.ini` and `ats_reverse_overlay.mode` in the game's
+  Documents folder.
 - It has **no network access** and doesn't touch your save games.
 
 ---
@@ -331,12 +348,13 @@ What the plugin does and doesn't do:
 ## 8. Uninstall
 
 1. Exit the game.
-2. Run **`Uninstall.bat`** from the download, or delete
-   `<ATS folder>\bin\win_x64\plugins\ats_reverse_overlay.dll`.
-3. Disable or unsubscribe **Backing & Lane Prediction - ATS** (or delete
-   `Documents\American Truck Simulator\mod\ats_reverse_overlay.scs`).
+2. Run **`Uninstall.bat`** from the download (it removes the plugin from
+   both games), or delete
+   `<game folder>\bin\win_x64\plugins\ats_reverse_overlay.dll`.
+3. Disable or unsubscribe **Backing & Lane Prediction - ATS** / **- ETS2** (or
+   delete its `.scs` from the `mod` folder in the game's Documents folder).
 4. Optionally delete `ats_reverse_overlay.ini`, `ats_reverse_overlay.log` and
-   `ats_reverse_overlay.mode` from `Documents\American Truck Simulator`.
+   `ats_reverse_overlay.mode` from the game's Documents folder.
 
 ---
 
@@ -344,12 +362,13 @@ What the plugin does and doesn't do:
 
 **Does it work in Convoy (multiplayer)?** Untested.
 
-**Euro Truck Simulator 2?** A separate ETS2 version is planned.
+**Euro Truck Simulator 2?** Yes, since 0.5.0: the same plugin, and its own
+Workshop item. Install the plugin once; `Install.bat` puts it into both games.
 
 **Mac or Linux?** Not currently.
 
 **Does it affect performance?** Barely. It's about 140 small line pieces while
-reversing and 2 small tiles while driving forward.
+reversing and at most 80 while driving forward.
 
 **Can I change the colours?** Not yet. The band distances can be changed.
 

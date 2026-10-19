@@ -1,0 +1,75 @@
+[h1]Backing & Lane Prediction - ETS2[/h1]
+[b]Subscribing alone shows nothing.[/b] The lines are drawn by a small plugin that Steam cannot install: [b][url=https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS/releases/latest]download the plugin here[/url][/b], exit the game and run [i]Install.bat[/i]. Already using it in American Truck Simulator? Run the new [i]Install.bat[/i] (0.5.0 or newer): it installs the plugin into both games.
+
+[b]Also for ATS:[/b] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979]Backing & Lane Prediction - ATS[/url].
+
+Backup-camera style guide lines for reversing, and a forward line for lane position. While you are in reverse, two lines are drawn on the ground from the rear corners of your trailer (or truck, when bobtail) along the path it will actually take:
+
+[list]
+[*][b]Red[/b] for the first 3 m, [b]yellow[/b] to 8 m, [b]green[/b] out to 15 m, with ticks where the colour changes
+[*]Real objects in the world, so they show in [b]every camera and in the mirrors[/b]
+[*]Follows your [b]actual wheel angles[/b] (different steering locks, lift axles and multi-steer trucks)
+[*]Works with any truck and trailer, including ones from DLCs and mods
+[*]Single trailers, doubles and triples; self-steering trailer axles included
+[*]Distances and line height adjustable in a settings file
+[/list]
+
+[h2]Forward line for lane position[/h2]
+In a forward gear, a light, see-through [b]blue line[/b] runs on the road from the middle of your front axle along the path the truck will take, curving with the steering. It is 25 m long when slow and up to 40 m at highway speed, and at speed it follows how the truck is actually turning, so it stays true on long bends. Keep it in the middle of your lane. Trailers are ignored, because they follow inside the truck's path.
+
+[h2]Keyboard shortcut: Ctrl+Shift+F9[/h2]
+Each press moves to the next mode (only while the game window has focus):
+[olist]
+[*][b]Forward line only[/b]
+[*][b]Reverse lines only[/b]
+[*][b]Both[/b]: the forward line in a forward gear, guide lines in reverse
+[*][b]Nothing[/b]: everything hidden
+[/olist]
+The next press starts again at forward line only. Your choice is remembered between games; the very first start is on [b]Both[/b]. Another key can be set in the [i][hotkey][/i] section of the settings file.
+
+Open source (MIT): read the full README, user guide and source code on GitHub before installing: [b][url=https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS]Backing & Lane Prediction on GitHub[/url][/b]
+
+[hr][/hr]
+[h2]IMPORTANT: two parts are needed[/h2]
+[olist]
+[*][b]This Workshop item[/b] provides the models for the lines. Subscribe and enable it in the Mod Manager.
+[*][b]The plugin DLL[/b] draws them. Steam Workshop cannot install it, so download it separately: [b][url=https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS/releases/latest]Backing & Lane Prediction - plugin download[/url][/b]. Exit the game and run [i]Install.bat[/i]. It copies [i]ats_reverse_overlay.dll[/i] (the file name is the same for both games) into [i]Euro Truck Simulator 2\bin\win_x64\plugins[/i], and into American Truck Simulator too if you have it, and creates that folder if needed.
+[/olist]
+[b]Subscribing alone does nothing.[/b] When you start the game with the plugin installed, it shows a notice about "advanced SDK features". That is expected.
+
+[h2]Requirements[/h2]
+[list]
+[*]Euro Truck Simulator 2 1.61 (plugin 0.5.0 or newer), Windows 64-bit
+[/list]
+
+[h2]Settings and troubleshooting[/h2]
+The plugin download includes a full user guide (User_Guide.md) with installation, settings, troubleshooting and what happens after game updates.
+
+Settings: [i]Documents\Euro Truck Simulator 2\ats_reverse_overlay.ini[/i] (created on first start, changes apply while driving).
+Log: [i]Documents\Euro Truck Simulator 2\ats_reverse_overlay.log[/i]. The first lines say whether the plugin found what it needs on your game version, and which mode the shortcut is in.
+
+[list]
+[*][b]No lines at all:[/b] check that the DLL is in [i]bin\win_x64\plugins[/i] and this mod is enabled, then press [b]Ctrl+Shift+F9[/b]: the mode may be set to show nothing.
+[*][b]Plugin does not load at all:[/b] the DLL is not digitally signed yet; Windows Smart App Control or antivirus software may block it. See the user guide.
+[*][b]After a game update:[/b] if the log says "engine functions missing", the lines switch themselves off until the plugin is updated. The game keeps running normally.
+[/list]
+
+[h2]Roadmap[/h2]
+[b]Done[/b]
+[list]
+[*][b]0.1.0 - 0.4.0 (ATS):[/b] reverse guide lines for the truck and up to ten trailers, the Ctrl+Shift+F9 modes, and the see-through blue forward line that follows how the truck is actually turning
+[*][b]0.5.0:[/b] Euro Truck Simulator 2: this item, and one plugin and installer for both games
+[/list]
+[b]Next[/b]
+[list]
+[*]Code-signed plugin (certificate ordered, waiting for activation)
+[*]Better line height on uneven ground
+[*]Configurable colours
+[/list]
+Ideas and bug reports are welcome in the comments or on GitHub.
+
+[h2]Compatibility[/h2]
+Works alongside other mods. Do not run it together with "Reverse Posture Assistant", which hooks the same part of the game. Use one or the other.
+
+[h2]Credits[/h2]
+In-world drawing technique and base line model from "Reverse Posture Assistant For ATS" by yyysheng (MIT licence). Uses the SCS Telemetry SDK and MinHook.
