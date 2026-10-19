@@ -44,8 +44,9 @@ constexpr std::array patterns{
 };
 
 // Executables on which in-world rendering has been seen working in game.
-constexpr std::array<std::string_view, 1> verified_hashes{
-    "C60E8EE02CC97B3CC6EF8C6298BB5C3C23C4FFD330B8185B646FB1B608A3C7B4", // 1.61.3.18
+constexpr std::array<std::string_view, 2> verified_hashes{
+    "C60E8EE02CC97B3CC6EF8C6298BB5C3C23C4FFD330B8185B646FB1B608A3C7B4", // ATS 1.61.3.18
+    "B70C2357CC56EB5834EE47FEA3C60B2F2D4591383FF2AC479CFD3CD254301B8C", // ETS2 1.61.1.9
 };
 
 struct Pattern
