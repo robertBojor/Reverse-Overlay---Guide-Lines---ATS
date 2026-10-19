@@ -54,6 +54,23 @@ Log: [i]Documents\American Truck Simulator\ats_reverse_overlay.log[/i]. The firs
 [*][b]After a game update:[/b] if the log says "engine functions missing", the lines switch themselves off until the plugin is updated. The game keeps running normally.
 [/list]
 
+[h2]Roadmap[/h2]
+[b]Done[/b]
+[list]
+[*][b]0.1.0:[/b] reverse guide lines for the truck and up to ten trailers, visible in every camera and the mirrors
+[*][b]0.2.0:[/b] forward dots for lane position; Ctrl+Shift+F9 cycles what is shown; renamed to Backing & Lane Prediction
+[*][b]0.3.0:[/b] the forward dots stretch into lines with speed and clear the hood from the cab
+[/list]
+[b]Next[/b]
+[list]
+[*][b]0.4.0 (in testing):[/b] one calmer, see-through blue line from the front axle instead of the red and green markers, curved from how the truck is actually turning so it stays true at highway speed. On tight turns a second line shows where the trailer's inner wheels will cut the corner.
+[*]Code-signed plugin
+[*]Euro Truck Simulator 2 version
+[*]Better line height on uneven ground
+[*]Configurable colours
+[/list]
+Ideas and bug reports are welcome in the comments or on GitHub.
+
 [h2]Compatibility[/h2]
 Works alongside other mods. Do not run it together with "Reverse Posture Assistant", which hooks the same part of the game. Use one or the other.
 

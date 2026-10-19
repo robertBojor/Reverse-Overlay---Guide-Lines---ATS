@@ -217,8 +217,23 @@ third_party/    SCS SDK headers, MinHook, licences
 
 ## Roadmap
 
-- [ ] Euro Truck Simulator 2 version
+**Done**
+
+- [x] **0.1.0:** reverse guide lines for the truck and up to ten trailers, red /
+  yellow / green by distance, visible in every camera and the mirrors.
+- [x] **0.2.0:** forward dots for lane position; Ctrl+Shift+F9 cycles forward
+  only / reverse only / both / off; renamed to Backing & Lane Prediction.
+- [x] **0.3.0:** the forward dots stretch into lines with speed, and sit far
+  enough ahead to clear the hood from the cab.
+
+**Next**
+
+- [ ] **0.4.0 (in testing):** one calmer, see-through blue line from the front
+  axle instead of the red and green markers, curved from how the truck is
+  actually turning so it stays true at highway speed. On tight turns a second
+  line shows where the trailer's inner wheels will cut the corner.
 - [ ] Code-signed releases
+- [ ] Euro Truck Simulator 2 version
 - [ ] Better height on uneven ground (wheel-based ground fit)
 - [ ] Configurable colours
 
