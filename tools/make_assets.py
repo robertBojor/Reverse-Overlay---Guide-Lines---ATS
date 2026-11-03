@@ -157,7 +157,7 @@ def manifest(game, workshop, with_icon):
         lines.append(' icon: "mod_icon.jpg"')
     lines.append(' description_file: "description.txt"')
     if not workshop:
-        lines.append(' compatible_versions[]: "1.61.*"')
+        lines += [' compatible_versions[]: "1.61.*"', ' compatible_versions[]: "1.62.*"']
     lines += ['}', '}', '']
     return '\n'.join(lines).encode()
 

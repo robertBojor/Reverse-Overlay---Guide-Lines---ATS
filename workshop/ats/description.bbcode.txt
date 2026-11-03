@@ -1,5 +1,5 @@
 [h1]Backing & Lane Prediction - ATS[/h1]
-[b]Subscribing alone shows nothing.[/b] The lines are drawn by a small plugin that Steam cannot install: [b][url=https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS/releases/latest]download the plugin here[/url][/b], exit the game and run [i]Install.bat[/i]. Already have it? [b]0.5.0 is out[/b] with a new installer that also covers Euro Truck Simulator 2.
+[b]Subscribing alone shows nothing.[/b] The lines are drawn by a small plugin that Steam cannot install: [b][url=https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS/releases/latest]download the plugin here[/url][/b], exit the game and run [i]Install.bat[/i]. Already have it? [b]ATS 1.62 needs plugin 0.5.1[/b]: download it and run the new [i]Install.bat[/i].
 
 [b]Now also for ETS2:[/b] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3823038411]Backing & Lane Prediction - ETS2[/url]. The same plugin works in both games.
 
@@ -40,7 +40,7 @@ Open source (MIT): read the full README, user guide and source code on GitHub be
 
 [h2]Requirements[/h2]
 [list]
-[*]American Truck Simulator 1.61, Windows 64-bit
+[*]American Truck Simulator 1.61 or 1.62 (plugin 0.5.1 or newer for 1.62), Windows 64-bit
 [/list]
 
 [h2]Settings and troubleshooting[/h2]
@@ -64,6 +64,7 @@ Log: [i]Documents\American Truck Simulator\ats_reverse_overlay.log[/i]. The firs
 [*][b]0.3.0:[/b] the forward dots stretch into lines with speed and clear the hood from the cab
 [*][b]0.4.0:[/b] one calm, see-through blue line from the front axle instead of the red and green markers, curved from how the truck is actually turning so it stays true at highway speed
 [*][b]0.5.0:[/b] Euro Truck Simulator 2, with one plugin and installer for both games
+[*][b]0.5.1:[/b] American Truck Simulator 1.62
 [/list]
 [b]Next[/b]
 [list]

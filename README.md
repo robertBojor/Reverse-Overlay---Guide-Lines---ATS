@@ -6,9 +6,9 @@
 and Euro Truck Simulator 2, plus a forward line for lane position, drawn in
 the game world and visible in the mirrors.**
 
-![Games](https://img.shields.io/badge/games-ATS%201.61%20%C2%B7%20ETS2%201.61-1f6feb)
+![Games](https://img.shields.io/badge/games-ATS%201.62%20%C2%B7%20ETS2%201.61-1f6feb)
 ![Platform](https://img.shields.io/badge/platform-Windows%20x64-555)
-![Version](https://img.shields.io/badge/version-0.5.0-2ea44f)
+![Version](https://img.shields.io/badge/version-0.5.1-2ea44f)
 ![Status](https://img.shields.io/badge/status-early%20release-orange)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![ATS Workshop](https://img.shields.io/badge/ATS%20Workshop-subscribe-171a21?logo=steam)](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979)
@@ -57,7 +57,12 @@ One shortcut chooses what you see. Each press moves to the next mode:
 - To use a different key, edit `[hotkey]` in the settings file
   ([details](docs/USER_GUIDE.md#hotkey)).
 
-## What's new in 0.5.0
+## What's new in 0.5.1
+
+- **American Truck Simulator 1.62.** The plugin works with ATS 1.62.1.1 (verified
+  in game). Run the new `Install.bat`; both Workshop items are unchanged.
+
+0.5.0 added Euro Truck Simulator 2:
 
 - **Euro Truck Simulator 2.** The same plugin works in both games; ETS2 has its
   own Workshop item, [**Backing & Lane Prediction - ETS2**](https://steamcommunity.com/sharedfiles/filedetails/?id=3823038411).
@@ -103,7 +108,7 @@ separate download.
    the `.scs` for your game from the download's `optional` folder:
    - ATS: [**Backing & Lane Prediction - ATS**](https://steamcommunity.com/sharedfiles/filedetails/?id=3822108979)
    - ETS2: [**Backing & Lane Prediction - ETS2**](https://steamcommunity.com/sharedfiles/filedetails/?id=3823038411)
-2. **Plugin:** download `Backing_Lane_Prediction_v0.5.0.zip` from the
+2. **Plugin:** download `Backing_Lane_Prediction_v0.5.1.zip` from the
    [**latest release**](../../releases/latest), exit the game(s) and run `Install.bat`. It
    copies `ats_reverse_overlay.dll` into `bin\win_x64\plugins` of every game
    it finds.
@@ -112,7 +117,7 @@ separate download.
    ([see above](#keyboard-shortcut-ctrlshiftf9)).
 
 > [!IMPORTANT]
-> **Updating from 0.4.0:** run the new `Install.bat`; the ATS mod is
+> **Updating from 0.4.0 or 0.5.0:** run the new `Install.bat`; the ATS mod is
 > unchanged. **From 0.3.0 or older:** update the ATS Workshop item too (Steam
 > does it on its own), because the plugin needs the blue line model. Until
 > then the reverse lines still work and the log reports
@@ -238,6 +243,7 @@ third_party/    SCS SDK headers, MinHook, licences
   so it stays true at highway speed.
 - [x] **0.5.0:** Euro Truck Simulator 2, with one plugin and installer for
   both games.
+- [x] **0.5.1:** American Truck Simulator 1.62.
 
 **Next**
 

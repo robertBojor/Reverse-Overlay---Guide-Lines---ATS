@@ -30,6 +30,9 @@ forward line, the reverse lines, both or neither.
 > → both → nothing**, then back to forward line only. Your choice is
 > remembered. Details in [section 3](#what-is-shown-ctrlshiftf9).
 
+**New in 0.5.1:** works with American Truck Simulator 1.62. Run the new
+`Install.bat`; the Workshop items are unchanged.
+
 **New in 0.5.0:** Euro Truck Simulator 2. One plugin serves both games, and
 `Install.bat` installs it into every game it finds. ETS2 has its own Workshop
 item. ATS players only need the new plugin if they want the new installer;
@@ -45,7 +48,7 @@ are separate for each game.
 
 ## 1. Requirements
 
-- American Truck Simulator **1.61** or Euro Truck Simulator 2 **1.61**, on
+- American Truck Simulator **1.61** or **1.62**, or Euro Truck Simulator 2 **1.61**, on
   **Windows 64-bit** (Steam).
 - Tested with the DirectX 11 renderer. The guide lines use the game's own
   rendering, so the renderer shouldn't matter, but the others are untested.

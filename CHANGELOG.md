@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.5.1
+
+**Changed**
+- **American Truck Simulator 1.62.** ATS 1.62.1.1 moved a vehicle field that
+  the render-hook pattern included, so that byte is now a wildcard. All five
+  engine patterns match exactly once in ATS 1.62.1.1, ATS 1.61.3.18 and ETS2
+  1.61.1.9. ATS 1.62.1.1 is verified in game.
+- The local `.scs` mod packages list 1.62 as a compatible game version, so
+  the Mod Manager no longer flags them on 1.62. The Workshop items already
+  worked with any game version.
+
+**Upgrading**
+- Run the new `Install.bat`. Neither Workshop item needs an update.
+
 ## 0.5.0
 
 **New**

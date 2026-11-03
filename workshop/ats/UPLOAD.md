@@ -42,6 +42,13 @@ Run `tools/make_assets.py workshop`, then in the uploader select the existing it
 
 Publish the matching plugin release on GitHub **at the same time**. The Workshop description links to the latest release.
 
+### 0.5.1 checklist (ATS 1.62)
+
+No upload is needed: the models are unchanged and both items are marked
+`universal`, so they work on any game version. In the uploader (or on the
+Workshop page's edit form), paste the updated `workshop/ats/description.bbcode.txt`
+into the ATS item. The ETS2 item is unchanged.
+
 ### 0.5.0 checklist (ETS2 first upload)
 
 The ETS2 item is a separate Workshop item (Euro Truck Simulator 2 is its own
