@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.5.2
+
+**Changed**
+- **Better crash reports.** When drawing the lines fails, the log now says
+  which engine step failed, what kind of error it was and where in the game
+  or another module it happened. The message also goes to the game's own
+  log (`game.log.txt`).
+- On a game build that hasn't been tested in game, the log records the
+  executable's SHA-256, so a report shows exactly which build it came from.
+- The log lists the other files in the `plugins` folder, since another
+  plugin hooking the same code is a common cause of problems.
+- Nothing changes in game.
+
+**Upgrading**
+- Run the new `Install.bat`. Neither Workshop item needs an update.
+
 ## 0.5.1
 
 **Changed**

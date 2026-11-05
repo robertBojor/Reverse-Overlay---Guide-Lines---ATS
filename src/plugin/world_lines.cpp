@@ -7,6 +7,8 @@
 #include <atomic>
 #include <cmath>
 #include <cstdio>
+#include <cstring>
+#include <string>
 #include <mutex>
 
 #include <MinHook.h>
@@ -47,6 +49,75 @@ std::atomic<bool> faulted{false};
 std::array<bool, model_paths.size()> missing{};
 bool logged_first_render = false;
 
+// Which engine call the render thread is in, so a fault can be reported
+// against it. Written only by the render thread.
+const char *stage = "idle";
+const char *stage_model = "";
+
+// Filled by the SEH filter when a fault is caught.
+struct FaultInfo
+{
+    DWORD code = 0;
+    std::uintptr_t address = 0;
+    std::uintptr_t access = 0; // address read or written, for access violations
+    ULONG_PTR access_kind = 0; // 0 read, 1 write, 8 execute
+    const char *stage = "";
+    const char *model = "";
+};
+FaultInfo fault;
+
+int record_fault(EXCEPTION_POINTERS *info)
+{
+    const EXCEPTION_RECORD *r = info->ExceptionRecord;
+    fault.code = r->ExceptionCode;
+    fault.address = reinterpret_cast<std::uintptr_t>(r->ExceptionAddress);
+    if (r->ExceptionCode == EXCEPTION_ACCESS_VIOLATION && r->NumberParameters >= 2)
+    {
+        fault.access_kind = r->ExceptionInformation[0];
+        fault.access = r->ExceptionInformation[1];
+    }
+    fault.stage = stage;
+    fault.model = stage_model;
+    return EXCEPTION_EXECUTE_HANDLER;
+}
+
+// "amtrucks.exe+0x123abc" for an address inside a loaded module.
+std::string module_offset(std::uintptr_t address)
+{
+    HMODULE module = nullptr;
+    char text[MAX_PATH + 32];
+    if (GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                           reinterpret_cast<LPCSTR>(address), &module) &&
+        module)
+    {
+        char path[MAX_PATH] = {};
+        GetModuleFileNameA(module, path, MAX_PATH);
+        const char *name = std::strrchr(path, '\\');
+        name = name ? name + 1 : path;
+        std::snprintf(text, sizeof(text), "%s+0x%llx", name,
+                      static_cast<unsigned long long>(address - reinterpret_cast<std::uintptr_t>(module)));
+    }
+    else
+        std::snprintf(text, sizeof(text), "0x%llx (no module)", static_cast<unsigned long long>(address));
+    return text;
+}
+
+std::string describe_fault()
+{
+    char text[160];
+    if (fault.code == EXCEPTION_ACCESS_VIOLATION)
+        std::snprintf(text, sizeof(text), "access violation (%s 0x%llx)",
+                      fault.access_kind == 1 ? "writing" : fault.access_kind == 8 ? "executing" : "reading",
+                      static_cast<unsigned long long>(fault.access));
+    else if (fault.code == 0xE06D7363)
+        std::snprintf(text, sizeof(text), "C++ exception");
+    else
+        std::snprintf(text, sizeof(text), "exception 0x%08lX", static_cast<unsigned long>(fault.code));
+    std::string out = std::string(text) + " at " + module_offset(fault.address) + " during " + fault.stage;
+    if (fault.model[0]) out += std::string(" (") + fault.model + ")";
+    return out;
+}
+
 const engine::PrismTransform hidden_transform{0.0f, -10000.0f, 0.0f, 0, 0, 1.0f, 0.0f, 0.0f, 0.0f};
 
 std::uint64_t node_of(std::uint64_t *model)
@@ -60,23 +131,31 @@ std::uint64_t *create_model(const char *path, const engine::PrismTransform &init
 {
     std::uint64_t output = 0, owned = 0;
     const std::uint64_t variant = 0, look = 0;
+    stage_model = path;
+    stage = "model_load";
     fn.model_load(&output, &path, &variant, &look, 0);
     if (!output) return nullptr;
+    stage = "model_transfer";
     fn.model_transfer(&owned, &output);
     if (!owned) return nullptr;
     auto *model = reinterpret_cast<std::uint64_t *>(owned);
+    stage = "model_parameter_init";
     fn.model_parameter_init(model);
+    stage = "set_transform (new model)";
     fn.set_transform(node_of(model), &initial);
     auto **vtable = *reinterpret_cast<void ***>(model);
     if (!vtable || !vtable[engine::vtable_finalize_slot]) return nullptr;
+    stage = "model finalize";
     reinterpret_cast<void(__fastcall *)(std::uint64_t *)>(vtable[engine::vtable_finalize_slot])(model);
     return model;
 }
 
 void render_model(std::uint64_t *model, const engine::PrismTransform &t, std::uint64_t context)
 {
+    stage = "set_transform";
     fn.set_transform(node_of(model), &t);
     auto **vtable = *reinterpret_cast<void ***>(model);
+    stage = "model render";
     reinterpret_cast<void(__fastcall *)(std::uint64_t *, std::uint64_t *)>(
         vtable[engine::vtable_render_slot])(model, reinterpret_cast<std::uint64_t *>(context));
 }
@@ -114,10 +193,12 @@ void render_pieces(std::uint64_t context)
                 continue;
             }
         }
+        stage_model = model_paths[band];
         render_model(pool[index], piece.transform, context);
         ++index;
     }
     // Park instances that are not drawn this pass.
+    stage = "set_transform (park unused)";
     for (std::size_t band = 0; band < pools.size(); ++band)
         for (std::size_t i = used[band]; i < pools[band].size() && pools[band][i]; ++i)
             fn.set_transform(node_of(pools[band][i]), &hidden_transform);
@@ -126,6 +207,23 @@ void render_pieces(std::uint64_t context)
     {
         logged_first_render = true;
         log::info("In-world guide lines rendering: " + std::to_string(pieces.size()) + " pieces.");
+    }
+    stage = "idle";
+    stage_model = "";
+}
+
+// No C++ objects here, so SEH can be used: the filter records the exception
+// before the stack unwinds (/EHa still runs the destructors in render_pieces).
+bool render_pieces_guarded(std::uint64_t context)
+{
+    __try
+    {
+        render_pieces(context);
+        return true;
+    }
+    __except (record_fault(GetExceptionInformation()))
+    {
+        return false;
     }
 }
 
@@ -136,16 +234,12 @@ void __fastcall hooked_dispatch(std::uint64_t wrapper, std::uint64_t context)
     if (context && !suspended.load(std::memory_order_acquire) &&
         !faulted.load(std::memory_order_acquire))
     {
-        // Built with /EHa: catch(...) also catches access violations and
-        // unwinds the mutex locks above.
-        try
-        {
-            render_pieces(context);
-        }
-        catch (...)
+        if (!render_pieces_guarded(context))
         {
             faulted = true;
-            log::error("In-world rendering raised an exception; guide lines disabled for this session.");
+            log::error("In-world rendering raised an exception; guide lines disabled for this session. " +
+                           describe_fault(),
+                       true);
         }
     }
     in_flight.fetch_sub(1, std::memory_order_acq_rel);

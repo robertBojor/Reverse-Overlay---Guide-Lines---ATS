@@ -626,6 +626,35 @@ const char *documents_subfolder(const char *game_id)
     return "American Truck Simulator";
 }
 
+// Other plugins hooking the same engine code are a common cause of faults,
+// so their names go into the log.
+std::string other_plugins()
+{
+    HMODULE self = nullptr;
+    if (!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                            reinterpret_cast<LPCWSTR>(&other_plugins), &self))
+        return "unknown";
+    wchar_t raw[MAX_PATH * 4];
+    if (!GetModuleFileNameW(self, raw, static_cast<DWORD>(std::size(raw)))) return "unknown";
+    const std::filesystem::path me(raw);
+    std::string names;
+    std::error_code ec;
+    for (const auto &entry : std::filesystem::directory_iterator(me.parent_path(), ec))
+    {
+        if (entry.path().filename() == me.filename()) continue;
+        if (!names.empty()) names += ", ";
+        try
+        {
+            names += entry.path().filename().string();
+        }
+        catch (...) // a name that does not convert to the ANSI code page
+        {
+            names += '?';
+        }
+    }
+    return names.empty() ? "none" : names;
+}
+
 void game_log_bridge(int type, const char *message);
 scs_log_t sdk_log = nullptr;
 void game_log_bridge(int type, const char *message)
@@ -648,6 +677,7 @@ SCSAPI_RESULT scs_telemetry_init(const scs_u32_t version, const scs_telemetry_in
                   SCS_GET_MAJOR_VERSION(api->common.game_version),
                   SCS_GET_MINOR_VERSION(api->common.game_version));
     rto::log::info(message, true);
+    rto::log::info("Other files in the plugins folder: " + other_plugins());
 
     state.config_path = folder / "ats_reverse_overlay.ini";
     reload_config_if_changed(true);

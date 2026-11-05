@@ -209,7 +209,9 @@ Resolution resolve(Functions *out)
     for (const auto &h : verified_hashes)
         if (digest == h) r.verified_build = true;
     r.report = (all ? "engine functions located:" : "engine functions missing:") + report +
-               (r.verified_build ? " (build verified in game)" : " (build not yet verified in game)");
+               (r.verified_build ? " (build verified in game)"
+                                  : " (build not yet verified in game; sha256 " +
+                                        (digest.empty() ? std::string("unavailable") : digest) + ")");
     if (!all) return r;
 
     f.model_load = reinterpret_cast<ModelLoad>(found[0]);

@@ -30,6 +30,9 @@ forward line, the reverse lines, both or neither.
 > → both → nothing**, then back to forward line only. Your choice is
 > remembered. Details in [section 3](#what-is-shown-ctrlshiftf9).
 
+**New in 0.5.2:** clearer error reports. If drawing the lines fails, the
+log says where and why. Nothing changes in game.
+
 **New in 0.5.1:** works with American Truck Simulator 1.62. Run the new
 `Install.bat`; the Workshop items are unchanged.
 
@@ -301,13 +304,17 @@ update, one of three things happens:
 folder. The game's own log is `game.log.txt` in the same folder; search
 it for `lane-prediction` or `ats_reverse_overlay`.
 
+**Reporting a problem:** [open an issue on GitHub](https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS/issues/new),
+attach `ats_reverse_overlay.log`, and say whether the game crashes or the
+lines just don't show.
+
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | No `ats_reverse_overlay.log` at all, or it isn't updated | The plugin isn't loaded | Check that the DLL is in `bin\win_x64\plugins\` (not just `bin\win_x64\`). In `game.log.txt`, look for `loading 'ats_reverse_overlay'`. If the game log shows the plugin failing to load, see [section 7](#7-windows-security-unsigned-plugin) |
 | Log: *"Could not create /model/rto_guides/… - is the … mod enabled in the Mod Manager?"* | The line models aren't loaded | Enable **Backing & Lane Prediction - ATS** (or **- ETS2**) in the Mod Manager. Then restart the game, because a model that failed to load stays off for the session |
 | Log: *"engine functions missing"* | Unsupported game version | See [Game updates](#5-game-updates) |
 | Log: *"In-world guide lines skipped: build not verified and allow_unverified = 0"* | Safety mode is on | Set `allow_unverified = 1` if you want to try it on this version |
-| Log: *"In-world rendering raised an exception…"* | Something went wrong while drawing. The lines are switched off for the session | Restart the game. If it repeats, send the log with your report |
+| Log: *"In-world rendering raised an exception…"* | Something went wrong while drawing. The lines are switched off for the session | Restart the game. If it repeats, [open an issue](https://github.com/robertBojor/Reverse-Overlay---Guide-Lines---ATS/issues/new) and attach the log: the message says where it failed |
 | Lines float above or sink into the road | Height estimate | Adjust `line_height_m` |
 | Lines look too narrow or wide for your trailer | Body size is estimated from the wheels | Known limitation, see [Accuracy notes](#accuracy-notes) |
 | Two sets of lines (blue/orange and red/yellow/green) | "Reverse Posture Assistant" is also installed | Use one or the other. Remove `ATSReverseTrajectoryRuntime.dll` from `plugins` and disable that mod |
